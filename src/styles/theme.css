@@ -1,21 +1,32 @@
-/* Handy Colors */
+/* Crowbar (crw.bar) Colors */
 
 :root {
+  /* crw.bar brand palette — mirrors crw.bar/web/app/globals.css. A dark,
+     near-black canvas with a single dominant orange accent; orange-hi is the
+     brighter hover/accent, green is the "live" status hue (reference only). */
+  --crw-orange: #ff6600; /* primary brand */
+  --crw-orange-hi: #ff8533; /* hover / brighter accent */
+  --crw-ink: #ece7dd; /* warm off-white text */
+  --crw-bg: #0c0e0d; /* near-black canvas */
+  --crw-green: #5fd38a; /* "live" accent (reference) */
+
   /* Palette source of truth. Each themed color is defined once as a
      light/dark pair; the active tokens below and the `data-theme` overrides
-     in App.css reference these, so a hex value lives in exactly one place. */
-  --light-color-text: #0f0f0f;
-  --light-color-background: #fbfbfb;
-  --light-color-logo-primary: #faa2ca;
-  --light-color-logo-stroke: #382731;
+     in App.css reference these, so a hex value lives in exactly one place.
+     crw.bar is dark-first; the light pair is a warm daylight variant of the
+     same identity so OS light mode still looks on-brand. */
+  --light-color-text: #1a1512;
+  --light-color-background: #faf8f4;
+  --light-color-logo-primary: #ff6600;
+  --light-color-logo-stroke: #2a1408;
 
-  --dark-color-text: #fbfbfb;
-  --dark-color-background: #2c2b29;
-  --dark-color-logo-primary: #f28cbb;
-  --dark-color-logo-stroke: #fad1ed;
+  --dark-color-text: #ece7dd;
+  --dark-color-background: #0c0e0d;
+  --dark-color-logo-primary: #ff6600;
+  --dark-color-logo-stroke: #ffce9e;
 
   /* Tokens that do not change between light and dark */
-  --color-background-ui: #da5893;
+  --color-background-ui: #ff6600;
   --color-text-stroke: #f6f6f6;
   --color-mid-gray: #808080;
 

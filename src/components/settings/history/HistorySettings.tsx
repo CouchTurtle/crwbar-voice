@@ -1,13 +1,24 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { readFile } from "@tauri-apps/plugin-fs";
-import { Check, Copy, FolderOpen, RotateCcw, Star, Trash2 } from "lucide-react";
+import {
+  Check,
+  Copy,
+  FileAudio,
+  FolderOpen,
+  Mic,
+  RotateCcw,
+  Star,
+  Trash2,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
   commands,
   events,
   type HistoryEntry,
+  type HistorySource,
+  type HistorySourceCounts,
   type HistoryUpdatePayload,
 } from "@/bindings";
 import { useOsType } from "@/hooks/useOsType";
@@ -38,6 +49,29 @@ const IconButton: React.FC<{
 
 const PAGE_SIZE = 30;
 
+type SourceFilter = "all" | HistorySource;
+
+// Small pill marking whether an entry came from the microphone or a dropped file.
+const SourceBadge: React.FC<{ source: HistorySource }> = ({ source }) => {
+  const { t } = useTranslation();
+  const isFile = source === "file";
+  const Icon = isFile ? FileAudio : Mic;
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+        isFile
+          ? "bg-logo-primary/10 text-logo-primary"
+          : "bg-mid-gray/15 text-text/50"
+      }`}
+    >
+      <Icon width={11} height={11} />
+      {isFile
+        ? t("settings.history.sourceFile")
+        : t("settings.history.sourceMic")}
+    </span>
+  );
+};
+
 interface OpenRecordingsButtonProps {
   onClick: () => void;
   label: string;
@@ -65,39 +99,66 @@ export const HistorySettings: React.FC = () => {
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
+  const [filter, setFilter] = useState<SourceFilter>("all");
+  const [sourceCounts, setSourceCounts] = useState<HistorySourceCounts | null>(
+    null,
+  );
   const sentinelRef = useRef<HTMLDivElement>(null);
   const entriesRef = useRef<HistoryEntry[]>([]);
   const loadingRef = useRef(false);
+  const loadGenerationRef = useRef(0);
 
   // Keep ref in sync for use in IntersectionObserver callback
   useEffect(() => {
     entriesRef.current = entries;
   }, [entries]);
 
-  const loadPage = useCallback(async (cursor?: number) => {
-    const isFirstPage = cursor === undefined;
-    if (!isFirstPage && loadingRef.current) return;
-    loadingRef.current = true;
+  const loadPage = useCallback(
+    async (cursor?: number) => {
+      const isFirstPage = cursor === undefined;
+      if (!isFirstPage && loadingRef.current) return;
+      const generation = isFirstPage
+        ? ++loadGenerationRef.current
+        : loadGenerationRef.current;
+      loadingRef.current = true;
 
-    if (isFirstPage) setLoading(true);
+      if (isFirstPage) setLoading(true);
 
-    try {
-      const result = await commands.getHistoryEntries(
-        cursor ?? null,
-        PAGE_SIZE,
-      );
-      if (result.status === "ok") {
-        const { entries: newEntries, has_more } = result.data;
-        setEntries((prev) =>
-          isFirstPage ? newEntries : [...prev, ...newEntries],
+      try {
+        const result = await commands.getHistoryEntries(
+          cursor ?? null,
+          PAGE_SIZE,
+          filter === "all" ? null : filter,
         );
-        setHasMore(has_more);
+        if (generation !== loadGenerationRef.current) return;
+        if (result.status === "ok") {
+          const { entries: newEntries, has_more } = result.data;
+          setEntries((prev) =>
+            isFirstPage ? newEntries : [...prev, ...newEntries],
+          );
+          setHasMore(has_more);
+        }
+      } catch (error) {
+        if (generation !== loadGenerationRef.current) return;
+        console.error("Failed to load history entries:", error);
+      } finally {
+        if (generation === loadGenerationRef.current) {
+          setLoading(false);
+          loadingRef.current = false;
+        }
+      }
+    },
+    [filter],
+  );
+
+  const loadSourceCounts = useCallback(async () => {
+    try {
+      const result = await commands.getHistorySourceCounts();
+      if (result.status === "ok") {
+        setSourceCounts(result.data);
       }
     } catch (error) {
-      console.error("Failed to load history entries:", error);
-    } finally {
-      setLoading(false);
-      loadingRef.current = false;
+      console.error("Failed to load history source counts:", error);
     }
   }, []);
 
@@ -105,6 +166,19 @@ export const HistorySettings: React.FC = () => {
   useEffect(() => {
     loadPage();
   }, [loadPage]);
+
+  useEffect(() => {
+    loadSourceCounts();
+  }, [loadSourceCounts]);
+
+  // If the last item for an active source is deleted, return to the complete
+  // history instead of leaving the user trapped on an unavailable filter.
+  useEffect(() => {
+    if (!sourceCounts || filter === "all") return;
+    if (sourceCounts[filter] === 0) {
+      setFilter("all");
+    }
+  }, [filter, sourceCounts]);
 
   // Infinite scroll via IntersectionObserver
   useEffect(() => {
@@ -135,7 +209,18 @@ export const HistorySettings: React.FC = () => {
     const unlisten = events.historyUpdatePayload.listen((event) => {
       const payload: HistoryUpdatePayload = event.payload;
       if (payload.action === "added") {
-        setEntries((prev) => [payload.entry, ...prev]);
+        setSourceCounts((current) =>
+          current
+            ? {
+                ...current,
+                total: current.total + 1,
+                [payload.entry.source]: current[payload.entry.source] + 1,
+              }
+            : current,
+        );
+        if (filter === "all" || payload.entry.source === filter) {
+          setEntries((prev) => [payload.entry, ...prev]);
+        }
       } else if (payload.action === "updated") {
         setEntries((prev) =>
           prev.map((e) => (e.id === payload.entry.id ? payload.entry : e)),
@@ -148,7 +233,7 @@ export const HistorySettings: React.FC = () => {
     return () => {
       unlisten.then((fn) => fn());
     };
-  }, []);
+  }, [filter]);
 
   const toggleSaved = async (id: number) => {
     // Optimistic update
@@ -210,9 +295,11 @@ export const HistorySettings: React.FC = () => {
         // Reload on failure
         loadPage();
       }
+      await loadSourceCounts();
     } catch (error) {
       console.error("Failed to delete entry:", error);
       loadPage();
+      await loadSourceCounts();
     }
   };
 
@@ -242,10 +329,16 @@ export const HistorySettings: React.FC = () => {
         {t("settings.history.loading")}
       </div>
     );
-  } else if (entries.length === 0) {
+  } else if (entries.length === 0 && filter === "all") {
     content = (
       <div className="px-4 py-3 text-center text-text/60">
         {t("settings.history.empty")}
+      </div>
+    );
+  } else if (entries.length === 0) {
+    content = (
+      <div className="px-4 py-3 text-center text-text/60">
+        {t("settings.history.emptyFiltered")}
       </div>
     );
   } else {
@@ -286,6 +379,33 @@ export const HistorySettings: React.FC = () => {
             label={t("settings.history.openFolder")}
           />
         </div>
+        {!loading && sourceCounts && (
+          <div className="px-4 flex items-center gap-1">
+            {(["all", "microphone", "file"] as const).map((f) => {
+              const count = f === "all" ? sourceCounts.total : sourceCounts[f];
+              const disabled = count === 0;
+
+              return (
+                <button
+                  key={f}
+                  onClick={() => setFilter(f)}
+                  aria-pressed={filter === f}
+                  disabled={disabled}
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:text-text/20 ${
+                    filter === f
+                      ? "bg-logo-primary/15 text-logo-primary"
+                      : "text-text/50 hover:text-text"
+                  }`}
+                >
+                  <span>{t(`settings.history.filter.${f}`)}</span>
+                  <span className="min-w-4 rounded-full bg-mid-gray/10 px-1 text-[10px] tabular-nums text-current">
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
         <div className="bg-background border border-mid-gray/20 rounded-lg overflow-visible">
           {content}
         </div>
@@ -358,7 +478,10 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
   return (
     <div className="px-4 py-2 pb-5 flex flex-col gap-3">
       <div className="flex justify-between items-center">
-        <p className="text-sm font-medium">{formattedDate}</p>
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-medium">{formattedDate}</p>
+          <SourceBadge source={entry.source} />
+        </div>
         <div className="flex items-center">
           <IconButton
             onClick={handleCopyText}

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">crwbar voice app icon</title>
+  <desc id="desc">A rounded orange crow profile on the Crowbar near-black background.</desc>
+  <defs>
+    <mask id="app-eye-cutout" maskUnits="userSpaceOnUse" x="0" y="0" width="1200" height="1024">
+      <rect width="1200" height="1024" fill="#fff"/>
+      <circle cx="638" cy="330" r="24" fill="#000"/>
+    </mask>
+  </defs>
+  <rect width="1024" height="1024" rx="224" fill="#0c0e0d"/>
+  <g transform="translate(-34 -52)">
+    <path d="M178 788c10-130 48-280 118-392 62-102 148-158 242-154 74 4 140 32 188 80 26 26 54 36 94 38 54 2 106 26 136 60 12 14 6 28-14 32l-152 30c-54 8-82 36-80 82 4 72-8 140-48 190-48 58-124 92-210 98l-132 8c-76 6-146-26-142-72Z" fill="#ff6600" mask="url(#app-eye-cutout)"/>
+  </g>
+</svg>

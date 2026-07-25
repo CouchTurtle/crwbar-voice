@@ -185,3 +185,11 @@ pub fn initialize_shortcuts(app: AppHandle) -> Result<(), String> {
     log::info!("Shortcuts initialized successfully");
     Ok(())
 }
+
+/// Copy the most recent completed transcription to the clipboard. Backs the
+/// overlay completion confirmation's copy button; mirrors the tray menu action.
+#[specta::specta]
+#[tauri::command]
+pub fn copy_last_transcript(app: AppHandle) {
+    crate::tray::copy_last_transcript(&app);
+}

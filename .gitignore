@@ -32,6 +32,12 @@ dist-ssr
 recording_*
 .crush/
 
+# Local application bundles and internal working notes are not source files.
+*.app/
+*.app.tar.gz
+/brand/
+/docs/
+
 # Playwright
 playwright-report/
 test-results/

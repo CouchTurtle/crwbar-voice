@@ -40,7 +40,7 @@ impl CurrentTrayIconState {
 pub enum AppTheme {
     Dark,
     Light,
-    Colored, // Pink/colored theme for Linux
+    Colored, // Branded/colored theme for Linux
 }
 
 /// Gets the current app theme, with Linux defaulting to Colored theme
@@ -104,10 +104,11 @@ pub fn get_icon_path(theme: AppTheme, state: TrayIconState) -> &'static str {
         (AppTheme::Light, TrayIconState::Idle) => "resources/tray_idle_dark.png",
         (AppTheme::Light, TrayIconState::Recording) => "resources/tray_recording_dark.png",
         (AppTheme::Light, TrayIconState::Transcribing) => "resources/tray_transcribing_dark.png",
-        // Colored theme uses pink icons (for Linux)
-        (AppTheme::Colored, TrayIconState::Idle) => "resources/handy.png",
-        (AppTheme::Colored, TrayIconState::Recording) => "resources/recording.png",
-        (AppTheme::Colored, TrayIconState::Transcribing) => "resources/transcribing.png",
+        // Linux also uses the neutral monochrome set; desktop panels tint or
+        // contrast template icons differently, so brand color is kept in-app.
+        (AppTheme::Colored, TrayIconState::Idle) => "resources/tray_idle.png",
+        (AppTheme::Colored, TrayIconState::Recording) => "resources/tray_recording.png",
+        (AppTheme::Colored, TrayIconState::Transcribing) => "resources/tray_transcribing.png",
     }
 }
 
@@ -161,9 +162,9 @@ pub fn tray_tooltip() -> String {
 
 fn version_label() -> String {
     if cfg!(debug_assertions) {
-        format!("Handy v{} (Dev)", env!("CARGO_PKG_VERSION"))
+        format!("crwbar voice v{} (Dev)", env!("CARGO_PKG_VERSION"))
     } else {
-        format!("Handy v{}", env!("CARGO_PKG_VERSION"))
+        format!("crwbar voice v{}", env!("CARGO_PKG_VERSION"))
     }
 }
 
@@ -192,14 +193,6 @@ pub fn update_tray_menu(app: &AppHandle, locale: Option<&str>) {
         settings_accelerator,
     )
     .expect("failed to create settings item");
-    let check_updates_i = MenuItem::with_id(
-        app,
-        "check_updates",
-        &strings.check_updates,
-        settings.update_checks_enabled,
-        None::<&str>,
-    )
-    .expect("failed to create check updates item");
     let copy_last_transcript_i = MenuItem::with_id(
         app,
         "copy_last_transcript",
@@ -266,7 +259,6 @@ pub fn update_tray_menu(app: &AppHandle, locale: Option<&str>) {
                     &copy_last_transcript_i,
                     &separator(),
                     &settings_i,
-                    &check_updates_i,
                     &separator(),
                     &quit_i,
                 ],
@@ -284,7 +276,6 @@ pub fn update_tray_menu(app: &AppHandle, locale: Option<&str>) {
                 &unload_model_i,
                 &separator(),
                 &settings_i,
-                &check_updates_i,
                 &separator(),
                 &quit_i,
             ],
@@ -348,7 +339,7 @@ pub fn copy_last_transcript(app: &AppHandle) {
 #[cfg(test)]
 mod tests {
     use super::{last_transcript_text, load_tray_icon};
-    use crate::managers::history::HistoryEntry;
+    use crate::managers::history::{HistoryEntry, HistorySource};
 
     fn build_entry(transcription: &str, post_processed: Option<&str>) -> HistoryEntry {
         HistoryEntry {
@@ -361,6 +352,7 @@ mod tests {
             post_processed_text: post_processed.map(|text| text.to_string()),
             post_process_prompt: None,
             post_process_requested: false,
+            source: HistorySource::Microphone,
         }
     }
 

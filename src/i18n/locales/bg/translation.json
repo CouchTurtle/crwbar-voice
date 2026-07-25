@@ -1,7 +1,6 @@
 {
   "tray": {
     "settings": "Настройки...",
-    "checkUpdates": "Проверка за актуализации...",
     "copyLastTranscript": "Копиране на последния транскрипт",
     "unloadModel": "Разтоварване на модела",
     "model": "Модел",
@@ -100,7 +99,7 @@
     },
     "permissions": {
       "title": "Необходими разрешения",
-      "description": "Handy се нуждае от няколко разрешения, за да работи правилно.",
+      "description": "crwbar voice се нуждае от няколко разрешения, за да работи правилно.",
       "microphone": {
         "title": "Достъп до микрофон",
         "description": "Необходим е, за да чуе гласа ви при транскрипция."
@@ -158,9 +157,21 @@
       "title": "Настройки на {{model}}"
     },
     "general": {
+      "dropTip": {
+        "title": "Транскрибиране на аудиофайл",
+        "body": "Плъзнете аудиофайл (WhatsApp .opus, mp3, m4a, wav…) върху лентата за запис, докато е видима; файлът ще бъде транскрибиран вместо микрофона. Включете функцията с превключвателя по-долу."
+      },
+      "dragDrop": {
+        "label": "Транскрибиране на пуснати файлове",
+        "description": "Позволява да плъзнете аудиофайл върху лентата за запис и да го транскрибирате вместо микрофона."
+      },
+      "autoCopy": {
+        "label": "Автоматично копиране в клипборда",
+        "description": "Автоматично копира всяка завършена транскрипция в клипборда."
+      },
       "title": "Общи",
       "shortcut": {
-        "title": "Бързи клавиши на Handy",
+        "title": "Бързи клавиши на crwbar voice",
         "description": "Настройте клавишни комбинации за стартиране на запис за реч към текст",
         "loading": "Зареждане на бързите клавиши...",
         "none": "Няма настроени бързи клавиши",
@@ -213,7 +224,7 @@
       "searchPlaceholder": "Търсене на модели по име…",
       "rescan": {
         "label": "Сканиране отново",
-        "tooltip": "Сканиране отново за модели, добавени в папката с модели или кеша на Hugging Face извън Handy"
+        "tooltip": "Сканиране отново за модели, добавени в папката с модели или кеша на Hugging Face извън crwbar voice"
       }
     },
     "sound": {
@@ -274,11 +285,11 @@
       },
       "autostart": {
         "label": "Стартиране със системата",
-        "description": "Автоматично стартиране на Handy при влизане в профила ви."
+        "description": "Автоматично стартиране на crwbar voice при влизане в профила ви."
       },
       "showTrayIcon": {
         "label": "Икона в системната област",
-        "description": "Показване на иконата на Handy в системната област."
+        "description": "Показване на иконата на crwbar voice в системната област."
       },
       "overlay": {
         "style": {
@@ -424,6 +435,14 @@
       }
     },
     "history": {
+      "sourceMic": "Микрофон",
+      "sourceFile": "Файл",
+      "filter": {
+        "all": "Всички",
+        "microphone": "Микрофон",
+        "file": "Файл"
+      },
+      "emptyFiltered": "Няма записи в тази категория.",
       "title": "История",
       "openFolder": "Отваряне на папката с записи",
       "loading": "Зареждане на историята...",
@@ -461,7 +480,7 @@
       },
       "updateChecks": {
         "label": "Проверка за актуализации",
-        "description": "Автоматична проверка за нови версии на Handy"
+        "description": "Автоматична проверка за нови версии на crwbar voice"
       },
       "soundTheme": {
         "label": "Звукова тема",
@@ -540,20 +559,20 @@
       "title": "За приложението",
       "version": {
         "title": "Версия",
-        "description": "Текуща версия на Handy"
+        "description": "Текуща версия на crwbar voice"
       },
       "appDataDirectory": {
         "title": "Папка с данни на приложението",
-        "description": "Мястото, където Handy съхранява данните си"
+        "description": "Мястото, където crwbar voice съхранява данните си"
       },
       "sourceCode": {
-        "title": "Изходен код",
-        "description": "Преглед на изходния код и принос",
-        "button": "Вижте в GitHub"
+        "title": "Handy",
+        "description": "crwbar voice is a refinement of the complete Handy codebase by CJ Pais—not an independent rewrite. This fork adds its own fixes, workflow changes, and visual direction.",
+        "button": "Open Handy on GitHub"
       },
       "supportDevelopment": {
         "title": "Подкрепете разработката",
-        "description": "Помогнете ни да продължим да развиваме Handy",
+        "description": "Помогнете ни да продължим да развиваме crwbar voice",
         "button": "Дарение"
       },
       "acknowledgments": {
@@ -561,12 +580,12 @@
         "ggml": {
           "title": "ggml",
           "description": "Високопроизводително изпълнение на автоматичния модел за разпознаване на реч Whisper на OpenAI",
-          "details": "Handy използва ggml за бързо локално реч-към-текст. Благодарности на Georgi Gerganov и сътрудниците за отличната работа."
+          "details": "crwbar voice използва ggml за бързо локално реч-към-текст. Благодарности на Georgi Gerganov и сътрудниците за отличната работа."
         }
       },
       "whatsNewUpdates": {
         "label": "Показвай новостите",
-        "description": "Показвай бележки към изданието след актуализации на Handy"
+        "description": "Показвай бележки към изданието след актуализации на crwbar voice"
       }
     }
   },
@@ -593,7 +612,7 @@
     "noOptionsFound": "Няма намерени опции"
   },
   "accessibility": {
-    "permissionsDescription": "Handy се нуждае от разрешения за достъпност, за да въвежда транскрибирания текст.",
+    "permissionsDescription": "crwbar voice се нуждае от разрешения за достъпност, за да въвежда транскрибирания текст.",
     "openSettings": "Отваряне на системните настройки"
   },
   "errors": {
@@ -616,11 +635,11 @@
   },
   "appLanguage": {
     "title": "Език на приложението",
-    "description": "Промяна на езика на интерфейса на Handy"
+    "description": "Промяна на езика на интерфейса на crwbar voice"
   },
   "theme": {
     "title": "Тема на приложението",
-    "description": "Изберете дали Handy да следва системната тема, или да остане светла или тъмна",
+    "description": "Изберете дали crwbar voice да следва системната тема, или да остане светла или тъмна",
     "options": {
       "system": "Системна",
       "light": "Светла",
@@ -628,10 +647,15 @@
     }
   },
   "overlay": {
+    "done": "Готово",
+    "copied": "Копирано",
+    "copyAgain": "Копиране отново",
+    "dropFile": "Пуснете файла",
+    "dropHint": "Пуснете аудиофайл тук, за да го транскрибирате",
     "transcribing": "Транскрибиране...",
     "processing": "Обработка..."
   },
   "whatsNew": {
-    "title": "Ново в Handy v{{version}}"
+    "title": "Ново в crwbar voice v{{version}}"
   }
 }

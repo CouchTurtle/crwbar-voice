@@ -1,7 +1,6 @@
 {
   "tray": {
     "settings": "Nastavení...",
-    "checkUpdates": "Zkontrolovat aktualizace...",
     "copyLastTranscript": "Zkopírovat poslední přepis",
     "unloadModel": "Uvolnit model",
     "model": "Model",
@@ -100,7 +99,7 @@
     },
     "permissions": {
       "title": "Vyžadována oprávnění",
-      "description": "Handy potřebuje několik oprávnění pro správné fungování.",
+      "description": "crwbar voice potřebuje několik oprávnění pro správné fungování.",
       "microphone": {
         "title": "Přístup k mikrofonu",
         "description": "Potřebný pro zachycení vašeho hlasu k přepisu."
@@ -172,13 +171,25 @@
       "searchPlaceholder": "Hledat modely podle názvu…",
       "rescan": {
         "label": "Znovu prohledat",
-        "tooltip": "Znovu prohledat modely přidané do složky modelů nebo mezipaměti Hugging Face mimo Handy"
+        "tooltip": "Znovu prohledat modely přidané do složky modelů nebo mezipaměti Hugging Face mimo crwbar voice"
       }
     },
     "general": {
+      "dropTip": {
+        "title": "Přepsat zvukový soubor",
+        "body": "Přetáhněte zvukový soubor (WhatsApp .opus, mp3, m4a, wav…) na lištu nahrávání, když je viditelná; místo mikrofonu se přepíše soubor. Funkci zapněte přepínačem níže."
+      },
+      "dragDrop": {
+        "label": "Přepisovat přetažené soubory",
+        "description": "Umožní přetáhnout zvukový soubor na lištu nahrávání a přepsat jej místo mikrofonu."
+      },
+      "autoCopy": {
+        "label": "Automaticky kopírovat do schránky",
+        "description": "Automaticky zkopíruje každý dokončený přepis do schránky."
+      },
       "title": "Obecné",
       "shortcut": {
-        "title": "Zkratky Handy",
+        "title": "Zkratky crwbar voice",
         "description": "Nastavte klávesové zkratky pro spuštění nahrávání řeči na text",
         "loading": "Načítám zkratky...",
         "none": "Žádné zkratky nejsou nastavené",
@@ -274,11 +285,11 @@
       },
       "autostart": {
         "label": "Spouštět při startu",
-        "description": "Automaticky spustit Handy po přihlášení do počítače."
+        "description": "Automaticky spustit crwbar voice po přihlášení do počítače."
       },
       "showTrayIcon": {
         "label": "Zobrazit ikonu v systémové liště",
-        "description": "Zobrazit ikonu Handy v systémové liště."
+        "description": "Zobrazit ikonu crwbar voice v systémové liště."
       },
       "overlay": {
         "style": {
@@ -424,6 +435,14 @@
       }
     },
     "history": {
+      "sourceMic": "Mikrofon",
+      "sourceFile": "Soubor",
+      "filter": {
+        "all": "Vše",
+        "microphone": "Mikrofon",
+        "file": "Soubor"
+      },
+      "emptyFiltered": "V této kategorii nejsou žádné položky.",
       "title": "Historie",
       "openFolder": "Otevřít složku nahrávek",
       "loading": "Načítám historii...",
@@ -461,7 +480,7 @@
       },
       "updateChecks": {
         "label": "Kontrolovat aktualizace",
-        "description": "Automaticky kontrolovat nové verze Handy"
+        "description": "Automaticky kontrolovat nové verze crwbar voice"
       },
       "soundTheme": {
         "label": "Zvukový motiv",
@@ -540,20 +559,20 @@
       "title": "O aplikaci",
       "version": {
         "title": "Verze",
-        "description": "Aktuální verze Handy"
+        "description": "Aktuální verze crwbar voice"
       },
       "appDataDirectory": {
         "title": "Adresář dat aplikace",
-        "description": "Umístění, kde Handy ukládá data"
+        "description": "Umístění, kde crwbar voice ukládá data"
       },
       "sourceCode": {
-        "title": "Zdrojový kód",
-        "description": "Zobrazit zdrojový kód a přispět",
-        "button": "Zobrazit na GitHubu"
+        "title": "Handy",
+        "description": "crwbar voice is a refinement of the complete Handy codebase by CJ Pais—not an independent rewrite. This fork adds its own fixes, workflow changes, and visual direction.",
+        "button": "Open Handy on GitHub"
       },
       "supportDevelopment": {
         "title": "Podpořte vývoj",
-        "description": "Pomozte nám pokračovat ve vývoji Handy",
+        "description": "Pomozte nám pokračovat ve vývoji crwbar voice",
         "button": "Přispět"
       },
       "acknowledgments": {
@@ -561,12 +580,12 @@
         "ggml": {
           "title": "ggml",
           "description": "Vysoce výkonné inferenční zpracování modelu automatického rozpoznávání řeči Whisper od OpenAI",
-          "details": "Handy používá ggml pro rychlé lokální zpracování řeči na text. Díky skvělé práci Georgiho Gerganova a přispěvatelů."
+          "details": "crwbar voice používá ggml pro rychlé lokální zpracování řeči na text. Díky skvělé práci Georgiho Gerganova a přispěvatelů."
         }
       },
       "whatsNewUpdates": {
         "label": "Zobrazovat novinky",
-        "description": "Zobrazovat poznámky k vydání po aktualizacích Handy"
+        "description": "Zobrazovat poznámky k vydání po aktualizacích crwbar voice"
       }
     }
   },
@@ -593,7 +612,7 @@
     "noOptionsFound": "Nenalezeny žádné možnosti"
   },
   "accessibility": {
-    "permissionsDescription": "Handy potřebuje oprávnění usnadnění přístupu, aby mohlo psát přepsaný text.",
+    "permissionsDescription": "crwbar voice potřebuje oprávnění usnadnění přístupu, aby mohlo psát přepsaný text.",
     "openSettings": "Otevřít Nastavení systému"
   },
   "errors": {
@@ -616,11 +635,11 @@
   },
   "appLanguage": {
     "title": "Jazyk aplikace",
-    "description": "Změňte jazyk rozhraní Handy"
+    "description": "Změňte jazyk rozhraní crwbar voice"
   },
   "theme": {
     "title": "Motiv aplikace",
-    "description": "Zvolte, zda má Handy sledovat motiv systému, nebo zůstat světlý či tmavý",
+    "description": "Zvolte, zda má crwbar voice sledovat motiv systému, nebo zůstat světlý či tmavý",
     "options": {
       "system": "Systém",
       "light": "Světlý",
@@ -628,10 +647,15 @@
     }
   },
   "overlay": {
+    "done": "Hotovo",
+    "copied": "Zkopírováno",
+    "copyAgain": "Kopírovat znovu",
+    "dropFile": "Pustit soubor",
+    "dropHint": "Pusťte sem zvukový soubor pro přepis",
     "transcribing": "Přepisuji...",
     "processing": "Zpracovávám..."
   },
   "whatsNew": {
-    "title": "Novinky v Handy v{{version}}"
+    "title": "Novinky v crwbar voice v{{version}}"
   }
 }

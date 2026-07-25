@@ -336,11 +336,15 @@ fn build_apple_intelligence_bridge() {
     use std::process::Command;
 
     const REAL_SWIFT_FILE: &str = "swift/apple_intelligence.swift";
-    const STUB_SWIFT_FILE: &str = "swift/apple_intelligence_stub.swift";
+    // The stub is pure C (compiled with clang) instead of Swift, so a
+    // Command-Line-Tools-only toolchain — whose swiftc can't build even the Swift
+    // stub (SwiftBridging module redefinition / SDK-compiler mismatch) — still
+    // builds. The real Apple Intelligence path below continues to use swiftc.
+    const STUB_C_FILE: &str = "swift/apple_intelligence_stub.c";
     const BRIDGE_HEADER: &str = "swift/apple_intelligence_bridge.h";
 
     println!("cargo:rerun-if-changed={REAL_SWIFT_FILE}");
-    println!("cargo:rerun-if-changed={STUB_SWIFT_FILE}");
+    println!("cargo:rerun-if-changed={STUB_C_FILE}");
     println!("cargo:rerun-if-changed={BRIDGE_HEADER}");
 
     let out_dir = PathBuf::from(env::var("OUT_DIR").expect("OUT_DIR not set"));
@@ -404,69 +408,110 @@ fn build_apple_intelligence_bridge() {
         } else {
             println!("cargo:warning=Apple Intelligence SDK not found. Building with stubs.");
         }
-        STUB_SWIFT_FILE
+        STUB_C_FILE
     };
 
     if !Path::new(source_file).exists() {
         panic!("Source file {} is missing!", source_file);
     }
 
-    // See SDKROOT note above — same env-override pattern for non-Xcode toolchains.
-    let swiftc_path = env::var("SWIFTC").unwrap_or_else(|_| {
-        String::from_utf8(
-            Command::new("xcrun")
-                .args(["--find", "swiftc"])
-                .output()
-                .expect("Failed to locate swiftc")
-                .stdout,
-        )
-        .expect("swiftc path is not valid UTF-8")
-        .trim()
-        .to_string()
-    });
+    if has_foundation_models {
+        // Real Apple Intelligence path: compile the Swift bridge with swiftc.
+        // See SDKROOT note above — same env-override pattern for non-Xcode toolchains.
+        let swiftc_path = env::var("SWIFTC").unwrap_or_else(|_| {
+            String::from_utf8(
+                Command::new("xcrun")
+                    .args(["--find", "swiftc"])
+                    .output()
+                    .expect("Failed to locate swiftc")
+                    .stdout,
+            )
+            .expect("swiftc path is not valid UTF-8")
+            .trim()
+            .to_string()
+        });
 
-    let toolchain_swift_lib = Path::new(&swiftc_path)
-        .parent()
-        .and_then(|p| p.parent())
-        .map(|root| root.join("lib/swift/macosx"))
-        .expect("Unable to determine Swift toolchain lib directory");
-    let sdk_swift_lib = Path::new(&sdk_path).join("usr/lib/swift");
+        let toolchain_swift_lib = Path::new(&swiftc_path)
+            .parent()
+            .and_then(|p| p.parent())
+            .map(|root| root.join("lib/swift/macosx"))
+            .expect("Unable to determine Swift toolchain lib directory");
+        let sdk_swift_lib = Path::new(&sdk_path).join("usr/lib/swift");
 
-    // Use macOS 11.0 as deployment target for compatibility
-    // The @available(macOS 26.0, *) checks in Swift handle runtime availability
-    // Weak linking for FoundationModels is handled via cargo:rustc-link-arg below
-    let status = Command::new(&swiftc_path)
-        .args([
-            // Without this flag swiftc treats single-file input as script
-            // mode and emits its own `_main` symbol into the .o, which can
-            // win the link against Rust's main under some linkers (e.g.
-            // open-source ld64 used in nixpkgs' Darwin stdenv), producing a
-            // binary whose main() is a 5-instruction no-op that returns 0.
-            // `-parse-as-library` keeps the compilation in library mode so
-            // no `_main` is emitted. See:
-            //   https://forums.swift.org/t/main-in-a-single-swift-file/63079
-            "-parse-as-library",
-            "-target",
-            "arm64-apple-macosx11.0",
-            "-sdk",
-            &sdk_path,
-            "-O",
-            "-import-objc-header",
-            BRIDGE_HEADER,
-            "-c",
-            source_file,
-            "-o",
-            object_path
-                .to_str()
-                .expect("Failed to convert object path to string"),
-        ])
-        .status()
-        .expect("Failed to invoke swiftc for Apple Intelligence bridge");
+        // Use macOS 11.0 as deployment target for compatibility. The
+        // @available(macOS 26.0, *) checks in Swift handle runtime availability;
+        // weak linking for FoundationModels is handled via cargo:rustc-link-arg.
+        let status = Command::new(&swiftc_path)
+            .args([
+                // `-parse-as-library` keeps single-file input in library mode so
+                // swiftc does not emit its own `_main` (which could otherwise win
+                // the link against Rust's main under some linkers).
+                "-parse-as-library",
+                "-target",
+                "arm64-apple-macosx11.0",
+                "-sdk",
+                &sdk_path,
+                "-O",
+                "-import-objc-header",
+                BRIDGE_HEADER,
+                "-c",
+                source_file,
+                "-o",
+                object_path
+                    .to_str()
+                    .expect("Failed to convert object path to string"),
+            ])
+            .status()
+            .expect("Failed to invoke swiftc for Apple Intelligence bridge");
+        if !status.success() {
+            panic!("swiftc failed to compile {source_file}");
+        }
 
-    if !status.success() {
-        panic!("swiftc failed to compile {source_file}");
+        libtool_static(&static_lib_path, &object_path);
+
+        println!("cargo:rustc-link-search=native={}", out_dir.display());
+        println!("cargo:rustc-link-lib=static=apple_intelligence");
+        println!(
+            "cargo:rustc-link-search=native={}",
+            toolchain_swift_lib.display()
+        );
+        println!("cargo:rustc-link-search=native={}", sdk_swift_lib.display());
+        println!("cargo:rustc-link-lib=framework=Foundation");
+        // Use weak linking so the app can launch on systems without FoundationModels
+        println!("cargo:rustc-link-arg=-weak_framework");
+        println!("cargo:rustc-link-arg=FoundationModels");
+        println!("cargo:rustc-link-arg=-Wl,-rpath,/usr/lib/swift");
+    } else {
+        // Stub path: compile the pure-C stub with clang, avoiding swiftc entirely
+        // so Command-Line-Tools-only toolchains build cleanly. The stub uses only
+        // libc, so no Swift runtime or Foundation linkage is required.
+        let status = Command::new("clang")
+            .args([
+                "-c",
+                source_file,
+                "-o",
+                object_path
+                    .to_str()
+                    .expect("Failed to convert object path to string"),
+            ])
+            .status()
+            .expect("Failed to invoke clang for Apple Intelligence C stub");
+        if !status.success() {
+            panic!("clang failed to compile {source_file}");
+        }
+
+        libtool_static(&static_lib_path, &object_path);
+
+        println!("cargo:rustc-link-search=native={}", out_dir.display());
+        println!("cargo:rustc-link-lib=static=apple_intelligence");
     }
+}
 
+/// Bundle a single object file into a static library with `libtool` — shared by
+/// the Swift and C-stub Apple Intelligence paths.
+#[cfg(all(target_os = "macos", target_arch = "aarch64"))]
+fn libtool_static(static_lib_path: &std::path::Path, object_path: &std::path::Path) {
+    use std::process::Command;
     let status = Command::new("libtool")
         .args([
             "-static",
@@ -480,27 +525,9 @@ fn build_apple_intelligence_bridge() {
         ])
         .status()
         .expect("Failed to create static library for Apple Intelligence bridge");
-
     if !status.success() {
         panic!("libtool failed for Apple Intelligence bridge");
     }
-
-    println!("cargo:rustc-link-search=native={}", out_dir.display());
-    println!("cargo:rustc-link-lib=static=apple_intelligence");
-    println!(
-        "cargo:rustc-link-search=native={}",
-        toolchain_swift_lib.display()
-    );
-    println!("cargo:rustc-link-search=native={}", sdk_swift_lib.display());
-    println!("cargo:rustc-link-lib=framework=Foundation");
-
-    if has_foundation_models {
-        // Use weak linking so the app can launch on systems without FoundationModels
-        println!("cargo:rustc-link-arg=-weak_framework");
-        println!("cargo:rustc-link-arg=FoundationModels");
-    }
-
-    println!("cargo:rustc-link-arg=-Wl,-rpath,/usr/lib/swift");
 }
 
 /// Returns true when the active developer directory is the standalone Command

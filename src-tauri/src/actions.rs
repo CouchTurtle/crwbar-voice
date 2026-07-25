@@ -3,7 +3,7 @@ use crate::apple_intelligence;
 use crate::audio_feedback::{play_feedback_sound, play_feedback_sound_blocking, SoundType};
 use crate::audio_toolkit::{is_microphone_access_denied, is_no_input_device_error, VadPolicy};
 use crate::managers::audio::AudioRecordingManager;
-use crate::managers::history::HistoryManager;
+use crate::managers::history::{HistoryManager, HistorySource};
 use crate::managers::model::ModelManager;
 use crate::managers::transcription::StreamWorkKind;
 use crate::managers::transcription::TranscriptionManager;
@@ -773,6 +773,7 @@ impl ShortcutAction for TranscribeAction {
                             if wav_saved {
                                 if let Err(err) = hm.save_entry(
                                     file_name,
+                                    HistorySource::Microphone,
                                     transcription,
                                     post_process,
                                     processed.post_processed_text.clone(),
@@ -808,7 +809,8 @@ impl ShortcutAction for TranscribeAction {
                                             let _ = ah_clone.emit("paste-error", ());
                                         }
                                     }
-                                    utils::hide_recording_overlay(&ah_clone);
+                                    // Confirmation pill (auto-hides) instead of hiding immediately.
+                                    utils::show_done_overlay(&ah_clone);
                                     change_tray_icon(&ah_clone, TrayIconState::Idle);
                                 })
                                 .unwrap_or_else(|e| {
@@ -836,6 +838,7 @@ impl ShortcutAction for TranscribeAction {
                             if wav_saved {
                                 if let Err(save_err) = hm.save_entry(
                                     file_name,
+                                    HistorySource::Microphone,
                                     String::new(),
                                     post_process,
                                     None,

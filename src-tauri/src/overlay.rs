@@ -2,7 +2,7 @@ use crate::input;
 use crate::settings;
 use crate::settings::{OverlayPosition, OverlayStyle};
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use tauri::{AppHandle, Emitter, Manager, PhysicalPosition, PhysicalSize};
 
 #[cfg(not(target_os = "macos"))]
@@ -61,6 +61,12 @@ fn overlay_dimensions(state: &str) -> (f64, f64) {
 
 static LAST_MIC_LEVEL_EMIT: AtomicU64 = AtomicU64::new(0);
 const EMIT_THROTTLE_MS: u64 = 33; // ~30 FPS
+
+// Bumped on every overlay state change and on hide. The completion confirmation
+// schedules a delayed auto-hide guarded by this counter, so a new recording
+// started within the delay window is never hidden by the stale timer.
+static OVERLAY_GEN: AtomicU64 = AtomicU64::new(0);
+const DONE_OVERLAY_MS: u64 = 3500;
 
 #[cfg(target_os = "macos")]
 const OVERLAY_TOP_OFFSET: f64 = 46.0;
@@ -373,6 +379,9 @@ pub fn create_recording_overlay(app_handle: &AppHandle) {
 }
 
 fn show_overlay_state(app_handle: &AppHandle, state: &str) {
+    // Any state change invalidates a pending "done" auto-hide timer.
+    OVERLAY_GEN.fetch_add(1, Ordering::Relaxed);
+
     // Whether the overlay shows at all is governed by overlay_style; position
     // only chooses Top vs Bottom placement.
     let settings = settings::get_settings(app_handle);
@@ -440,6 +449,22 @@ pub fn show_processing_overlay(app_handle: &AppHandle) {
     show_overlay_state(app_handle, "processing");
 }
 
+/// Shows the brief completion confirmation pill after a transcription finishes,
+/// then auto-hides it after `DONE_OVERLAY_MS`. The delayed hide is guarded by
+/// the overlay generation so it never hides a newer overlay (e.g. if the user
+/// starts another recording within the window).
+pub fn show_done_overlay(app_handle: &AppHandle) {
+    show_overlay_state(app_handle, "done");
+    let my_gen = OVERLAY_GEN.load(Ordering::Relaxed);
+    let app = app_handle.clone();
+    std::thread::spawn(move || {
+        std::thread::sleep(Duration::from_millis(DONE_OVERLAY_MS));
+        if OVERLAY_GEN.load(Ordering::Relaxed) == my_gen {
+            hide_recording_overlay(&app);
+        }
+    });
+}
+
 /// Updates the overlay window position based on current settings
 pub fn update_overlay_position(app_handle: &AppHandle) {
     if let Some(overlay_window) = app_handle.get_webview_window("recording_overlay") {
@@ -461,6 +486,10 @@ pub fn update_overlay_position(app_handle: &AppHandle) {
 
 /// Hides the recording overlay window with fade-out animation
 pub fn hide_recording_overlay(app_handle: &AppHandle) {
+    // Bump the generation (also invalidates any pending "done" auto-hide) and
+    // remember our value so the delayed hide below can bail if a newer overlay
+    // state is shown in the meantime.
+    let my_gen = OVERLAY_GEN.fetch_add(1, Ordering::Relaxed) + 1;
     // Always hide the overlay regardless of settings - if setting was changed while recording,
     // we still want to hide it properly
     if let Some(overlay_window) = app_handle.get_webview_window("recording_overlay") {
@@ -469,8 +498,13 @@ pub fn hide_recording_overlay(app_handle: &AppHandle) {
         // Hide the window after a short delay to allow animation to complete
         let window_clone = overlay_window.clone();
         std::thread::spawn(move || {
-            std::thread::sleep(std::time::Duration::from_millis(300));
-            let _ = window_clone.hide();
+            std::thread::sleep(Duration::from_millis(300));
+            // Skip the hide if a newer overlay was shown meanwhile — e.g. a
+            // dropped-file transcription starting right after a cancel, whose
+            // stale 300ms timer must not hide the fresh overlay.
+            if OVERLAY_GEN.load(Ordering::Relaxed) == my_gen {
+                let _ = window_clone.hide();
+            }
         });
     }
 }

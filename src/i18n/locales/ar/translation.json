@@ -1,7 +1,6 @@
 {
   "tray": {
     "settings": "...الإعدادات",
-    "checkUpdates": "...التحقق من وجود تحديثات",
     "copyLastTranscript": "نسخ آخر نص تم تفريغه",
     "unloadModel": "تفريغ النموذج",
     "model": "النموذج",
@@ -100,7 +99,7 @@
     },
     "permissions": {
       "title": "الأذونات المطلوبة",
-      "description": ".يحتاج Handy إلى بعض الأذونات ليعمل بشكل صحيح",
+      "description": ".يحتاج crwbar voice إلى بعض الأذونات ليعمل بشكل صحيح",
       "microphone": {
         "title": "الوصول إلى الميكروفون",
         "description": ".مطلوب لسماع صوتك من أجل التفريغ الصوتي"
@@ -155,9 +154,21 @@
   },
   "settings": {
     "general": {
+      "dropTip": {
+        "title": "نسخ ملف صوتي",
+        "body": "اسحب ملفًا صوتيًا (WhatsApp .opus أو mp3 أو m4a أو wav…) إلى شريط التسجيل أثناء ظهوره؛ سيتم نسخ الملف بدلًا من الميكروفون. فعّل الميزة باستخدام المفتاح أدناه."
+      },
+      "dragDrop": {
+        "label": "نسخ الملفات المُسقطة",
+        "description": "يتيح لك سحب ملف صوتي إلى شريط التسجيل لنسخه بدلًا من الميكروفون."
+      },
+      "autoCopy": {
+        "label": "النسخ تلقائيًا إلى الحافظة",
+        "description": "ينسخ كل عملية نسخ مكتملة تلقائيًا إلى الحافظة."
+      },
       "title": "عام",
       "shortcut": {
-        "title": "اختصارات Handy",
+        "title": "اختصارات crwbar voice",
         "description": "إعداد اختصارات لوحة المفاتيح لبدء تسجيل التفريغ الصوتي",
         "loading": "...جاري تحميل الاختصارات",
         "none": "لا توجد اختصارات مجهزة",
@@ -253,11 +264,11 @@
       },
       "autostart": {
         "label": "التشغيل عند بدء التشغيل",
-        "description": ".بدء تشغيل Handy تلقائياً عند تسجيل الدخول إلى جهاز الكمبيوتر الخاص بك"
+        "description": ".بدء تشغيل crwbar voice تلقائياً عند تسجيل الدخول إلى جهاز الكمبيوتر الخاص بك"
       },
       "showTrayIcon": {
         "label": "إظهار أيقونة شريط النظام",
-        "description": ".عرض أيقونة Handy في شريط النظام"
+        "description": ".عرض أيقونة crwbar voice في شريط النظام"
       },
       "overlay": {
         "style": {
@@ -403,6 +414,14 @@
       }
     },
     "history": {
+      "sourceMic": "الميكروفون",
+      "sourceFile": "ملف",
+      "filter": {
+        "all": "الكل",
+        "microphone": "الميكروفون",
+        "file": "ملف"
+      },
+      "emptyFiltered": "لا توجد عناصر في هذه الفئة.",
       "title": "السجل",
       "openFolder": "فتح مجلد التسجيلات",
       "loading": "...جاري تحميل السجل",
@@ -440,7 +459,7 @@
       },
       "updateChecks": {
         "label": "التحقق من وجود تحديثات",
-        "description": "التحقق تلقائياً من وجود إصدارات جديدة من Handy"
+        "description": "التحقق تلقائياً من وجود إصدارات جديدة من crwbar voice"
       },
       "soundTheme": {
         "label": "سمة الصوت",
@@ -519,20 +538,20 @@
       "title": "حول",
       "version": {
         "title": "الإصدار",
-        "description": "الإصدار الحالي من Handy"
+        "description": "الإصدار الحالي من crwbar voice"
       },
       "appDataDirectory": {
         "title": "مجلد بيانات التطبيق",
-        "description": "الموقع الذي يخزن فيه Handy بياناته"
+        "description": "الموقع الذي يخزن فيه crwbar voice بياناته"
       },
       "sourceCode": {
-        "title": "كود المصدر",
-        "description": "عرض كود المصدر والمساهمة",
-        "button": "عرض على GitHub"
+        "title": "Handy",
+        "description": "crwbar voice is a refinement of the complete Handy codebase by CJ Pais—not an independent rewrite. This fork adds its own fixes, workflow changes, and visual direction.",
+        "button": "Open Handy on GitHub"
       },
       "supportDevelopment": {
         "title": "دعم التطوير",
-        "description": "ساعدنا في مواصلة بناء Handy",
+        "description": "ساعدنا في مواصلة بناء crwbar voice",
         "button": "تبرع"
       },
       "acknowledgments": {
@@ -540,12 +559,12 @@
         "ggml": {
           "title": "ggml",
           "description": "استنتاج عالي الأداء لنموذج التعرف التلقائي على الكلام Whisper من OpenAI",
-          "details": ".يستخدم Handy برنامج ggml لمعالجة سريعة ومحلية لتحويل الكلام إلى نص. شكراً للعمل الرائع الذي قام به Georgi Gerganov والمساهمون"
+          "details": ".يستخدم crwbar voice برنامج ggml لمعالجة سريعة ومحلية لتحويل الكلام إلى نص. شكراً للعمل الرائع الذي قام به Georgi Gerganov والمساهمون"
         }
       },
       "whatsNewUpdates": {
         "label": "إظهار الجديد",
-        "description": "إظهار ملاحظات الإصدار بعد تحديثات Handy"
+        "description": "إظهار ملاحظات الإصدار بعد تحديثات crwbar voice"
       }
     },
     "modelSettings": {
@@ -566,7 +585,7 @@
       "searchPlaceholder": "ابحث عن النماذج بالاسم…",
       "rescan": {
         "label": "إعادة الفحص",
-        "tooltip": "إعادة الفحص بحثًا عن النماذج المضافة إلى مجلد النماذج أو ذاكرة Hugging Face التخزينية المؤقتة خارج Handy"
+        "tooltip": "إعادة الفحص بحثًا عن النماذج المضافة إلى مجلد النماذج أو ذاكرة Hugging Face التخزينية المؤقتة خارج crwbar voice"
       }
     }
   },
@@ -593,7 +612,7 @@
     "noOptionsFound": "لم يتم العثور على خيارات"
   },
   "accessibility": {
-    "permissionsDescription": ".يحتاج Handy إلى أذونات إمكانية الوصول لكتابة النص المفرغ",
+    "permissionsDescription": ".يحتاج crwbar voice إلى أذونات إمكانية الوصول لكتابة النص المفرغ",
     "openSettings": "فتح إعدادات النظام"
   },
   "errors": {
@@ -616,11 +635,11 @@
   },
   "appLanguage": {
     "title": "لغة التطبيق",
-    "description": "تغيير لغة واجهة Handy"
+    "description": "تغيير لغة واجهة crwbar voice"
   },
   "theme": {
     "title": "سمة التطبيق",
-    "description": "اختر ما إذا كان Handy يتبع مظهر النظام أو يبقى فاتحًا أو داكنًا",
+    "description": "اختر ما إذا كان crwbar voice يتبع مظهر النظام أو يبقى فاتحًا أو داكنًا",
     "options": {
       "system": "النظام",
       "light": "فاتح",
@@ -628,10 +647,15 @@
     }
   },
   "overlay": {
+    "done": "تم",
+    "copied": "تم النسخ",
+    "copyAgain": "نسخ مرة أخرى",
+    "dropFile": "أفلت الملف",
+    "dropHint": "أفلت ملفًا صوتيًا هنا لنسخه",
     "transcribing": "...جاري التفريغ",
     "processing": "...جاري المعالجة"
   },
   "whatsNew": {
-    "title": "الجديد في Handy v{{version}}"
+    "title": "الجديد في crwbar voice v{{version}}"
   }
 }

@@ -1,7 +1,6 @@
 {
   "tray": {
     "settings": "设置...",
-    "checkUpdates": "检查更新...",
     "copyLastTranscript": "复制最新转录",
     "unloadModel": "卸载模型",
     "model": "模型",
@@ -100,7 +99,7 @@
     },
     "permissions": {
       "title": "需要权限",
-      "description": "Handy 需要一些权限才能正常工作。",
+      "description": "crwbar voice 需要一些权限才能正常工作。",
       "microphone": {
         "title": "麦克风访问",
         "description": "需要听取您的语音进行转录。"
@@ -172,13 +171,25 @@
       "searchPlaceholder": "按名称搜索模型…",
       "rescan": {
         "label": "重新扫描",
-        "tooltip": "重新扫描在 Handy 之外添加到模型文件夹或 Hugging Face 缓存中的模型"
+        "tooltip": "重新扫描在 crwbar voice 之外添加到模型文件夹或 Hugging Face 缓存中的模型"
       }
     },
     "general": {
+      "dropTip": {
+        "title": "转录音频文件",
+        "body": "在录音栏可见时，将音频文件（WhatsApp .opus、mp3、m4a、wav 等）拖到录音栏上；应用会转录文件，而不是麦克风输入。请使用下方开关启用此功能。"
+      },
+      "dragDrop": {
+        "label": "转录拖放的文件",
+        "description": "允许将音频文件拖到录音栏上，转录文件而不是麦克风输入。"
+      },
+      "autoCopy": {
+        "label": "自动复制到剪贴板",
+        "description": "自动将每次完成的转录复制到剪贴板。"
+      },
       "title": "通用",
       "shortcut": {
-        "title": "Handy 快捷键",
+        "title": "crwbar voice 快捷键",
         "description": "配置启动语音转文字录制的键盘快捷键",
         "loading": "加载快捷键中...",
         "none": "未配置快捷键",
@@ -274,11 +285,11 @@
       },
       "autostart": {
         "label": "开机启动",
-        "description": "登录计算机时自动启动 Handy。"
+        "description": "登录计算机时自动启动 crwbar voice。"
       },
       "showTrayIcon": {
         "label": "显示托盘图标",
-        "description": "在系统托盘中显示 Handy 图标。"
+        "description": "在系统托盘中显示 crwbar voice 图标。"
       },
       "overlay": {
         "style": {
@@ -424,6 +435,14 @@
       }
     },
     "history": {
+      "sourceMic": "麦克风",
+      "sourceFile": "文件",
+      "filter": {
+        "all": "全部",
+        "microphone": "麦克风",
+        "file": "文件"
+      },
+      "emptyFiltered": "此类别中没有条目。",
       "title": "历史记录",
       "openFolder": "打开录音文件夹",
       "loading": "加载历史记录中...",
@@ -461,7 +480,7 @@
       },
       "updateChecks": {
         "label": "检查更新",
-        "description": "自动检查 Handy 的新版本"
+        "description": "自动检查 crwbar voice 的新版本"
       },
       "soundTheme": {
         "label": "声音主题",
@@ -540,20 +559,20 @@
       "title": "关于",
       "version": {
         "title": "版本",
-        "description": "Handy 的当前版本"
+        "description": "crwbar voice 的当前版本"
       },
       "appDataDirectory": {
         "title": "应用数据目录",
-        "description": "Handy 存储数据的位置"
+        "description": "crwbar voice 存储数据的位置"
       },
       "sourceCode": {
-        "title": "源代码",
-        "description": "查看源代码并贡献",
-        "button": "在 GitHub 上查看"
+        "title": "Handy",
+        "description": "crwbar voice is a refinement of the complete Handy codebase by CJ Pais—not an independent rewrite. This fork adds its own fixes, workflow changes, and visual direction.",
+        "button": "Open Handy on GitHub"
       },
       "supportDevelopment": {
         "title": "支持开发",
-        "description": "帮助我们继续开发 Handy",
+        "description": "帮助我们继续开发 crwbar voice",
         "button": "捐赠"
       },
       "acknowledgments": {
@@ -561,12 +580,12 @@
         "ggml": {
           "title": "ggml",
           "description": "OpenAI Whisper 自动语音识别模型的高性能推理",
-          "details": "Handy 使用 ggml 进行快速的本地语音转文字处理。感谢 Georgi Gerganov 和贡献者们的出色工作。"
+          "details": "crwbar voice 使用 ggml 进行快速的本地语音转文字处理。感谢 Georgi Gerganov 和贡献者们的出色工作。"
         }
       },
       "whatsNewUpdates": {
         "label": "显示新功能",
-        "description": "Handy 更新后显示发行说明"
+        "description": "crwbar voice 更新后显示发行说明"
       }
     }
   },
@@ -593,7 +612,7 @@
     "noOptionsFound": "未找到选项"
   },
   "accessibility": {
-    "permissionsDescription": "Handy 需要辅助功能权限才能输入转录的文字。",
+    "permissionsDescription": "crwbar voice 需要辅助功能权限才能输入转录的文字。",
     "openSettings": "打开系统设置"
   },
   "errors": {
@@ -616,11 +635,11 @@
   },
   "appLanguage": {
     "title": "应用语言",
-    "description": "更改 Handy 界面的语言"
+    "description": "更改 crwbar voice 界面的语言"
   },
   "theme": {
     "title": "应用主题",
-    "description": "选择 Handy 跟随系统主题，还是保持浅色或深色",
+    "description": "选择 crwbar voice 跟随系统主题，还是保持浅色或深色",
     "options": {
       "system": "跟随系统",
       "light": "浅色",
@@ -628,10 +647,15 @@
     }
   },
   "overlay": {
+    "done": "完成",
+    "copied": "已复制",
+    "copyAgain": "再次复制",
+    "dropFile": "放下文件",
+    "dropHint": "将音频文件放到此处进行转录",
     "transcribing": "正在转录...",
     "processing": "处理中..."
   },
   "whatsNew": {
-    "title": "Handy v{{version}} 新功能"
+    "title": "crwbar voice v{{version}} 新功能"
   }
 }

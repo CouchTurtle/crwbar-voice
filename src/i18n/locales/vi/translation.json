@@ -1,7 +1,6 @@
 {
   "tray": {
     "settings": "Cài đặt...",
-    "checkUpdates": "Kiểm tra cập nhật...",
     "copyLastTranscript": "Sao chép bản chép lời mới nhất",
     "unloadModel": "Dỡ mô hình",
     "model": "Mô hình",
@@ -100,7 +99,7 @@
     },
     "permissions": {
       "title": "Cần cấp quyền",
-      "description": "Handy cần một số quyền để hoạt động bình thường.",
+      "description": "crwbar voice cần một số quyền để hoạt động bình thường.",
       "microphone": {
         "title": "Quyền truy cập Micrô",
         "description": "Cần thiết để nghe giọng nói của bạn để chuyển đổi."
@@ -172,13 +171,25 @@
       "searchPlaceholder": "Tìm mô hình theo tên…",
       "rescan": {
         "label": "Quét lại",
-        "tooltip": "Quét lại các mô hình được thêm vào thư mục mô hình hoặc bộ nhớ đệm Hugging Face bên ngoài Handy"
+        "tooltip": "Quét lại các mô hình được thêm vào thư mục mô hình hoặc bộ nhớ đệm Hugging Face bên ngoài crwbar voice"
       }
     },
     "general": {
+      "dropTip": {
+        "title": "Chuyển lời tệp âm thanh thành văn bản",
+        "body": "Kéo một tệp âm thanh (WhatsApp .opus, mp3, m4a, wav…) vào thanh ghi âm khi thanh này đang hiển thị; tệp sẽ được chuyển thành văn bản thay cho micrô. Bật tính năng bằng công tắc bên dưới."
+      },
+      "dragDrop": {
+        "label": "Chuyển tệp được thả thành văn bản",
+        "description": "Cho phép kéo tệp âm thanh vào thanh ghi âm để chuyển tệp thành văn bản thay cho micrô."
+      },
+      "autoCopy": {
+        "label": "Tự động sao chép vào bảng nhớ tạm",
+        "description": "Tự động sao chép mọi bản chép lời đã hoàn tất vào bảng nhớ tạm."
+      },
       "title": "Chung",
       "shortcut": {
-        "title": "Phím tắt Handy",
+        "title": "Phím tắt crwbar voice",
         "description": "Cấu hình phím tắt để kích hoạt ghi âm chuyển đổi giọng nói thành văn bản",
         "loading": "Đang tải phím tắt...",
         "none": "Chưa cấu hình phím tắt",
@@ -274,11 +285,11 @@
       },
       "autostart": {
         "label": "Khởi động cùng hệ thống",
-        "description": "Tự động khởi động Handy khi bạn đăng nhập vào máy tính."
+        "description": "Tự động khởi động crwbar voice khi bạn đăng nhập vào máy tính."
       },
       "showTrayIcon": {
         "label": "Hiển thị biểu tượng khay",
-        "description": "Hiển thị biểu tượng Handy trong khay hệ thống."
+        "description": "Hiển thị biểu tượng crwbar voice trong khay hệ thống."
       },
       "overlay": {
         "style": {
@@ -424,6 +435,14 @@
       }
     },
     "history": {
+      "sourceMic": "Micrô",
+      "sourceFile": "Tệp",
+      "filter": {
+        "all": "Tất cả",
+        "microphone": "Micrô",
+        "file": "Tệp"
+      },
+      "emptyFiltered": "Không có mục nào trong danh mục này.",
       "title": "Lịch sử",
       "openFolder": "Mở thư mục ghi âm",
       "loading": "Đang tải lịch sử...",
@@ -461,7 +480,7 @@
       },
       "updateChecks": {
         "label": "Kiểm tra cập nhật",
-        "description": "Tự động kiểm tra phiên bản mới của Handy"
+        "description": "Tự động kiểm tra phiên bản mới của crwbar voice"
       },
       "soundTheme": {
         "label": "Chủ đề âm thanh",
@@ -540,20 +559,20 @@
       "title": "Giới thiệu",
       "version": {
         "title": "Phiên bản",
-        "description": "Phiên bản hiện tại của Handy"
+        "description": "Phiên bản hiện tại của crwbar voice"
       },
       "appDataDirectory": {
         "title": "Thư mục dữ liệu ứng dụng",
-        "description": "Vị trí Handy lưu trữ dữ liệu"
+        "description": "Vị trí crwbar voice lưu trữ dữ liệu"
       },
       "sourceCode": {
-        "title": "Mã nguồn",
-        "description": "Xem mã nguồn và đóng góp",
-        "button": "Xem trên GitHub"
+        "title": "Handy",
+        "description": "crwbar voice is a refinement of the complete Handy codebase by CJ Pais—not an independent rewrite. This fork adds its own fixes, workflow changes, and visual direction.",
+        "button": "Open Handy on GitHub"
       },
       "supportDevelopment": {
         "title": "Hỗ trợ phát triển",
-        "description": "Giúp chúng tôi tiếp tục xây dựng Handy",
+        "description": "Giúp chúng tôi tiếp tục xây dựng crwbar voice",
         "button": "Quyên góp"
       },
       "acknowledgments": {
@@ -561,12 +580,12 @@
         "ggml": {
           "title": "ggml",
           "description": "Suy luận hiệu suất cao của mô hình nhận dạng giọng nói tự động Whisper của OpenAI",
-          "details": "Handy sử dụng ggml để xử lý chuyển đổi giọng nói thành văn bản nhanh, cục bộ. Cảm ơn công việc tuyệt vời của Georgi Gerganov và các cộng tác viên."
+          "details": "crwbar voice sử dụng ggml để xử lý chuyển đổi giọng nói thành văn bản nhanh, cục bộ. Cảm ơn công việc tuyệt vời của Georgi Gerganov và các cộng tác viên."
         }
       },
       "whatsNewUpdates": {
         "label": "Hiển thị điểm mới",
-        "description": "Hiển thị ghi chú phát hành sau khi Handy cập nhật"
+        "description": "Hiển thị ghi chú phát hành sau khi crwbar voice cập nhật"
       }
     }
   },
@@ -593,7 +612,7 @@
     "noOptionsFound": "Không tìm thấy tùy chọn"
   },
   "accessibility": {
-    "permissionsDescription": "Handy cần quyền truy cập để gõ văn bản đã chuyển đổi.",
+    "permissionsDescription": "crwbar voice cần quyền truy cập để gõ văn bản đã chuyển đổi.",
     "openSettings": "Mở Cài đặt Hệ thống"
   },
   "errors": {
@@ -616,11 +635,11 @@
   },
   "appLanguage": {
     "title": "Ngôn ngữ ứng dụng",
-    "description": "Thay đổi ngôn ngữ giao diện của Handy"
+    "description": "Thay đổi ngôn ngữ giao diện của crwbar voice"
   },
   "theme": {
     "title": "Giao diện ứng dụng",
-    "description": "Chọn xem Handy theo chủ đề hệ thống hay giữ ở chế độ sáng hoặc tối",
+    "description": "Chọn xem crwbar voice theo chủ đề hệ thống hay giữ ở chế độ sáng hoặc tối",
     "options": {
       "system": "Hệ thống",
       "light": "Sáng",
@@ -628,10 +647,15 @@
     }
   },
   "overlay": {
+    "done": "Hoàn tất",
+    "copied": "Đã sao chép",
+    "copyAgain": "Sao chép lại",
+    "dropFile": "Thả tệp",
+    "dropHint": "Thả tệp âm thanh vào đây để chuyển thành văn bản",
     "transcribing": "Đang chuyển đổi...",
     "processing": "Đang xử lý..."
   },
   "whatsNew": {
-    "title": "Điểm mới trong Handy v{{version}}"
+    "title": "Điểm mới trong crwbar voice v{{version}}"
   }
 }

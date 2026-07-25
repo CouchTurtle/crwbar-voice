@@ -1,7 +1,6 @@
 {
   "tray": {
     "settings": "सेटिङहरू...",
-    "checkUpdates": "अपडेटहरू जाँच गर्नुहोस्...",
     "copyLastTranscript": "पछिल्लो ट्रान्सक्रिप्ट कपी गर्नुहोस्",
     "unloadModel": "मोडेल अनलोड गर्नुहोस्",
     "model": "मोडेल",
@@ -100,7 +99,7 @@
     },
     "permissions": {
       "title": "अनुमतिहरू आवश्यक छन्",
-      "description": "Handy लाई राम्रोसँग काम गर्न केही अनुमतिहरू चाहिन्छ।",
+      "description": "crwbar voice लाई राम्रोसँग काम गर्न केही अनुमतिहरू चाहिन्छ।",
       "microphone": {
         "title": "माइक्रोफोन पहुँच",
         "description": "ट्रान्सक्रिप्सनका लागि तपाईंको आवाज सुन्न आवश्यक छ।"
@@ -158,9 +157,21 @@
       "title": "{{model}} सेटिङहरू"
     },
     "general": {
+      "dropTip": {
+        "title": "अडियो फाइल ट्रान्सक्राइब गर्नुहोस्",
+        "body": "रेकर्डिङ बार देखिएको बेला अडियो फाइल (WhatsApp .opus, mp3, m4a, wav…) त्यसमा तान्नुहोस्; माइक्रोफोनको सट्टा फाइल ट्रान्सक्राइब हुनेछ। तलको स्विचबाट यो सुविधा सक्रिय गर्नुहोस्।"
+      },
+      "dragDrop": {
+        "label": "ड्रप गरिएका फाइल ट्रान्सक्राइब गर्नुहोस्",
+        "description": "अडियो फाइललाई रेकर्डिङ बारमा तानेर माइक्रोफोनको सट्टा त्यसलाई ट्रान्सक्राइब गर्न दिन्छ।"
+      },
+      "autoCopy": {
+        "label": "क्लिपबोर्डमा स्वतः प्रतिलिपि गर्नुहोस्",
+        "description": "पूरा भएको प्रत्येक ट्रान्सक्रिप्सनलाई क्लिपबोर्डमा स्वतः प्रतिलिपि गर्छ।"
+      },
       "title": "सामान्य",
       "shortcut": {
-        "title": "Handy सर्टकटहरू",
+        "title": "crwbar voice सर्टकटहरू",
         "description": "स्पिच-टु-टेक्स्ट रेकर्डिङ सुरु गर्न किबोर्ड सर्टकटहरू सेट अप गर्नुहोस्",
         "loading": "सर्टकटहरू लोड गरिँदैछन्...",
         "none": "कुनै सर्टकट सेट गरिएको छैन",
@@ -212,7 +223,7 @@
       },
       "rescan": {
         "label": "फेरि स्क्यान गर्नुहोस्",
-        "tooltip": "Handy बाहिरबाट मोडेल फोल्डर वा Hugging Face क्यासमा थपिएका मोडेलहरू फेरि स्क्यान गर्नुहोस्"
+        "tooltip": "crwbar voice बाहिरबाट मोडेल फोल्डर वा Hugging Face क्यासमा थपिएका मोडेलहरू फेरि स्क्यान गर्नुहोस्"
       },
       "noModelsMatch": "यो फिल्टरसँग कुनै मोडेल मिल्दैन।"
     },
@@ -274,11 +285,11 @@
       },
       "autostart": {
         "label": "स्टार्टअपमा सुरु गर्नुहोस्",
-        "description": "कम्प्युटरमा लगइन गर्दा Handy स्वतः सुरु गर्नुहोस्।"
+        "description": "कम्प्युटरमा लगइन गर्दा crwbar voice स्वतः सुरु गर्नुहोस्।"
       },
       "showTrayIcon": {
         "label": "ट्रे आइकन देखाउनुहोस्",
-        "description": "सिस्टम ट्रेमा Handy आइकन देखाउनुहोस्।"
+        "description": "सिस्टम ट्रेमा crwbar voice आइकन देखाउनुहोस्।"
       },
       "overlay": {
         "style": {
@@ -424,6 +435,14 @@
       }
     },
     "history": {
+      "sourceMic": "माइक्रोफोन",
+      "sourceFile": "फाइल",
+      "filter": {
+        "all": "सबै",
+        "microphone": "माइक्रोफोन",
+        "file": "फाइल"
+      },
+      "emptyFiltered": "यस वर्गमा कुनै प्रविष्टि छैन।",
       "title": "हिस्ट्री",
       "openFolder": "रेकर्डिङ फोल्डर खोल्नुहोस्",
       "loading": "हिस्ट्री लोड गरिँदैछ...",
@@ -461,7 +480,7 @@
       },
       "updateChecks": {
         "label": "अपडेटहरू जाँच गर्नुहोस्",
-        "description": "Handy को नयाँ संस्करण स्वतः जाँच गर्नुहोस्"
+        "description": "crwbar voice को नयाँ संस्करण स्वतः जाँच गर्नुहोस्"
       },
       "whatsNewPreview": {
         "title": "नयाँ के छ पूर्वावलोकन",
@@ -540,24 +559,24 @@
       "title": "बारेमा",
       "version": {
         "title": "संस्करण",
-        "description": "Handy को हालको संस्करण"
+        "description": "crwbar voice को हालको संस्करण"
       },
       "whatsNewUpdates": {
         "label": "नयाँ के छ देखाउनुहोस्",
-        "description": "Handy अपडेट भएपछि रिलिज नोटहरू देखाउनुहोस्"
+        "description": "crwbar voice अपडेट भएपछि रिलिज नोटहरू देखाउनुहोस्"
       },
       "appDataDirectory": {
         "title": "एप डेटा डाइरेक्टरी",
-        "description": "Handy ले आफ्नो डेटा भण्डारण गर्ने स्थान"
+        "description": "crwbar voice ले आफ्नो डेटा भण्डारण गर्ने स्थान"
       },
       "sourceCode": {
-        "title": "स्रोत कोड",
-        "description": "स्रोत कोड हेर्नुहोस् र योगदान गर्नुहोस्",
-        "button": "GitHub मा हेर्नुहोस्"
+        "title": "Handy",
+        "description": "crwbar voice is a refinement of the complete Handy codebase by CJ Pais—not an independent rewrite. This fork adds its own fixes, workflow changes, and visual direction.",
+        "button": "Open Handy on GitHub"
       },
       "supportDevelopment": {
         "title": "विकासलाई सहयोग गर्नुहोस्",
-        "description": "Handy निर्माण जारी राख्न हामीलाई सहयोग गर्नुहोस्",
+        "description": "crwbar voice निर्माण जारी राख्न हामीलाई सहयोग गर्नुहोस्",
         "button": "दान गर्नुहोस्"
       },
       "acknowledgments": {
@@ -565,7 +584,7 @@
         "ggml": {
           "title": "ggml",
           "description": "अन-डिभाइस मेसिन लर्निङ अनुमानका लागि उच्च-प्रदर्शन टेन्सर लाइब्रेरी",
-          "details": "Handy को स्थानीय स्पिच-टु-टेक्स्ट transcribe.cpp र ggml मा आधारित छ। Georgi Gerganov र योगदानकर्ताहरूको उत्कृष्ट कामका लागि धन्यवाद।"
+          "details": "crwbar voice को स्थानीय स्पिच-टु-टेक्स्ट transcribe.cpp र ggml मा आधारित छ। Georgi Gerganov र योगदानकर्ताहरूको उत्कृष्ट कामका लागि धन्यवाद।"
         }
       }
     }
@@ -584,7 +603,7 @@
     "portableUpdateButton": "GitHub Releases खोल्नुहोस्"
   },
   "whatsNew": {
-    "title": "Handy v{{version}} मा नयाँ"
+    "title": "crwbar voice v{{version}} मा नयाँ"
   },
   "common": {
     "loading": "लोड गरिँदैछ...",
@@ -596,7 +615,7 @@
     "noOptionsFound": "कुनै विकल्प भेटिएन"
   },
   "accessibility": {
-    "permissionsDescription": "ट्रान्सक्राइब गरिएको टेक्स्ट टाइप गर्न Handy लाई एक्सेसिबिलिटी अनुमति चाहिन्छ।",
+    "permissionsDescription": "ट्रान्सक्राइब गरिएको टेक्स्ट टाइप गर्न crwbar voice लाई एक्सेसिबिलिटी अनुमति चाहिन्छ।",
     "openSettings": "सिस्टम सेटिङहरू खोल्नुहोस्"
   },
   "errors": {
@@ -619,11 +638,11 @@
   },
   "appLanguage": {
     "title": "एपको भाषा",
-    "description": "Handy इन्टरफेसको भाषा परिवर्तन गर्नुहोस्"
+    "description": "crwbar voice इन्टरफेसको भाषा परिवर्तन गर्नुहोस्"
   },
   "theme": {
     "title": "अनुप्रयोगको थिम",
-    "description": "Handy ले तपाईंको सिस्टम थिम अनुसरण गर्ने वा उज्यालो वा अँध्यारो रहने छान्नुहोस्",
+    "description": "crwbar voice ले तपाईंको सिस्टम थिम अनुसरण गर्ने वा उज्यालो वा अँध्यारो रहने छान्नुहोस्",
     "options": {
       "system": "सिस्टम",
       "light": "उज्यालो",
@@ -631,6 +650,11 @@
     }
   },
   "overlay": {
+    "done": "सम्पन्न",
+    "copied": "प्रतिलिपि भयो",
+    "copyAgain": "फेरि प्रतिलिपि गर्नुहोस्",
+    "dropFile": "फाइल छोड्नुहोस्",
+    "dropHint": "ट्रान्सक्राइब गर्न अडियो फाइल यहाँ छोड्नुहोस्",
     "transcribing": "ट्रान्सक्राइब गरिँदैछ...",
     "processing": "प्रशोधन गरिँदैछ..."
   }

@@ -31,12 +31,27 @@ static MIGRATIONS: &[M] = &[
     M::up("ALTER TABLE transcription_history ADD COLUMN post_processed_text TEXT;"),
     M::up("ALTER TABLE transcription_history ADD COLUMN post_process_prompt TEXT;"),
     M::up("ALTER TABLE transcription_history ADD COLUMN post_process_requested BOOLEAN NOT NULL DEFAULT 0;"),
+    M::up(
+        "ALTER TABLE transcription_history
+         ADD COLUMN source TEXT NOT NULL DEFAULT 'microphone'
+         CHECK (source IN ('microphone', 'file'));
+         UPDATE transcription_history
+         SET source = 'file'
+         WHERE file_name LIKE 'handy-import-%';",
+    ),
 ];
 
 #[derive(Clone, Debug, Serialize, Deserialize, Type)]
 pub struct PaginatedHistory {
     pub entries: Vec<HistoryEntry>,
     pub has_more: bool,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize, Type)]
+pub struct HistorySourceCounts {
+    pub total: usize,
+    pub microphone: usize,
+    pub file: usize,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Type, tauri_specta::Event)]
@@ -63,6 +78,30 @@ pub struct HistoryEntry {
     pub post_processed_text: Option<String>,
     pub post_process_prompt: Option<String>,
     pub post_process_requested: bool,
+    pub source: HistorySource,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "snake_case")]
+pub enum HistorySource {
+    Microphone,
+    File,
+}
+
+impl HistorySource {
+    fn as_str(self) -> &'static str {
+        match self {
+            Self::Microphone => "microphone",
+            Self::File => "file",
+        }
+    }
+
+    fn from_db(value: &str) -> Self {
+        match value {
+            "file" => Self::File,
+            _ => Self::Microphone,
+        }
+    }
 }
 
 pub struct HistoryManager {
@@ -197,6 +236,7 @@ impl HistoryManager {
     }
 
     fn map_history_entry(row: &rusqlite::Row<'_>) -> rusqlite::Result<HistoryEntry> {
+        let source: String = row.get("source")?;
         Ok(HistoryEntry {
             id: row.get("id")?,
             file_name: row.get("file_name")?,
@@ -207,6 +247,7 @@ impl HistoryManager {
             post_processed_text: row.get("post_processed_text")?,
             post_process_prompt: row.get("post_process_prompt")?,
             post_process_requested: row.get("post_process_requested")?,
+            source: HistorySource::from_db(&source),
         })
     }
 
@@ -219,6 +260,7 @@ impl HistoryManager {
     pub fn save_entry(
         &self,
         file_name: String,
+        source: HistorySource,
         transcription_text: String,
         post_process_requested: bool,
         post_processed_text: Option<String>,
@@ -237,8 +279,9 @@ impl HistoryManager {
                 transcription_text,
                 post_processed_text,
                 post_process_prompt,
-                post_process_requested
-            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+                post_process_requested,
+                source
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
             params![
                 &file_name,
                 timestamp,
@@ -248,6 +291,7 @@ impl HistoryManager {
                 &post_processed_text,
                 &post_process_prompt,
                 post_process_requested,
+                source.as_str(),
             ],
         )?;
 
@@ -261,6 +305,7 @@ impl HistoryManager {
             post_processed_text,
             post_process_prompt,
             post_process_requested,
+            source,
         };
 
         debug!("Saved history entry with id {}", entry.id);
@@ -308,7 +353,7 @@ impl HistoryManager {
 
         let entry = conn
             .query_row(
-                "SELECT id, file_name, timestamp, saved, title, transcription_text, post_processed_text, post_process_prompt, post_process_requested
+                "SELECT id, file_name, timestamp, saved, title, transcription_text, post_processed_text, post_process_prompt, post_process_requested, source
                  FROM transcription_history WHERE id = ?1",
                 params![id],
                 Self::map_history_entry,
@@ -451,50 +496,41 @@ impl HistoryManager {
         &self,
         cursor: Option<i64>,
         limit: Option<usize>,
+        source: Option<HistorySource>,
     ) -> Result<PaginatedHistory> {
         let conn = self.get_connection()?;
         let limit = limit.map(|l| l.min(100));
 
-        let mut entries: Vec<HistoryEntry> = match (cursor, limit) {
-            (Some(cursor_id), Some(lim)) => {
-                let fetch_count = (lim + 1) as i64;
-                let mut stmt = conn.prepare(
-                    "SELECT id, file_name, timestamp, saved, title, transcription_text, post_processed_text, post_process_prompt, post_process_requested
-                     FROM transcription_history
-                     WHERE id < ?1
-                     ORDER BY id DESC
-                     LIMIT ?2",
-                )?;
-                let result = stmt
-                    .query_map(params![cursor_id, fetch_count], Self::map_history_entry)?
-                    .collect::<std::result::Result<Vec<_>, _>>()?;
-                result
-            }
-            (None, Some(lim)) => {
-                let fetch_count = (lim + 1) as i64;
-                let mut stmt = conn.prepare(
-                    "SELECT id, file_name, timestamp, saved, title, transcription_text, post_processed_text, post_process_prompt, post_process_requested
-                     FROM transcription_history
-                     ORDER BY id DESC
-                     LIMIT ?1",
-                )?;
-                let result = stmt
-                    .query_map(params![fetch_count], Self::map_history_entry)?
-                    .collect::<std::result::Result<Vec<_>, _>>()?;
-                result
-            }
-            (_, None) => {
-                let mut stmt = conn.prepare(
-                    "SELECT id, file_name, timestamp, saved, title, transcription_text, post_processed_text, post_process_prompt, post_process_requested
-                     FROM transcription_history
-                     ORDER BY id DESC",
-                )?;
-                let result = stmt
-                    .query_map([], Self::map_history_entry)?
-                    .collect::<std::result::Result<Vec<_>, _>>()?;
-                result
-            }
-        };
+        let mut query = String::from(
+            "SELECT id, file_name, timestamp, saved, title, transcription_text,
+                    post_processed_text, post_process_prompt, post_process_requested, source
+             FROM transcription_history",
+        );
+        let mut conditions = Vec::new();
+        let mut values = Vec::<rusqlite::types::Value>::new();
+
+        if let Some(cursor_id) = cursor {
+            values.push(cursor_id.into());
+            conditions.push(format!("id < ?{}", values.len()));
+        }
+        if let Some(source) = source {
+            values.push(source.as_str().to_string().into());
+            conditions.push(format!("source = ?{}", values.len()));
+        }
+        if !conditions.is_empty() {
+            query.push_str(" WHERE ");
+            query.push_str(&conditions.join(" AND "));
+        }
+        query.push_str(" ORDER BY id DESC");
+        if let Some(lim) = limit {
+            values.push(((lim + 1) as i64).into());
+            query.push_str(&format!(" LIMIT ?{}", values.len()));
+        }
+
+        let mut stmt = conn.prepare(&query)?;
+        let mut entries = stmt
+            .query_map(rusqlite::params_from_iter(values), Self::map_history_entry)?
+            .collect::<std::result::Result<Vec<_>, _>>()?;
 
         let has_more = limit.is_some_and(|lim| entries.len() > lim);
         if has_more {
@@ -502,6 +538,34 @@ impl HistoryManager {
         }
 
         Ok(PaginatedHistory { entries, has_more })
+    }
+
+    pub fn get_source_counts(&self) -> Result<HistorySourceCounts> {
+        let conn = self.get_connection()?;
+        Self::get_source_counts_with_conn(&conn)
+    }
+
+    fn get_source_counts_with_conn(conn: &Connection) -> Result<HistorySourceCounts> {
+        let mut counts = HistorySourceCounts::default();
+        let mut stmt = conn.prepare(
+            "SELECT source, COUNT(*)
+             FROM transcription_history
+             GROUP BY source",
+        )?;
+        let rows = stmt.query_map([], |row| {
+            Ok((row.get::<_, String>(0)?, row.get::<_, usize>(1)?))
+        })?;
+
+        for row in rows {
+            let (source, count) = row?;
+            counts.total += count;
+            match HistorySource::from_db(&source) {
+                HistorySource::Microphone => counts.microphone += count,
+                HistorySource::File => counts.file += count,
+            }
+        }
+
+        Ok(counts)
     }
 
     #[cfg(test)]
@@ -516,7 +580,8 @@ impl HistoryManager {
                 transcription_text,
                 post_processed_text,
                 post_process_prompt,
-                post_process_requested
+                post_process_requested,
+                source
              FROM transcription_history
              ORDER BY timestamp DESC
              LIMIT 1",
@@ -543,7 +608,8 @@ impl HistoryManager {
                 transcription_text,
                 post_processed_text,
                 post_process_prompt,
-                post_process_requested
+                post_process_requested,
+                source
              FROM transcription_history
              WHERE transcription_text != ''
              ORDER BY timestamp DESC
@@ -597,7 +663,8 @@ impl HistoryManager {
                 transcription_text,
                 post_processed_text,
                 post_process_prompt,
-                post_process_requested
+                post_process_requested,
+                source
              FROM transcription_history
              WHERE id = ?1",
         )?;
@@ -666,7 +733,8 @@ mod tests {
                 transcription_text TEXT NOT NULL,
                 post_processed_text TEXT,
                 post_process_prompt TEXT,
-                post_process_requested BOOLEAN NOT NULL DEFAULT 0
+                post_process_requested BOOLEAN NOT NULL DEFAULT 0,
+                source TEXT NOT NULL DEFAULT 'microphone'
             );",
         )
         .expect("create transcription_history table");
@@ -683,8 +751,9 @@ mod tests {
                 transcription_text,
                 post_processed_text,
                 post_process_prompt,
-                post_process_requested
-            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+                post_process_requested,
+                source
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
             params![
                 format!("handy-{}.wav", timestamp),
                 timestamp,
@@ -694,9 +763,52 @@ mod tests {
                 post_processed,
                 Option::<String>::None,
                 false,
+                HistorySource::Microphone.as_str(),
             ],
         )
         .expect("insert history entry");
+    }
+
+    #[test]
+    fn source_migration_backfills_existing_imports() {
+        let mut conn = Connection::open_in_memory().expect("open in-memory db");
+        let migrations = Migrations::new(MIGRATIONS.to_vec());
+        migrations
+            .to_version(&mut conn, 4)
+            .expect("apply legacy history migrations");
+
+        for file_name in ["handy-100.wav", "handy-import-200.wav"] {
+            conn.execute(
+                "INSERT INTO transcription_history (
+                    file_name, timestamp, saved, title, transcription_text,
+                    post_processed_text, post_process_prompt, post_process_requested
+                 ) VALUES (?1, 1, 0, 'Recording', 'text', NULL, NULL, 0)",
+                [file_name],
+            )
+            .expect("insert legacy entry");
+        }
+
+        migrations
+            .to_latest(&mut conn)
+            .expect("apply source migration");
+
+        let microphone_source: String = conn
+            .query_row(
+                "SELECT source FROM transcription_history WHERE file_name = 'handy-100.wav'",
+                [],
+                |row| row.get(0),
+            )
+            .expect("read microphone source");
+        let file_source: String = conn
+            .query_row(
+                "SELECT source FROM transcription_history WHERE file_name = 'handy-import-200.wav'",
+                [],
+                |row| row.get(0),
+            )
+            .expect("read file source");
+
+        assert_eq!(microphone_source, "microphone");
+        assert_eq!(file_source, "file");
     }
 
     #[test]
@@ -733,5 +845,33 @@ mod tests {
 
         assert_eq!(entry.timestamp, 100);
         assert_eq!(entry.transcription_text, "completed");
+    }
+
+    #[test]
+    fn source_counts_cover_the_entire_history() {
+        let conn = setup_conn();
+        insert_entry(&conn, 100, "first microphone", None);
+        insert_entry(&conn, 200, "second microphone", None);
+        conn.execute(
+            "INSERT INTO transcription_history (
+                file_name,
+                timestamp,
+                saved,
+                title,
+                transcription_text,
+                post_processed_text,
+                post_process_prompt,
+                post_process_requested,
+                source
+            ) VALUES ('handy-import-300.wav', 300, 0, 'File', 'file text', NULL, NULL, 0, 'file')",
+            [],
+        )
+        .expect("insert file history entry");
+
+        let counts =
+            HistoryManager::get_source_counts_with_conn(&conn).expect("count history sources");
+        assert_eq!(counts.total, 3);
+        assert_eq!(counts.microphone, 2);
+        assert_eq!(counts.file, 1);
     }
 }

@@ -1,7 +1,6 @@
 {
   "tray": {
     "settings": "Instellingen...",
-    "checkUpdates": "Controleren op updates...",
     "copyLastTranscript": "Laatste transcriptie kopiëren",
     "unloadModel": "Model ontladen",
     "model": "Model",
@@ -15,7 +14,7 @@
     "postProcessing": "Naverwerking",
     "history": "Geschiedenis",
     "debug": "Probleemoplossing",
-    "about": "Over Handy"
+    "about": "Over crwbar voice"
   },
   "onboarding": {
     "subtitle": "Kies een transcriptiemodel om aan de slag te gaan",
@@ -100,7 +99,7 @@
     },
     "permissions": {
       "title": "Machtigingen vereist",
-      "description": "Handy heeft een aantal machtigingen nodig om goed te kunnen werken.",
+      "description": "crwbar voice heeft een aantal machtigingen nodig om goed te kunnen werken.",
       "microphone": {
         "title": "Microfoontoegang",
         "description": "Vereist om je stem op te nemen voor transcriptie."
@@ -158,6 +157,18 @@
       "title": "Instellingen voor {{model}}"
     },
     "general": {
+      "dropTip": {
+        "title": "Een audiobestand transcriberen",
+        "body": "Sleep een audiobestand (WhatsApp .opus, mp3, m4a, wav…) naar de opnamebalk terwijl die zichtbaar is; het bestand wordt dan getranscribeerd in plaats van de microfoon. Schakel de functie hieronder in."
+      },
+      "dragDrop": {
+        "label": "Neergezette bestanden transcriberen",
+        "description": "Hiermee kun je een audiobestand naar de opnamebalk slepen om het te transcriberen in plaats van de microfoon."
+      },
+      "autoCopy": {
+        "label": "Automatisch naar het klembord kopiëren",
+        "description": "Kopieert elke voltooide transcriptie automatisch naar het klembord."
+      },
       "title": "Algemeen",
       "shortcut": {
         "title": "Sneltoetsen",
@@ -212,7 +223,7 @@
       },
       "rescan": {
         "label": "Opnieuw scannen",
-        "tooltip": "Scannen naar modellen die buiten Handy om zijn toegevoegd aan de modellenmap of Hugging Face-cache"
+        "tooltip": "Scannen naar modellen die buiten crwbar voice om zijn toegevoegd aan de modellenmap of Hugging Face-cache"
       },
       "noModelsMatch": "Geen modellen voldoen aan dit filter."
     },
@@ -274,11 +285,11 @@
       },
       "autostart": {
         "label": "Starten bij opstarten",
-        "description": "Handy automatisch starten zodra je inlogt op je computer."
+        "description": "crwbar voice automatisch starten zodra je inlogt op je computer."
       },
       "showTrayIcon": {
         "label": "Pictogram in systeemvak tonen",
-        "description": "Toon het Handy-pictogram in het systeemvak."
+        "description": "Toon het crwbar voice-pictogram in het systeemvak."
       },
       "overlay": {
         "style": {
@@ -424,6 +435,14 @@
       }
     },
     "history": {
+      "sourceMic": "Microfoon",
+      "sourceFile": "Bestand",
+      "filter": {
+        "all": "Alles",
+        "microphone": "Microfoon",
+        "file": "Bestand"
+      },
+      "emptyFiltered": "Geen items in deze categorie.",
       "title": "Geschiedenis",
       "openFolder": "Opnamemap openen",
       "loading": "Geschiedenis laden...",
@@ -461,7 +480,7 @@
       },
       "updateChecks": {
         "label": "Controleren op updates",
-        "description": "Automatisch controleren op nieuwe versies van Handy"
+        "description": "Automatisch controleren op nieuwe versies van crwbar voice"
       },
       "whatsNewPreview": {
         "title": "Voorbeeld van release-notes",
@@ -537,27 +556,27 @@
       }
     },
     "about": {
-      "title": "Over Handy",
+      "title": "Over crwbar voice",
       "version": {
         "title": "Versie",
-        "description": "Huidige versie van Handy"
+        "description": "Huidige versie van crwbar voice"
       },
       "whatsNewUpdates": {
         "label": "Toon 'Wat is er nieuw'",
-        "description": "Release-notes tonen nadat Handy is bijgewerkt"
+        "description": "Release-notes tonen nadat crwbar voice is bijgewerkt"
       },
       "appDataDirectory": {
         "title": "App-datamap",
-        "description": "Locatie waar Handy de gegevens opslaat"
+        "description": "Locatie waar crwbar voice de gegevens opslaat"
       },
       "sourceCode": {
-        "title": "Broncode",
-        "description": "Bekijk de broncode en draag bij",
-        "button": "Bekijk op GitHub"
+        "title": "Handy",
+        "description": "crwbar voice is a refinement of the complete Handy codebase by CJ Pais—not an independent rewrite. This fork adds its own fixes, workflow changes, and visual direction.",
+        "button": "Open Handy on GitHub"
       },
       "supportDevelopment": {
         "title": "Ontwikkeling ondersteunen",
-        "description": "Help ons om te blijven bouwen aan Handy",
+        "description": "Help ons om te blijven bouwen aan crwbar voice",
         "button": "Doneren"
       },
       "acknowledgments": {
@@ -565,7 +584,7 @@
         "ggml": {
           "title": "ggml",
           "description": "Krachtige tensorbibliotheek voor lokale AI-verwerking",
-          "details": "Handy's lokale spraak-naar-tekst is gebouwd op transcribe.cpp en ggml. Met dank aan het geweldige werk van Georgi Gerganov en alle bijdragers."
+          "details": "crwbar voice's lokale spraak-naar-tekst is gebouwd op transcribe.cpp en ggml. Met dank aan het geweldige werk van Georgi Gerganov en alle bijdragers."
         }
       }
     }
@@ -584,7 +603,7 @@
     "portableUpdateButton": "GitHub Releases openen"
   },
   "whatsNew": {
-    "title": "Nieuw in Handy v{{version}}"
+    "title": "Nieuw in crwbar voice v{{version}}"
   },
   "common": {
     "loading": "Laden...",
@@ -596,7 +615,7 @@
     "noOptionsFound": "Geen opties gevonden"
   },
   "accessibility": {
-    "permissionsDescription": "Handy heeft toegankelijkheidsmachtigingen nodig om getranscribeerde tekst te kunnen typen.",
+    "permissionsDescription": "crwbar voice heeft toegankelijkheidsmachtigingen nodig om getranscribeerde tekst te kunnen typen.",
     "openSettings": "Systeeminstellingen openen"
   },
   "errors": {
@@ -619,11 +638,11 @@
   },
   "appLanguage": {
     "title": "Interfacetaal",
-    "description": "Wijzig de taal van de Handy-interface"
+    "description": "Wijzig de taal van de crwbar voice-interface"
   },
   "theme": {
     "title": "App-thema",
-    "description": "Kies of Handy het systeemthema volgt of licht of donker blijft",
+    "description": "Kies of crwbar voice het systeemthema volgt of licht of donker blijft",
     "options": {
       "system": "Systeem",
       "light": "Licht",
@@ -631,6 +650,11 @@
     }
   },
   "overlay": {
+    "done": "Klaar",
+    "copied": "Gekopieerd",
+    "copyAgain": "Opnieuw kopiëren",
+    "dropFile": "Bestand neerzetten",
+    "dropHint": "Zet hier een audiobestand neer om het te transcriberen",
     "transcribing": "Transcriberen...",
     "processing": "Verwerken..."
   }

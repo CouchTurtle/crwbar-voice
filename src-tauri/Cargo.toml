@@ -1,11 +1,11 @@
 [package]
-name = "handy"
-version = "0.9.2"
-description = "Handy"
-authors = ["cjpais"]
+name = "crwbar-voice"
+version = "0.1.0"
+description = "Private, local-first speech transcription"
+authors = ["crwbar contributors", "CJ Pais and Handy contributors"]
 edition = "2021"
 license = "MIT"
-default-run = "handy"
+default-run = "crwbar-voice"
 
 [profile.dev]
 incremental = true # Compile your binary in smaller steps.
@@ -16,7 +16,7 @@ incremental = true # Compile your binary in smaller steps.
 # The `_lib` suffix may seem redundant but it is necessary
 # to make the lib name unique and wouldn't conflict with the bin name.
 # This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
-name = "handy_app_lib"
+name = "crwbar_voice_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 # [[bin]]
@@ -58,6 +58,12 @@ tokio = "1.43.0"
 vad-rs = { git = "https://github.com/cjpais/vad-rs", default-features = false }
 enigo = "0.6.1"
 rodio = { git = "https://github.com/cjpais/rodio.git" }
+# Ogg Opus decoding (WhatsApp voice notes). rodio/Symphonia has no Opus codec, so
+# we demux the Ogg container with `ogg` and decode packets with libopus via
+# `audiopus` (audiopus_sys builds a vendored static libopus with cmake — no system
+# library required at build or run time).
+ogg = "0.9"
+audiopus = "0.3.0-rc.0"
 reqwest = { version = "0.12", features = ["json", "stream"] }
 futures-util = "0.3"
 rustfft = "6.4.0"
@@ -92,7 +98,6 @@ signal-hook = "0.3"
 tauri-plugin-autostart = "2.5.1"
 tauri-plugin-global-shortcut = "2.3.1"
 tauri-plugin-single-instance = "2.3.2"
-tauri-plugin-updater = "2.10.0"
 
 [target.'cfg(windows)'.dependencies]
 # ONNX Runtime on Windows is CPU-only (no ort-directml), matching macOS/Linux.

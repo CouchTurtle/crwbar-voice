@@ -1,7 +1,6 @@
 {
   "tray": {
     "settings": "設定…",
-    "checkUpdates": "アップデートを確認…",
     "copyLastTranscript": "最新の文字起こしをコピー",
     "unloadModel": "モデルをアンロード",
     "model": "モデル",
@@ -100,7 +99,7 @@
     },
     "permissions": {
       "title": "権限が必要です",
-      "description": "Handy が正常に動作するにはいくつかの権限が必要です。",
+      "description": "crwbar voice が正常に動作するにはいくつかの権限が必要です。",
       "microphone": {
         "title": "マイクへのアクセス",
         "description": "文字起こしのためにあなたの声を聞くために必要です。"
@@ -172,13 +171,25 @@
       "searchPlaceholder": "モデルを名前で検索…",
       "rescan": {
         "label": "再スキャン",
-        "tooltip": "Handy を使わずに models フォルダーまたは Hugging Face キャッシュに追加されたモデルを再スキャンします"
+        "tooltip": "crwbar voice を使わずに models フォルダーまたは Hugging Face キャッシュに追加されたモデルを再スキャンします"
       }
     },
     "general": {
+      "dropTip": {
+        "title": "音声ファイルを文字起こし",
+        "body": "録音バーが表示されている間に音声ファイル（WhatsApp .opus、mp3、m4a、wav など）をドラッグしてください。マイクの代わりにファイルを文字起こしします。下のスイッチで機能を有効にしてください。"
+      },
+      "dragDrop": {
+        "label": "ドロップしたファイルを文字起こし",
+        "description": "音声ファイルを録音バーにドラッグし、マイクの代わりに文字起こしできます。"
+      },
+      "autoCopy": {
+        "label": "クリップボードへ自動コピー",
+        "description": "完了した文字起こしを毎回クリップボードへ自動的にコピーします。"
+      },
       "title": "一般",
       "shortcut": {
-        "title": "Handy ショートカット",
+        "title": "crwbar voice ショートカット",
         "description": "音声録音を開始するキーボードショートカットを設定",
         "loading": "ショートカットを読み込み中…",
         "none": "ショートカットが設定されていません",
@@ -274,11 +285,11 @@
       },
       "autostart": {
         "label": "起動時に実行",
-        "description": "コンピューターにログインしたときに Handy を自動的に起動。"
+        "description": "コンピューターにログインしたときに crwbar voice を自動的に起動。"
       },
       "showTrayIcon": {
         "label": "トレイアイコンを表示",
-        "description": "システムトレイに Handy のアイコンを表示します。"
+        "description": "システムトレイに crwbar voice のアイコンを表示します。"
       },
       "overlay": {
         "style": {
@@ -424,6 +435,14 @@
       }
     },
     "history": {
+      "sourceMic": "マイク",
+      "sourceFile": "ファイル",
+      "filter": {
+        "all": "すべて",
+        "microphone": "マイク",
+        "file": "ファイル"
+      },
+      "emptyFiltered": "このカテゴリには項目がありません。",
       "title": "履歴",
       "openFolder": "録音フォルダを開く",
       "loading": "履歴を読み込み中…",
@@ -461,7 +480,7 @@
       },
       "updateChecks": {
         "label": "アップデートを確認",
-        "description": "Handy の新しいバージョンを自動的にチェック"
+        "description": "crwbar voice の新しいバージョンを自動的にチェック"
       },
       "soundTheme": {
         "label": "サウンドテーマ",
@@ -540,20 +559,20 @@
       "title": "概要",
       "version": {
         "title": "バージョン",
-        "description": "Handy の現在のバージョン"
+        "description": "crwbar voice の現在のバージョン"
       },
       "appDataDirectory": {
         "title": "アプリデータディレクトリ",
-        "description": "Handy がデータを保存する場所"
+        "description": "crwbar voice がデータを保存する場所"
       },
       "sourceCode": {
-        "title": "ソースコード",
-        "description": "ソースコードを見て貢献する",
-        "button": "GitHub で見る"
+        "title": "Handy",
+        "description": "crwbar voice is a refinement of the complete Handy codebase by CJ Pais—not an independent rewrite. This fork adds its own fixes, workflow changes, and visual direction.",
+        "button": "Open Handy on GitHub"
       },
       "supportDevelopment": {
         "title": "開発を支援",
-        "description": "Handy の開発を支援してください",
+        "description": "crwbar voice の開発を支援してください",
         "button": "寄付する"
       },
       "acknowledgments": {
@@ -561,12 +580,12 @@
         "ggml": {
           "title": "ggml",
           "description": "オンデバイス機械学習推論のための高性能テンソルライブラリ",
-          "details": "Handy のローカルの音声からテキストへの文字起こしは transcribe.cpp と ggml を基盤としています。Georgi Gerganov 氏と貢献者の皆様の素晴らしい仕事に感謝します。"
+          "details": "crwbar voice のローカルの音声からテキストへの文字起こしは transcribe.cpp と ggml を基盤としています。Georgi Gerganov 氏と貢献者の皆様の素晴らしい仕事に感謝します。"
         }
       },
       "whatsNewUpdates": {
         "label": "新機能を表示",
-        "description": "Handy のアップデート後にリリースノートを表示"
+        "description": "crwbar voice のアップデート後にリリースノートを表示"
       }
     }
   },
@@ -593,7 +612,7 @@
     "noOptionsFound": "オプションが見つかりません"
   },
   "accessibility": {
-    "permissionsDescription": "Handy が文字起こしテキストを入力するには、アクセシビリティ権限が必要です。",
+    "permissionsDescription": "crwbar voice が文字起こしテキストを入力するには、アクセシビリティ権限が必要です。",
     "openSettings": "システム設定を開く"
   },
   "errors": {
@@ -616,11 +635,11 @@
   },
   "appLanguage": {
     "title": "アプリの言語",
-    "description": "Handy インターフェースの言語を変更"
+    "description": "crwbar voice インターフェースの言語を変更"
   },
   "theme": {
     "title": "アプリのテーマ",
-    "description": "Handy をシステムのテーマに合わせるか、ライトまたはダークで固定するかを選択します",
+    "description": "crwbar voice をシステムのテーマに合わせるか、ライトまたはダークで固定するかを選択します",
     "options": {
       "system": "システム",
       "light": "ライト",
@@ -628,10 +647,15 @@
     }
   },
   "overlay": {
+    "done": "完了",
+    "copied": "コピー済み",
+    "copyAgain": "もう一度コピー",
+    "dropFile": "ファイルをドロップ",
+    "dropHint": "文字起こしする音声ファイルをここにドロップ",
     "transcribing": "文字起こし中…",
     "processing": "処理中…"
   },
   "whatsNew": {
-    "title": "Handy v{{version}} の新機能"
+    "title": "crwbar voice v{{version}} の新機能"
   }
 }

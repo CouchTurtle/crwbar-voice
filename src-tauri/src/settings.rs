@@ -464,6 +464,10 @@ pub struct AppSettings {
     /// `overlay_position` (position `none` → style `None`).
     #[serde(default = "default_overlay_style")]
     pub overlay_style: OverlayStyle,
+    /// Allow transcribing an audio file dragged onto the recording overlay.
+    /// Opt-in — defaults to off.
+    #[serde(default)]
+    pub drag_drop_enabled: bool,
 }
 
 fn default_model() -> String {
@@ -497,7 +501,7 @@ fn default_autostart_enabled() -> bool {
 }
 
 fn default_update_checks_enabled() -> bool {
-    true
+    false
 }
 
 fn default_show_whats_new_on_update() -> bool {
@@ -580,9 +584,9 @@ fn default_post_process_enabled() -> bool {
 }
 
 fn default_app_language() -> String {
-    tauri_plugin_os::locale()
-        .map(|l| l.replace('_', "-"))
-        .unwrap_or_else(|| "en".to_string())
+    // Crowbar is an English-first product: default the UI to English regardless
+    // of the OS locale. Users can still switch language in Settings → General.
+    "en".to_string()
 }
 
 fn default_show_tray_icon() -> bool {
@@ -894,6 +898,7 @@ pub fn get_default_settings() -> AppSettings {
         extra_recording_buffer_ms: 0,
         vad_enabled: default_vad_enabled(),
         overlay_style: default_overlay_style(),
+        drag_drop_enabled: false,
     }
 }
 

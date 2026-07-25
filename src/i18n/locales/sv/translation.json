@@ -1,7 +1,6 @@
 {
   "tray": {
     "settings": "Inställningar...",
-    "checkUpdates": "Sök efter uppdateringar...",
     "copyLastTranscript": "Kopiera senaste transkriptionen",
     "unloadModel": "Avlasta modell",
     "model": "Modell",
@@ -100,7 +99,7 @@
     },
     "permissions": {
       "title": "Behörigheter krävs",
-      "description": "Handy behöver ett par behörigheter för att fungera korrekt.",
+      "description": "crwbar voice behöver ett par behörigheter för att fungera korrekt.",
       "microphone": {
         "title": "Mikrofonåtkomst",
         "description": "Krävs för att höra din röst för transkription."
@@ -158,9 +157,21 @@
       "title": "{{model}}-inställningar"
     },
     "general": {
+      "dropTip": {
+        "title": "Transkribera en ljudfil",
+        "body": "Dra en ljudfil (WhatsApp .opus, mp3, m4a, wav…) till inspelningsfältet medan det visas; filen transkriberas då i stället för mikrofonen. Aktivera funktionen med reglaget nedan."
+      },
+      "dragDrop": {
+        "label": "Transkribera släppta filer",
+        "description": "Gör att du kan dra en ljudfil till inspelningsfältet och transkribera den i stället för mikrofonen."
+      },
+      "autoCopy": {
+        "label": "Kopiera automatiskt till urklipp",
+        "description": "Kopierar varje färdig transkription automatiskt till urklipp."
+      },
       "title": "Allmänt",
       "shortcut": {
-        "title": "Handy-kortkommandon",
+        "title": "crwbar voice-kortkommandon",
         "description": "Konfigurera kortkommandon för att starta tal-till-text-inspelning",
         "loading": "Laddar kortkommandon...",
         "none": "Inga kortkommandon konfigurerade",
@@ -213,7 +224,7 @@
       "searchPlaceholder": "Sök modeller efter namn…",
       "rescan": {
         "label": "Skanna om",
-        "tooltip": "Skanna om efter modeller som lagts till i modellmappen eller Hugging Face-cachen utanför Handy"
+        "tooltip": "Skanna om efter modeller som lagts till i modellmappen eller Hugging Face-cachen utanför crwbar voice"
       }
     },
     "sound": {
@@ -274,11 +285,11 @@
       },
       "autostart": {
         "label": "Starta vid uppstart",
-        "description": "Starta Handy automatiskt när du loggar in på din dator."
+        "description": "Starta crwbar voice automatiskt när du loggar in på din dator."
       },
       "showTrayIcon": {
         "label": "Visa ikon i systemfältet",
-        "description": "Visa Handy-ikonen i systemfältet."
+        "description": "Visa crwbar voice-ikonen i systemfältet."
       },
       "overlay": {
         "style": {
@@ -424,6 +435,14 @@
       }
     },
     "history": {
+      "sourceMic": "Mikrofon",
+      "sourceFile": "Fil",
+      "filter": {
+        "all": "Alla",
+        "microphone": "Mikrofon",
+        "file": "Fil"
+      },
+      "emptyFiltered": "Det finns inga poster i den här kategorin.",
       "title": "Historik",
       "openFolder": "Öppna mapp för inspelningar",
       "loading": "Laddar historik...",
@@ -461,7 +480,7 @@
       },
       "updateChecks": {
         "label": "Sök efter uppdateringar",
-        "description": "Sök automatiskt efter nya versioner av Handy"
+        "description": "Sök automatiskt efter nya versioner av crwbar voice"
       },
       "soundTheme": {
         "label": "Ljudtema",
@@ -540,20 +559,20 @@
       "title": "Om",
       "version": {
         "title": "Version",
-        "description": "Nuvarande version av Handy"
+        "description": "Nuvarande version av crwbar voice"
       },
       "appDataDirectory": {
         "title": "Mapp för appdata",
-        "description": "Plats där Handy lagrar sina data"
+        "description": "Plats där crwbar voice lagrar sina data"
       },
       "sourceCode": {
-        "title": "Källkod",
-        "description": "Visa källkod och bidra",
-        "button": "Visa på GitHub"
+        "title": "Handy",
+        "description": "crwbar voice is a refinement of the complete Handy codebase by CJ Pais—not an independent rewrite. This fork adds its own fixes, workflow changes, and visual direction.",
+        "button": "Open Handy on GitHub"
       },
       "supportDevelopment": {
         "title": "Stöd utvecklingen",
-        "description": "Hjälp oss att fortsätta bygga Handy",
+        "description": "Hjälp oss att fortsätta bygga crwbar voice",
         "button": "Donera"
       },
       "acknowledgments": {
@@ -561,12 +580,12 @@
         "ggml": {
           "title": "ggml",
           "description": "Högpresterande inferens av OpenAI:s Whisper-modell för automatisk taligenkänning",
-          "details": "Handy använder ggml för snabb, lokal tal-till-text-behandling. Tack till det fantastiska arbete som utförts av Georgi Gerganov med medarbetare."
+          "details": "crwbar voice använder ggml för snabb, lokal tal-till-text-behandling. Tack till det fantastiska arbete som utförts av Georgi Gerganov med medarbetare."
         }
       },
       "whatsNewUpdates": {
         "label": "Visa nyheter",
-        "description": "Visa versionsinformation efter Handy-uppdateringar"
+        "description": "Visa versionsinformation efter crwbar voice-uppdateringar"
       }
     }
   },
@@ -593,7 +612,7 @@
     "noOptionsFound": "Inga alternativ hittades"
   },
   "accessibility": {
-    "permissionsDescription": "Handy behöver behörighet för hjälpmedel för att kunna skriva transkriberad text.",
+    "permissionsDescription": "crwbar voice behöver behörighet för hjälpmedel för att kunna skriva transkriberad text.",
     "openSettings": "Öppna systeminställningar"
   },
   "errors": {
@@ -616,11 +635,11 @@
   },
   "appLanguage": {
     "title": "Applikationsspråk",
-    "description": "Ändra språket i Handy-gränssnittet"
+    "description": "Ändra språket i crwbar voice-gränssnittet"
   },
   "theme": {
     "title": "Apptema",
-    "description": "Välj om Handy ska följa systemets tema eller förbli ljust eller mörkt",
+    "description": "Välj om crwbar voice ska följa systemets tema eller förbli ljust eller mörkt",
     "options": {
       "system": "System",
       "light": "Ljust",
@@ -628,10 +647,15 @@
     }
   },
   "overlay": {
+    "done": "Klart",
+    "copied": "Kopierat",
+    "copyAgain": "Kopiera igen",
+    "dropFile": "Släpp fil",
+    "dropHint": "Släpp en ljudfil här för att transkribera den",
     "transcribing": "Transkriberar...",
     "processing": "Bearbetar..."
   },
   "whatsNew": {
-    "title": "Nytt i Handy v{{version}}"
+    "title": "Nytt i crwbar voice v{{version}}"
   }
 }

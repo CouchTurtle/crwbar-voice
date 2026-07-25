@@ -1,7 +1,6 @@
 {
   "tray": {
     "settings": "Ustawienia...",
-    "checkUpdates": "Sprawdź aktualizacje...",
     "copyLastTranscript": "Kopiuj ostatnią transkrypcję",
     "unloadModel": "Zwolnij model",
     "model": "Model",
@@ -100,7 +99,7 @@
     },
     "permissions": {
       "title": "Wymagane uprawnienia",
-      "description": "Handy potrzebuje kilku uprawnień, aby działać poprawnie.",
+      "description": "crwbar voice potrzebuje kilku uprawnień, aby działać poprawnie.",
       "microphone": {
         "title": "Dostęp do mikrofonu",
         "description": "Wymagany do słyszenia Twojego głosu w celu transkrypcji."
@@ -172,13 +171,25 @@
       "searchPlaceholder": "Szukaj modeli według nazwy…",
       "rescan": {
         "label": "Skanuj ponownie",
-        "tooltip": "Skanuj ponownie w poszukiwaniu modeli dodanych do folderu modeli lub pamięci podręcznej Hugging Face poza Handy"
+        "tooltip": "Skanuj ponownie w poszukiwaniu modeli dodanych do folderu modeli lub pamięci podręcznej Hugging Face poza crwbar voice"
       }
     },
     "general": {
+      "dropTip": {
+        "title": "Transkrybuj plik audio",
+        "body": "Przeciągnij plik audio (WhatsApp .opus, mp3, m4a, wav…) na pasek nagrywania, gdy jest widoczny; zamiast mikrofonu zostanie przepisany plik. Włącz tę funkcję przełącznikiem poniżej."
+      },
+      "dragDrop": {
+        "label": "Transkrybuj upuszczone pliki",
+        "description": "Pozwala przeciągnąć plik audio na pasek nagrywania i przepisać go zamiast dźwięku z mikrofonu."
+      },
+      "autoCopy": {
+        "label": "Automatycznie kopiuj do schowka",
+        "description": "Automatycznie kopiuje każdą ukończoną transkrypcję do schowka."
+      },
       "title": "Ogólne",
       "shortcut": {
-        "title": "Skróty Handy",
+        "title": "Skróty crwbar voice",
         "description": "Skonfiguruj skróty klawiaturowe do uruchamiania nagrywania mowy",
         "loading": "Wczytywanie skrótów...",
         "none": "Brak skonfigurowanych skrótów",
@@ -274,11 +285,11 @@
       },
       "autostart": {
         "label": "Uruchamiaj przy starcie",
-        "description": "Automatycznie uruchamiaj Handy po zalogowaniu."
+        "description": "Automatycznie uruchamiaj crwbar voice po zalogowaniu."
       },
       "showTrayIcon": {
         "label": "Pokaż ikonę w zasobniku",
-        "description": "Wyświetlaj ikonę Handy w zasobniku systemowym."
+        "description": "Wyświetlaj ikonę crwbar voice w zasobniku systemowym."
       },
       "overlay": {
         "style": {
@@ -424,6 +435,14 @@
       }
     },
     "history": {
+      "sourceMic": "Mikrofon",
+      "sourceFile": "Plik",
+      "filter": {
+        "all": "Wszystkie",
+        "microphone": "Mikrofon",
+        "file": "Plik"
+      },
+      "emptyFiltered": "Brak wpisów w tej kategorii.",
       "title": "Historia",
       "openFolder": "Otwórz folder nagrań",
       "loading": "Wczytywanie historii...",
@@ -461,7 +480,7 @@
       },
       "updateChecks": {
         "label": "Sprawdzaj aktualizacje",
-        "description": "Automatycznie sprawdzaj nowe wersje Handy"
+        "description": "Automatycznie sprawdzaj nowe wersje crwbar voice"
       },
       "soundTheme": {
         "label": "Motyw dźwiękowy",
@@ -540,20 +559,20 @@
       "title": "O programie",
       "version": {
         "title": "Wersja",
-        "description": "Aktualna wersja Handy"
+        "description": "Aktualna wersja crwbar voice"
       },
       "appDataDirectory": {
         "title": "Katalog danych aplikacji",
-        "description": "Miejsce, gdzie Handy przechowuje swoje dane"
+        "description": "Miejsce, gdzie crwbar voice przechowuje swoje dane"
       },
       "sourceCode": {
-        "title": "Kod źródłowy",
-        "description": "Zobacz kod źródłowy i współtwórz",
-        "button": "Zobacz na GitHub"
+        "title": "Handy",
+        "description": "crwbar voice is a refinement of the complete Handy codebase by CJ Pais—not an independent rewrite. This fork adds its own fixes, workflow changes, and visual direction.",
+        "button": "Open Handy on GitHub"
       },
       "supportDevelopment": {
         "title": "Wspieraj rozwój",
-        "description": "Pomóż nam dalej rozwijać Handy",
+        "description": "Pomóż nam dalej rozwijać crwbar voice",
         "button": "Wesprzyj"
       },
       "acknowledgments": {
@@ -561,12 +580,12 @@
         "ggml": {
           "title": "ggml",
           "description": "Wydajne wykonywanie modelu rozpoznawania mowy Whisper od OpenAI",
-          "details": "Handy używa ggml do szybkiego, lokalnego przetwarzania mowy na tekst. Dzięki niesamowitej pracy Georgi Gerganova i współtwórców."
+          "details": "crwbar voice używa ggml do szybkiego, lokalnego przetwarzania mowy na tekst. Dzięki niesamowitej pracy Georgi Gerganova i współtwórców."
         }
       },
       "whatsNewUpdates": {
         "label": "Pokaż nowości",
-        "description": "Pokazuj informacje o wydaniu po aktualizacjach Handy"
+        "description": "Pokazuj informacje o wydaniu po aktualizacjach crwbar voice"
       }
     }
   },
@@ -593,7 +612,7 @@
     "noOptionsFound": "Nie znaleziono opcji"
   },
   "accessibility": {
-    "permissionsDescription": "Handy potrzebuje uprawnień dostępności, aby wpisywać transkrybowany tekst.",
+    "permissionsDescription": "crwbar voice potrzebuje uprawnień dostępności, aby wpisywać transkrybowany tekst.",
     "openSettings": "Otwórz ustawienia systemowe"
   },
   "errors": {
@@ -616,11 +635,11 @@
   },
   "appLanguage": {
     "title": "Język aplikacji",
-    "description": "Zmień język interfejsu Handy"
+    "description": "Zmień język interfejsu crwbar voice"
   },
   "theme": {
     "title": "Motyw aplikacji",
-    "description": "Wybierz, czy Handy ma podążać za motywem systemu, czy pozostać jasny lub ciemny",
+    "description": "Wybierz, czy crwbar voice ma podążać za motywem systemu, czy pozostać jasny lub ciemny",
     "options": {
       "system": "System",
       "light": "Jasny",
@@ -628,10 +647,15 @@
     }
   },
   "overlay": {
+    "done": "Gotowe",
+    "copied": "Skopiowano",
+    "copyAgain": "Kopiuj ponownie",
+    "dropFile": "Upuść plik",
+    "dropHint": "Upuść tutaj plik audio, aby go przepisać",
     "transcribing": "Transkrypcja...",
     "processing": "Przetwarzanie..."
   },
   "whatsNew": {
-    "title": "Nowości w Handy v{{version}}"
+    "title": "Nowości w crwbar voice v{{version}}"
   }
 }

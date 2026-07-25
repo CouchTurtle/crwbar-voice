@@ -1,7 +1,6 @@
 {
   "tray": {
     "settings": "Settings...",
-    "checkUpdates": "Check for Updates...",
     "copyLastTranscript": "Copy Last Transcript",
     "unloadModel": "Unload Model",
     "model": "Model",
@@ -100,7 +99,7 @@
     },
     "permissions": {
       "title": "Permissions Required",
-      "description": "Handy needs a couple of permissions to work properly.",
+      "description": "crwbar voice needs a couple of permissions to work properly.",
       "microphone": {
         "title": "Microphone Access",
         "description": "Required to hear your voice for transcription."
@@ -159,8 +158,20 @@
     },
     "general": {
       "title": "General",
+      "dropTip": {
+        "title": "Transcribe an audio file",
+        "body": "Drag an audio file (WhatsApp .opus, mp3, m4a, wav …) onto the recording bar while it's visible – the file is transcribed instead of the microphone. Enable the feature with the toggle below."
+      },
+      "dragDrop": {
+        "label": "Transcribe dropped files",
+        "description": "Lets you drag an audio file onto the recording bar to transcribe it instead of the microphone."
+      },
+      "autoCopy": {
+        "label": "Copy to clipboard automatically",
+        "description": "Copies every finished transcription to the clipboard automatically."
+      },
       "shortcut": {
-        "title": "Handy Shortcuts",
+        "title": "crwbar voice Shortcuts",
         "description": "Configure keyboard shortcuts to trigger speech-to-text recording",
         "loading": "Loading shortcuts...",
         "none": "No shortcuts configured",
@@ -212,7 +223,7 @@
       },
       "rescan": {
         "label": "Rescan",
-        "tooltip": "Rescan for models added to the models folder or Hugging Face cache outside Handy"
+        "tooltip": "Rescan for models added to the models folder or Hugging Face cache outside crwbar voice"
       },
       "noModelsMatch": "No models match this filter."
     },
@@ -274,11 +285,11 @@
       },
       "autostart": {
         "label": "Launch on Startup",
-        "description": "Automatically start Handy when you log in to your computer."
+        "description": "Automatically start crwbar voice when you log in to your computer."
       },
       "showTrayIcon": {
         "label": "Show Tray Icon",
-        "description": "Display the Handy icon in the system tray."
+        "description": "Display the crwbar voice icon in the system tray."
       },
       "overlay": {
         "style": {
@@ -426,6 +437,14 @@
     "history": {
       "title": "History",
       "openFolder": "Open Recordings Folder",
+      "sourceMic": "Microphone",
+      "sourceFile": "File",
+      "filter": {
+        "all": "All",
+        "microphone": "Microphone",
+        "file": "File"
+      },
+      "emptyFiltered": "No entries in this category.",
       "loading": "Loading history...",
       "empty": "No transcriptions yet. Start recording to build your history!",
       "copyToClipboard": "Copy transcription to clipboard",
@@ -461,7 +480,7 @@
       },
       "updateChecks": {
         "label": "Check for Updates",
-        "description": "Automatically check for new versions of Handy"
+        "description": "Automatically check for new versions of crwbar voice"
       },
       "whatsNewPreview": {
         "title": "Preview What's New",
@@ -540,24 +559,24 @@
       "title": "About",
       "version": {
         "title": "Version",
-        "description": "Current version of Handy"
+        "description": "Current version of crwbar voice"
       },
       "whatsNewUpdates": {
         "label": "Show What's New",
-        "description": "Show release notes after Handy updates"
+        "description": "Show release notes after crwbar voice updates"
       },
       "appDataDirectory": {
         "title": "App Data Directory",
-        "description": "Location where Handy stores its data"
+        "description": "Location where crwbar voice stores its data"
       },
       "sourceCode": {
-        "title": "Source Code",
-        "description": "View source code and contribute",
-        "button": "View on GitHub"
+        "title": "Handy",
+        "description": "crwbar voice is a refinement of the complete Handy codebase by CJ Pais—not an independent rewrite. This fork adds its own fixes, workflow changes, and visual direction.",
+        "button": "Open Handy on GitHub"
       },
       "supportDevelopment": {
         "title": "Support Development",
-        "description": "Help us continue building Handy",
+        "description": "Help us continue building crwbar voice",
         "button": "Donate"
       },
       "acknowledgments": {
@@ -565,7 +584,7 @@
         "ggml": {
           "title": "ggml",
           "description": "High-performance tensor library for on-device machine learning inference",
-          "details": "Handy's local speech-to-text is built on transcribe.cpp and ggml. Thanks to the amazing work by Georgi Gerganov and contributors."
+          "details": "crwbar voice's local speech-to-text is built on transcribe.cpp and ggml. Thanks to the amazing work by Georgi Gerganov and contributors."
         }
       }
     }
@@ -584,7 +603,7 @@
     "portableUpdateButton": "Open GitHub Releases"
   },
   "whatsNew": {
-    "title": "New in Handy v{{version}}"
+    "title": "New in crwbar voice v{{version}}"
   },
   "common": {
     "loading": "Loading...",
@@ -596,7 +615,7 @@
     "noOptionsFound": "No options found"
   },
   "accessibility": {
-    "permissionsDescription": "Handy needs accessibility permissions to type transcribed text.",
+    "permissionsDescription": "crwbar voice needs accessibility permissions to type transcribed text.",
     "openSettings": "Open System Settings"
   },
   "errors": {
@@ -619,11 +638,11 @@
   },
   "appLanguage": {
     "title": "Application Language",
-    "description": "Change the language of the Handy interface"
+    "description": "Change the language of the crwbar voice interface"
   },
   "theme": {
     "title": "Application Theme",
-    "description": "Choose whether Handy follows your system theme or stays light or dark",
+    "description": "Choose whether crwbar voice follows your system theme or stays light or dark",
     "options": {
       "system": "System",
       "light": "Light",
@@ -632,6 +651,11 @@
   },
   "overlay": {
     "transcribing": "Transcribing...",
-    "processing": "Processing..."
+    "processing": "Processing...",
+    "done": "Done",
+    "copied": "Copied",
+    "copyAgain": "Copy again",
+    "dropFile": "Drop file",
+    "dropHint": "Drop an audio file here to transcribe it"
   }
 }

@@ -1,7 +1,6 @@
 {
   "tray": {
     "settings": "設定...",
-    "checkUpdates": "檢查更新...",
     "copyLastTranscript": "複製最新轉錄",
     "unloadModel": "卸載模型",
     "model": "模型",
@@ -100,7 +99,7 @@
     },
     "permissions": {
       "title": "需要權限",
-      "description": "Handy 需要一些權限才能正常運作",
+      "description": "crwbar voice 需要一些權限才能正常運作",
       "microphone": {
         "title": "麥克風存取",
         "description": "需要聽取您的語音進行轉錄"
@@ -158,9 +157,21 @@
       "title": "{{model}} 設定"
     },
     "general": {
+      "dropTip": {
+        "title": "轉錄音訊檔案",
+        "body": "錄音列顯示時，將音訊檔案（WhatsApp .opus、mp3、m4a、wav 等）拖到錄音列上；應用程式會轉錄檔案，而不是麥克風輸入。請使用下方開關啟用此功能。"
+      },
+      "dragDrop": {
+        "label": "轉錄拖放的檔案",
+        "description": "允許將音訊檔案拖到錄音列上，轉錄檔案而不是麥克風輸入。"
+      },
+      "autoCopy": {
+        "label": "自動複製到剪貼簿",
+        "description": "自動將每次完成的轉錄複製到剪貼簿。"
+      },
       "title": "一般",
       "shortcut": {
-        "title": "Handy 快捷鍵",
+        "title": "crwbar voice 快捷鍵",
         "description": "設定啟動語音轉文字錄製的鍵盤快捷鍵",
         "loading": "載入快捷鍵中...",
         "none": "未設定快捷鍵",
@@ -213,7 +224,7 @@
       "searchPlaceholder": "依名稱搜尋模型…",
       "rescan": {
         "label": "重新掃描",
-        "tooltip": "重新掃描在 Handy 之外新增到模型資料夾或 Hugging Face 快取中的模型"
+        "tooltip": "重新掃描在 crwbar voice 之外新增到模型資料夾或 Hugging Face 快取中的模型"
       }
     },
     "sound": {
@@ -274,11 +285,11 @@
       },
       "autostart": {
         "label": "開機啟動",
-        "description": "登入電腦時自動啟動 Handy"
+        "description": "登入電腦時自動啟動 crwbar voice"
       },
       "showTrayIcon": {
         "label": "顯示系統匣圖示",
-        "description": "在系統匣中顯示 Handy 圖示"
+        "description": "在系統匣中顯示 crwbar voice 圖示"
       },
       "overlay": {
         "style": {
@@ -424,6 +435,14 @@
       }
     },
     "history": {
+      "sourceMic": "麥克風",
+      "sourceFile": "檔案",
+      "filter": {
+        "all": "全部",
+        "microphone": "麥克風",
+        "file": "檔案"
+      },
+      "emptyFiltered": "此類別中沒有項目。",
       "title": "歷史紀錄",
       "openFolder": "開啟錄音資料夾",
       "loading": "載入歷史紀錄中...",
@@ -461,7 +480,7 @@
       },
       "updateChecks": {
         "label": "檢查更新",
-        "description": "自動檢查 Handy 的新版本"
+        "description": "自動檢查 crwbar voice 的新版本"
       },
       "soundTheme": {
         "label": "聲音主題",
@@ -540,20 +559,20 @@
       "title": "關於",
       "version": {
         "title": "版本",
-        "description": "Handy 的目前版本"
+        "description": "crwbar voice 的目前版本"
       },
       "appDataDirectory": {
         "title": "應用程式資料目錄",
-        "description": "Handy 儲存資料的位置"
+        "description": "crwbar voice 儲存資料的位置"
       },
       "sourceCode": {
-        "title": "原始碼",
-        "description": "檢視原始碼並參與貢獻",
-        "button": "在 GitHub 上檢視"
+        "title": "Handy",
+        "description": "crwbar voice is a refinement of the complete Handy codebase by CJ Pais—not an independent rewrite. This fork adds its own fixes, workflow changes, and visual direction.",
+        "button": "Open Handy on GitHub"
       },
       "supportDevelopment": {
         "title": "支持開發",
-        "description": "幫助我們繼續開發 Handy",
+        "description": "幫助我們繼續開發 crwbar voice",
         "button": "捐贈"
       },
       "acknowledgments": {
@@ -561,12 +580,12 @@
         "ggml": {
           "title": "ggml",
           "description": "針對 OpenAI Whisper 自動語音識別模型的高效能推理引擎",
-          "details": "Handy 使用 ggml 進行快速的本機語音轉文字處理。感謝 Georgi Gerganov 和貢獻者們的傑出工作"
+          "details": "crwbar voice 使用 ggml 進行快速的本機語音轉文字處理。感謝 Georgi Gerganov 和貢獻者們的傑出工作"
         }
       },
       "whatsNewUpdates": {
         "label": "顯示新功能",
-        "description": "Handy 更新後顯示版本資訊"
+        "description": "crwbar voice 更新後顯示版本資訊"
       }
     }
   },
@@ -593,7 +612,7 @@
     "noOptionsFound": "未找到選項"
   },
   "accessibility": {
-    "permissionsDescription": "Handy 需要輔助使用權限才能輸入轉錄的文字",
+    "permissionsDescription": "crwbar voice 需要輔助使用權限才能輸入轉錄的文字",
     "openSettings": "開啟系統設定"
   },
   "errors": {
@@ -616,11 +635,11 @@
   },
   "appLanguage": {
     "title": "應用程式語言",
-    "description": "變更 Handy 介面的語言"
+    "description": "變更 crwbar voice 介面的語言"
   },
   "theme": {
     "title": "應用程式主題",
-    "description": "選擇 Handy 跟隨系統主題，或維持淺色或深色",
+    "description": "選擇 crwbar voice 跟隨系統主題，或維持淺色或深色",
     "options": {
       "system": "跟隨系統",
       "light": "淺色",
@@ -628,10 +647,15 @@
     }
   },
   "overlay": {
+    "done": "完成",
+    "copied": "已複製",
+    "copyAgain": "再次複製",
+    "dropFile": "放下檔案",
+    "dropHint": "將音訊檔案放到這裡進行轉錄",
     "transcribing": "正在轉錄...",
     "processing": "處理中..."
   },
   "whatsNew": {
-    "title": "Handy v{{version}} 新功能"
+    "title": "crwbar voice v{{version}} 新功能"
   }
 }

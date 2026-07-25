@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { getVersion } from "@tauri-apps/api/app";
 
 import ModelSelector from "../model-selector";
-import UpdateChecker from "../update-checker";
 
 const Footer: React.FC = () => {
   const [version, setVersion] = useState("");
@@ -14,7 +13,7 @@ const Footer: React.FC = () => {
         setVersion(appVersion);
       } catch (error) {
         console.error("Failed to get app version:", error);
-        setVersion("0.1.2");
+        setVersion("0.1.0");
       }
     };
 
@@ -28,10 +27,7 @@ const Footer: React.FC = () => {
           <ModelSelector />
         </div>
 
-        {/* Update Status */}
         <div className="flex items-center gap-1">
-          <UpdateChecker />
-          <span>•</span>
           {/* eslint-disable-next-line i18next/no-literal-string */}
           <span>v{version}</span>
         </div>
