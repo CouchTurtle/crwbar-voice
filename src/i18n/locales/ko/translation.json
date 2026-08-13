@@ -189,6 +189,10 @@
           "transcribe_with_post_process": {
             "name": "후처리 단축키",
             "description": "선택 사항: 항상 AI 후처리를 적용하는 전용 단축키입니다."
+          },
+          "voice_action": {
+            "name": "Voice Action Shortcut",
+            "description": "Speak an instruction and generate text using optional context and your selected AI backend."
           }
         },
         "errors": {
@@ -432,6 +436,33 @@
         "cancel": "취소",
         "selectToEdit": "세부 정보를 보고 편집하려면 위에서 프롬프트를 선택하세요.",
         "createFirst": "첫 번째 후처리 프롬프트를 만들려면 위의 '새 프롬프트 만들기'를 클릭하세요."
+      },
+      "voiceAction": {
+        "title": "Voice Actions",
+        "backend": {
+          "title": "AI Backend",
+          "description": "Use the configured API provider or an installed, signed-in Codex or Claude CLI.",
+          "options": {
+            "api": "Configured API",
+            "codexCli": "Codex CLI",
+            "claudeCli": "Claude Code CLI"
+          }
+        },
+        "clipboardContext": {
+          "label": "Include Clipboard Context",
+          "description": "Send the current text clipboard as source material for commands such as ‘Write an email from this’."
+        },
+        "context": {
+          "title": "Persistent Context",
+          "description": "Optional background that is included with every Voice Action, such as your role, company, preferred writing style, or wording to avoid. It is never used for normal transcriptions.",
+          "placeholder": "Example: I work at … Keep emails concise, friendly, and direct.",
+          "storage": "Saved as you type, stored locally on this device, and only sent with Voice Actions — never with normal transcriptions.",
+          "clear": "Clear"
+        },
+        "privacy": "Your spoken instruction and any enabled context are sent to the selected AI service. Clipboard context is off by default."
+      },
+      "enable": {
+        "title": "AI Features"
       }
     },
     "history": {
@@ -518,8 +549,8 @@
         "description": "텍스트 변환 후 AI 기반 텍스트 개선 활성화"
       },
       "muteWhileRecording": {
-        "label": "녹음 중 음소거",
-        "description": "녹음 중 시스템 오디오 음소거"
+        "label": "녹음 중 오디오 줄이기",
+        "description": "녹음 중 시스템 오디오를 서서히 낮추고 끝나면 복원합니다"
       },
       "appendTrailingSpace": {
         "label": "끝 공백 추가",
@@ -553,6 +584,19 @@
         "button": "미리보기",
         "noNotes": "내장 릴리스 노트를 찾을 수 없습니다",
         "error": "릴리스 노트를 미리 볼 수 없습니다"
+      }
+    },
+    "appearance": {
+      "title": "모양",
+      "accent": {
+        "title": "강조 색상",
+        "description": "버튼, 녹음 바, 강조 표시에 사용할 강조 색상을 직접 선택합니다. '초기화'하면 기본 주황색으로 돌아갑니다.",
+        "reset": "초기화"
+      },
+      "rgbMode": {
+        "label": "Emil Mode",
+        "description": "강조 색상이 무지개처럼 계속 변합니다. 켜져 있는 동안에는 강조 색상보다 우선합니다.",
+        "boosted": "2배 속도 사용 중"
       }
     },
     "about": {
@@ -653,7 +697,10 @@
     "dropFile": "파일 놓기",
     "dropHint": "받아쓸 오디오 파일을 여기에 놓으세요",
     "transcribing": "텍스트로 변환 중...",
-    "processing": "처리 중..."
+    "processing": "처리 중...",
+    "voiceTranscribing": "요청을 받아쓰는 중...",
+    "voiceProcessing": "생각하고 작성하는 중...",
+    "voiceDone": "AI 응답을 붙여넣었습니다"
   },
   "whatsNew": {
     "title": "crwbar voice v{{version}}의 새 소식"

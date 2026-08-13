@@ -207,6 +207,10 @@
           "transcribe_with_post_process": {
             "name": "後処理のショートカット",
             "description": "文字起こしに常に AI 後処理を適用するキーボードショートカット。 (任意)"
+          },
+          "voice_action": {
+            "name": "Voice Action Shortcut",
+            "description": "Speak an instruction and generate text using optional context and your selected AI backend."
           }
         },
         "errors": {
@@ -432,6 +436,33 @@
         "cancel": "キャンセル",
         "selectToEdit": "上からプロンプトを選択して、詳細を表示・編集します。",
         "createFirst": "上の「新しいプロンプトを作成」をクリックして、最初の後処理プロンプトを作成してください。"
+      },
+      "voiceAction": {
+        "title": "Voice Actions",
+        "backend": {
+          "title": "AI Backend",
+          "description": "Use the configured API provider or an installed, signed-in Codex or Claude CLI.",
+          "options": {
+            "api": "Configured API",
+            "codexCli": "Codex CLI",
+            "claudeCli": "Claude Code CLI"
+          }
+        },
+        "clipboardContext": {
+          "label": "Include Clipboard Context",
+          "description": "Send the current text clipboard as source material for commands such as ‘Write an email from this’."
+        },
+        "context": {
+          "title": "Persistent Context",
+          "description": "Optional background that is included with every Voice Action, such as your role, company, preferred writing style, or wording to avoid. It is never used for normal transcriptions.",
+          "placeholder": "Example: I work at … Keep emails concise, friendly, and direct.",
+          "storage": "Saved as you type, stored locally on this device, and only sent with Voice Actions — never with normal transcriptions.",
+          "clear": "Clear"
+        },
+        "privacy": "Your spoken instruction and any enabled context are sent to the selected AI service. Clipboard context is off by default."
+      },
+      "enable": {
+        "title": "AI Features"
       }
     },
     "history": {
@@ -518,8 +549,8 @@
         "description": "文字起こし後の AI によるテキスト改善を有効化"
       },
       "muteWhileRecording": {
-        "label": "録音中にミュート",
-        "description": "録音中にシステムオーディオをミュート"
+        "label": "録音中に音量を下げる",
+        "description": "録音中はシステム音量を徐々に下げ、終了後に元に戻します"
       },
       "appendTrailingSpace": {
         "label": "末尾にスペースを追加",
@@ -553,6 +584,19 @@
         "button": "プレビュー",
         "noNotes": "同梱リリースノートが見つかりません",
         "error": "リリースノートのプレビューに失敗しました"
+      }
+    },
+    "appearance": {
+      "title": "外観",
+      "accent": {
+        "title": "アクセントカラー",
+        "description": "ボタン、録音バー、ハイライトのアクセントカラーを自由に設定できます。「リセット」で既定のオレンジに戻ります。",
+        "reset": "リセット"
+      },
+      "rgbMode": {
+        "label": "Emil Mode",
+        "description": "アクセントカラーを虹色に循環させます。有効な間はアクセントカラーより優先されます。",
+        "boosted": "2 倍速が有効"
       }
     },
     "about": {
@@ -653,7 +697,10 @@
     "dropFile": "ファイルをドロップ",
     "dropHint": "文字起こしする音声ファイルをここにドロップ",
     "transcribing": "文字起こし中…",
-    "processing": "処理中…"
+    "processing": "処理中…",
+    "voiceTranscribing": "指示を文字起こし中…",
+    "voiceProcessing": "考えて執筆中…",
+    "voiceDone": "AIの回答を貼り付けました"
   },
   "whatsNew": {
     "title": "crwbar voice v{{version}} の新機能"

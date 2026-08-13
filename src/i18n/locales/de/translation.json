@@ -11,7 +11,7 @@
     "general": "Allgemein",
     "models": "Modelle",
     "advanced": "Erweitert",
-    "postProcessing": "Nachbearbeitung",
+    "postProcessing": "KI & Voice Actions",
     "history": "Verlauf",
     "debug": "Debug",
     "about": "Info"
@@ -207,6 +207,10 @@
           "transcribe_with_post_process": {
             "name": "Nachbearbeitungs-Tastenkürzel",
             "description": "Optional: Ein dediziertes Tastenkürzel, das immer die KI-Nachbearbeitung auf deine Transkription anwendet."
+          },
+          "voice_action": {
+            "name": "Voice-Action-Tastenkürzel",
+            "description": "Sprich eine Anweisung und erzeuge daraus mit optionalem Kontext und dem gewählten KI-Backend einen Text."
           }
         },
         "errors": {
@@ -381,8 +385,35 @@
       }
     },
     "postProcessing": {
+      "enable": {
+        "title": "KI-Funktionen"
+      },
       "hotkey": {
-        "title": "Tastenkürzel"
+        "title": "Nachbearbeitungs-Tastenkürzel"
+      },
+      "voiceAction": {
+        "title": "Voice Actions",
+        "privacy": "Deine gesprochene Anweisung und aktivierter Kontext werden an den gewählten KI-Dienst gesendet. Zwischenablage-Kontext ist standardmäßig aus.",
+        "backend": {
+          "title": "KI-Backend",
+          "description": "Nutze den konfigurierten API-Anbieter oder eine installierte und eingeloggte Codex- oder Claude-CLI.",
+          "options": {
+            "api": "Konfigurierte API",
+            "codexCli": "Codex CLI",
+            "claudeCli": "Claude Code CLI"
+          }
+        },
+        "clipboardContext": {
+          "label": "Zwischenablage als Kontext verwenden",
+          "description": "Sendet den aktuellen Text aus der Zwischenablage als Ausgangsmaterial mit – etwa für ‚Schreib daraus eine Mail‘."
+        },
+        "context": {
+          "title": "Dauerhafter Kontext",
+          "description": "Optionale Angaben, die bei jeder Voice Action mitgesendet werden, etwa deine Rolle, Firma, bevorzugte Tonalität oder Formulierungen, die vermieden werden sollen. Für normale Transkriptionen wird er nie verwendet.",
+          "placeholder": "Beispiel: Ich arbeite bei … Mails bitte kurz, freundlich und direkt schreiben.",
+          "storage": "Wird beim Tippen gespeichert, bleibt lokal auf diesem Gerät und geht nur bei Voice Actions mit – nie bei normalen Transkriptionen.",
+          "clear": "Löschen"
+        }
       },
       "api": {
         "title": "API (OpenAI-kompatibel)",
@@ -514,12 +545,12 @@
         "description": "Mikrofon bei geschlossenem Laptop-Deckel"
       },
       "postProcessingToggle": {
-        "label": "Nachbearbeitung",
-        "description": "KI-gestützte Textverfeinerung nach der Transkription aktivieren"
+        "label": "KI-Funktionen",
+        "description": "KI-Nachbearbeitung und Voice Actions aktivieren"
       },
       "muteWhileRecording": {
-        "label": "Während Aufnahme stummschalten",
-        "description": "Systemaudio während der Aufnahme stummschalten"
+        "label": "Audio während der Aufnahme absenken",
+        "description": "Systemaudio weich absenken und danach wiederherstellen"
       },
       "appendTrailingSpace": {
         "label": "Leerzeichen anhängen",
@@ -553,6 +584,19 @@
         "button": "Vorschau",
         "noNotes": "Keine gebündelten Versionshinweise gefunden",
         "error": "Versionshinweise konnten nicht angezeigt werden"
+      }
+    },
+    "appearance": {
+      "title": "Darstellung",
+      "accent": {
+        "title": "Akzentfarbe",
+        "description": "Wähle eine eigene Akzentfarbe für Buttons, die Aufnahme-Leiste und Hervorhebungen. „Zurücksetzen“ stellt das Standard-Orange wieder her.",
+        "reset": "Zurücksetzen"
+      },
+      "rgbMode": {
+        "label": "Emil Mode",
+        "description": "Lässt die Akzentfarbe dauerhaft durch den Regenbogen wandern. Überschreibt die gewählte Akzentfarbe, solange er aktiv ist.",
+        "boosted": "Doppelte Geschwindigkeit aktiv"
       }
     },
     "about": {
@@ -649,6 +693,9 @@
   "overlay": {
     "transcribing": "Transkribiere...",
     "processing": "Verarbeite...",
+    "voiceTranscribing": "Transkribiere Anweisung...",
+    "voiceProcessing": "Denke & schreibe...",
+    "voiceDone": "KI-Antwort eingefügt",
     "done": "Fertig",
     "copied": "Kopiert",
     "copyAgain": "Erneut kopieren",

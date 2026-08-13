@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { Tooltip } from "./Tooltip";
 
 interface SettingContainerProps {
-  title: string;
+  /** Rendered as content, so a node is allowed (e.g. an interactive label). */
+  title: React.ReactNode;
   description: string;
   children: React.ReactNode;
   descriptionMode?: "inline" | "tooltip";

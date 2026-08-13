@@ -203,6 +203,26 @@ fn initialize_core_logic(app_handle: &AppHandle) {
             let _ = app_handle.set_activation_policy(tauri::ActivationPolicy::Accessory);
         }
     }
+
+    // Starting hidden means the main window is never rendered, and macOS
+    // suspends the (invisible) webview — so the frontend never runs and never
+    // issues the `initialize_shortcuts` / `initialize_enigo` calls it is
+    // normally responsible for. The app would sit in the tray with a dead
+    // global hotkey. Do it here instead when the window will not appear.
+    // Both commands are marker-guarded, so the frontend's later call is a no-op
+    // if the user does open the window. Only after onboarding, which is where
+    // the permission prompts live.
+    {
+        let settings = settings::get_settings(app_handle);
+        if settings.start_hidden && settings.onboarding_completed {
+            if let Err(e) = commands::initialize_enigo(app_handle.clone()) {
+                log::warn!("Hidden start: could not initialize input simulation: {e}");
+            }
+            if let Err(e) = commands::initialize_shortcuts(app_handle.clone()) {
+                log::warn!("Hidden start: could not initialize shortcuts: {e}");
+            }
+        }
+    }
     // Get the current theme to set the appropriate initial icon
     let initial_theme = tray::get_current_theme(app_handle);
 
@@ -522,6 +542,8 @@ pub fn run(cli_args: CliArgs) {
             shortcut::change_audio_feedback_volume_setting,
             shortcut::change_sound_theme_setting,
             shortcut::change_theme_setting,
+            shortcut::change_accent_color_setting,
+            shortcut::change_rgb_mode_setting,
             shortcut::change_start_hidden_setting,
             shortcut::change_autostart_setting,
             shortcut::change_translate_to_english_setting,
@@ -556,6 +578,9 @@ pub fn run(cli_args: CliArgs) {
             shortcut::suspend_binding,
             shortcut::resume_binding,
             shortcut::change_mute_while_recording_setting,
+            shortcut::change_voice_action_backend_setting,
+            shortcut::change_voice_action_include_clipboard_setting,
+            shortcut::change_voice_action_context_setting,
             shortcut::change_append_trailing_space_setting,
             shortcut::change_lazy_stream_close_setting,
             shortcut::change_vad_enabled_setting,
@@ -609,6 +634,7 @@ pub fn run(cli_args: CliArgs) {
             commands::audio::get_selected_output_device,
             commands::audio::play_test_sound,
             commands::audio::check_custom_sounds,
+            commands::audio::import_custom_sound_theme,
             commands::audio::set_clamshell_microphone,
             commands::audio::get_clamshell_microphone,
             commands::audio::is_recording,
@@ -907,6 +933,9 @@ pub fn run(cli_args: CliArgs) {
             }
             // Teardown transcribe.cpp before exit
             tauri::RunEvent::Exit => {
+                if let Some(audio_manager) = app.try_state::<Arc<AudioRecordingManager>>() {
+                    audio_manager.restore_system_audio_immediately();
+                }
                 if let Some(tm) = app.try_state::<Arc<TranscriptionManager>>() {
                     let _ = tm.unload_model();
                 }

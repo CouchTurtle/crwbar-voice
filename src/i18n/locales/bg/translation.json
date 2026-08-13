@@ -189,6 +189,10 @@
           "transcribe_with_post_process": {
             "name": "Бърз клавиш за постобработка",
             "description": "По избор: отделна комбинация, която винаги прилага ИИ постобработка върху транскрипцията."
+          },
+          "voice_action": {
+            "name": "Voice Action Shortcut",
+            "description": "Speak an instruction and generate text using optional context and your selected AI backend."
           }
         },
         "errors": {
@@ -432,6 +436,33 @@
         "cancel": "Отказ",
         "selectToEdit": "Изберете подкана по-горе, за да видите и редактирате подробностите ѝ.",
         "createFirst": "Натиснете „Нова подкана“ по-горе, за да създадете първата си подкана за постобработка."
+      },
+      "voiceAction": {
+        "title": "Voice Actions",
+        "backend": {
+          "title": "AI Backend",
+          "description": "Use the configured API provider or an installed, signed-in Codex or Claude CLI.",
+          "options": {
+            "api": "Configured API",
+            "codexCli": "Codex CLI",
+            "claudeCli": "Claude Code CLI"
+          }
+        },
+        "clipboardContext": {
+          "label": "Include Clipboard Context",
+          "description": "Send the current text clipboard as source material for commands such as ‘Write an email from this’."
+        },
+        "context": {
+          "title": "Persistent Context",
+          "description": "Optional background that is included with every Voice Action, such as your role, company, preferred writing style, or wording to avoid. It is never used for normal transcriptions.",
+          "placeholder": "Example: I work at … Keep emails concise, friendly, and direct.",
+          "storage": "Saved as you type, stored locally on this device, and only sent with Voice Actions — never with normal transcriptions.",
+          "clear": "Clear"
+        },
+        "privacy": "Your spoken instruction and any enabled context are sent to the selected AI service. Clipboard context is off by default."
+      },
+      "enable": {
+        "title": "AI Features"
       }
     },
     "history": {
@@ -518,8 +549,8 @@
         "description": "Включване на подобряване на текста с ИИ след транскрипция"
       },
       "muteWhileRecording": {
-        "label": "Заглушаване при запис",
-        "description": "Заглушаване на системния звук по време на запис"
+        "label": "Намаляване на звука при запис",
+        "description": "Плавно намалява системния звук при запис и после го възстановява"
       },
       "appendTrailingSpace": {
         "label": "Интервал в края",
@@ -553,6 +584,19 @@
         "button": "Преглед",
         "noNotes": "Не са намерени включени бележки към изданието",
         "error": "Неуспешен преглед на бележките към изданието"
+      }
+    },
+    "appearance": {
+      "title": "Външен вид",
+      "accent": {
+        "title": "Акцентен цвят",
+        "description": "Изберете собствен акцентен цвят за бутоните, лентата за запис и акцентите. „Нулиране“ връща оранжевото по подразбиране.",
+        "reset": "Нулиране"
+      },
+      "rgbMode": {
+        "label": "Emil Mode",
+        "description": "Превърта акцентния цвят през дъгата. Замества акцентния цвят, докато е включен.",
+        "boosted": "Двойна скорост активна"
       }
     },
     "about": {
@@ -653,7 +697,10 @@
     "dropFile": "Пуснете файла",
     "dropHint": "Пуснете аудиофайл тук, за да го транскрибирате",
     "transcribing": "Транскрибиране...",
-    "processing": "Обработка..."
+    "processing": "Обработка...",
+    "voiceTranscribing": "Транскрибиране на заявката...",
+    "voiceProcessing": "Мисля и пиша...",
+    "voiceDone": "Отговорът на ИИ е поставен"
   },
   "whatsNew": {
     "title": "Ново в crwbar voice v{{version}}"

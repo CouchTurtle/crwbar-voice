@@ -207,6 +207,10 @@
           "transcribe_with_post_process": {
             "name": "Phím tắt xử lý sau",
             "description": "Tùy chọn: Phím tắt chuyên dụng luôn áp dụng xử lý sau bằng AI cho bản chuyển đổi của bạn."
+          },
+          "voice_action": {
+            "name": "Voice Action Shortcut",
+            "description": "Speak an instruction and generate text using optional context and your selected AI backend."
           }
         },
         "errors": {
@@ -432,6 +436,33 @@
         "cancel": "Hủy",
         "selectToEdit": "Chọn một prompt ở trên để xem và chỉnh sửa chi tiết.",
         "createFirst": "Nhấn 'Tạo Prompt mới' ở trên để tạo prompt xử lý sau đầu tiên của bạn."
+      },
+      "voiceAction": {
+        "title": "Voice Actions",
+        "backend": {
+          "title": "AI Backend",
+          "description": "Use the configured API provider or an installed, signed-in Codex or Claude CLI.",
+          "options": {
+            "api": "Configured API",
+            "codexCli": "Codex CLI",
+            "claudeCli": "Claude Code CLI"
+          }
+        },
+        "clipboardContext": {
+          "label": "Include Clipboard Context",
+          "description": "Send the current text clipboard as source material for commands such as ‘Write an email from this’."
+        },
+        "context": {
+          "title": "Persistent Context",
+          "description": "Optional background that is included with every Voice Action, such as your role, company, preferred writing style, or wording to avoid. It is never used for normal transcriptions.",
+          "placeholder": "Example: I work at … Keep emails concise, friendly, and direct.",
+          "storage": "Saved as you type, stored locally on this device, and only sent with Voice Actions — never with normal transcriptions.",
+          "clear": "Clear"
+        },
+        "privacy": "Your spoken instruction and any enabled context are sent to the selected AI service. Clipboard context is off by default."
+      },
+      "enable": {
+        "title": "AI Features"
       }
     },
     "history": {
@@ -518,8 +549,8 @@
         "description": "Bật tinh chỉnh văn bản bằng AI sau khi chuyển đổi"
       },
       "muteWhileRecording": {
-        "label": "Tắt tiếng khi ghi âm",
-        "description": "Tắt tiếng âm thanh hệ thống trong khi ghi âm"
+        "label": "Giảm âm lượng khi ghi âm",
+        "description": "Giảm dần âm thanh hệ thống và khôi phục sau khi ghi âm"
       },
       "appendTrailingSpace": {
         "label": "Thêm dấu cách cuối",
@@ -553,6 +584,19 @@
         "button": "Xem trước",
         "noNotes": "Không tìm thấy ghi chú phát hành được đóng gói",
         "error": "Không thể xem trước ghi chú phát hành"
+      }
+    },
+    "appearance": {
+      "title": "Giao diện",
+      "accent": {
+        "title": "Màu nhấn",
+        "description": "Chọn màu nhấn riêng cho nút bấm, thanh ghi âm và các điểm nổi bật. “Đặt lại” trả về màu cam mặc định.",
+        "reset": "Đặt lại"
+      },
+      "rgbMode": {
+        "label": "Emil Mode",
+        "description": "Cho màu nhấn chuyển liên tục qua các sắc cầu vồng. Ghi đè màu nhấn khi đang bật.",
+        "boosted": "Đang bật tốc độ gấp đôi"
       }
     },
     "about": {
@@ -653,7 +697,10 @@
     "dropFile": "Thả tệp",
     "dropHint": "Thả tệp âm thanh vào đây để chuyển thành văn bản",
     "transcribing": "Đang chuyển đổi...",
-    "processing": "Đang xử lý..."
+    "processing": "Đang xử lý...",
+    "voiceTranscribing": "Đang chép lại yêu cầu...",
+    "voiceProcessing": "Đang suy nghĩ và viết...",
+    "voiceDone": "Đã dán phản hồi AI"
   },
   "whatsNew": {
     "title": "Điểm mới trong crwbar voice v{{version}}"

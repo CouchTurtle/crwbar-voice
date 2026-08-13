@@ -189,6 +189,10 @@
           "transcribe_with_post_process": {
             "name": "קיצור לעיבוד משלים",
             "description": "אופציונלי: קיצור מקשים ייעודי שתמיד מפעיל עיבוד AI על התמלול."
+          },
+          "voice_action": {
+            "name": "Voice Action Shortcut",
+            "description": "Speak an instruction and generate text using optional context and your selected AI backend."
           }
         },
         "errors": {
@@ -432,6 +436,33 @@
         "cancel": "ביטול",
         "selectToEdit": "בחר פרומפט למעלה כדי לצפות בפרטים שלו ולערוך אותם.",
         "createFirst": "לחץ על 'צור פרומפט חדש' למעלה כדי ליצור את פרומפט העיבוד הראשון שלך."
+      },
+      "voiceAction": {
+        "title": "Voice Actions",
+        "backend": {
+          "title": "AI Backend",
+          "description": "Use the configured API provider or an installed, signed-in Codex or Claude CLI.",
+          "options": {
+            "api": "Configured API",
+            "codexCli": "Codex CLI",
+            "claudeCli": "Claude Code CLI"
+          }
+        },
+        "clipboardContext": {
+          "label": "Include Clipboard Context",
+          "description": "Send the current text clipboard as source material for commands such as ‘Write an email from this’."
+        },
+        "context": {
+          "title": "Persistent Context",
+          "description": "Optional background that is included with every Voice Action, such as your role, company, preferred writing style, or wording to avoid. It is never used for normal transcriptions.",
+          "placeholder": "Example: I work at … Keep emails concise, friendly, and direct.",
+          "storage": "Saved as you type, stored locally on this device, and only sent with Voice Actions — never with normal transcriptions.",
+          "clear": "Clear"
+        },
+        "privacy": "Your spoken instruction and any enabled context are sent to the selected AI service. Clipboard context is off by default."
+      },
+      "enable": {
+        "title": "AI Features"
       }
     },
     "history": {
@@ -518,8 +549,8 @@
         "description": "הפעל שיפור טקסט מבוסס AI אחרי התמלול"
       },
       "muteWhileRecording": {
-        "label": "השתק בזמן הקלטה",
-        "description": "השתק את שמע המערכת בזמן הקלטה"
+        "label": "הנמך שמע בזמן הקלטה",
+        "description": "מנמיך בהדרגה את שמע המערכת ומשחזר אותו לאחר ההקלטה"
       },
       "appendTrailingSpace": {
         "label": "הוסף רווח בסוף",
@@ -553,6 +584,19 @@
         "button": "תצוגה מקדימה",
         "noNotes": "לא נמצאו הערות גרסה מצורפות",
         "error": "הצגת התצוגה המקדימה של הערות הגרסה נכשלה"
+      }
+    },
+    "appearance": {
+      "title": "מראה",
+      "accent": {
+        "title": "צבע הדגשה",
+        "description": "בחר צבע הדגשה משלך עבור הכפתורים, סרגל ההקלטה וההדגשות. \"איפוס\" מחזיר לכתום ברירת המחדל.",
+        "reset": "איפוס"
+      },
+      "rgbMode": {
+        "label": "Emil Mode",
+        "description": "מחליף את צבע ההדגשה לאורך הקשת ברציפות. עוקף את צבע ההדגשה כל עוד הוא פעיל.",
+        "boosted": "מהירות כפולה פעילה"
       }
     },
     "about": {
@@ -653,7 +697,10 @@
     "dropFile": "שחרר קובץ",
     "dropHint": "שחרר כאן קובץ שמע כדי לתמלל אותו",
     "transcribing": "מתמלל...",
-    "processing": "מעבד..."
+    "processing": "מעבד...",
+    "voiceTranscribing": "מתמלל את הבקשה...",
+    "voiceProcessing": "חושב וכותב...",
+    "voiceDone": "תגובת ה-AI הודבקה"
   },
   "whatsNew": {
     "title": "חדש ב-crwbar voice v{{version}}"

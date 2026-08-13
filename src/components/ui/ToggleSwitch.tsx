@@ -6,7 +6,7 @@ interface ToggleSwitchProps {
   onChange: (checked: boolean) => void;
   disabled?: boolean;
   isUpdating?: boolean;
-  label: string;
+  label: React.ReactNode;
   description: string;
   descriptionMode?: "inline" | "tooltip";
   grouped?: boolean;

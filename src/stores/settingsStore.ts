@@ -141,6 +141,12 @@ const settingUpdaters: {
     commands.setPostProcessSelectedPrompt(value as string),
   mute_while_recording: (value) =>
     commands.changeMuteWhileRecordingSetting(value as boolean),
+  voice_action_backend: (value) =>
+    commands.changeVoiceActionBackendSetting(value as string),
+  voice_action_include_clipboard: (value) =>
+    commands.changeVoiceActionIncludeClipboardSetting(value as boolean),
+  voice_action_context: (value) =>
+    commands.changeVoiceActionContextSetting(value as string),
   append_trailing_space: (value) =>
     commands.changeAppendTrailingSpaceSetting(value as boolean),
   drag_drop_enabled: (value) =>
@@ -148,6 +154,9 @@ const settingUpdaters: {
   log_level: (value) => commands.setLogLevel(value as any),
   app_language: (value) => commands.changeAppLanguageSetting(value as string),
   theme: (value) => commands.changeThemeSetting(value as string),
+  accent_color: (value) =>
+    commands.changeAccentColorSetting(value as string | null),
+  rgb_mode: (value) => commands.changeRgbModeSetting(value as boolean),
   experimental_enabled: (value) =>
     commands.changeExperimentalEnabledSetting(value as boolean),
   lazy_stream_close: (value) =>

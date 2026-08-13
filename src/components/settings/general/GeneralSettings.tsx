@@ -12,7 +12,10 @@ import { AutoCopyClipboard } from "../AutoCopyClipboard";
 import { AudioFeedback } from "../AudioFeedback";
 import { useSettings } from "../../../hooks/useSettings";
 import { VolumeSlider } from "../VolumeSlider";
-import { MuteWhileRecording } from "../MuteWhileRecording";
+import { AudioDucking } from "../AudioDucking";
+import { SoundPicker } from "../SoundPicker";
+import { AccentColorPicker } from "../AccentColorPicker";
+import { RgbModeToggle } from "../RgbModeToggle";
 import { ModelSettingsCard } from "./ModelSettingsCard";
 
 export const GeneralSettings: React.FC = () => {
@@ -51,14 +54,23 @@ export const GeneralSettings: React.FC = () => {
       <ModelSettingsCard />
       <SettingsGroup title={t("settings.sound.title")}>
         <MicrophoneSelector descriptionMode="tooltip" grouped={true} />
-        <MuteWhileRecording descriptionMode="tooltip" grouped={true} />
+        <AudioDucking descriptionMode="tooltip" grouped={true} />
         <AudioFeedback descriptionMode="tooltip" grouped={true} />
+        <SoundPicker
+          label={t("settings.debug.soundTheme.label")}
+          description={t("settings.debug.soundTheme.description")}
+        />
         <OutputDeviceSelector
           descriptionMode="tooltip"
           grouped={true}
           disabled={!audioFeedbackEnabled}
         />
         <VolumeSlider disabled={!audioFeedbackEnabled} />
+      </SettingsGroup>
+
+      <SettingsGroup title={t("settings.appearance.title")}>
+        <AccentColorPicker descriptionMode="tooltip" grouped={true} />
+        <RgbModeToggle descriptionMode="tooltip" grouped={true} />
       </SettingsGroup>
     </div>
   );

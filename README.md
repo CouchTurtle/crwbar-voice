@@ -23,9 +23,9 @@ and tray assets, and is not affiliated with or endorsed by the Handy project.
 
 ## Current status
 
-The fork starts a new release line at `0.1.0` and is intended for direct GitHub
-distribution, not an app store. Automatic updates are intentionally disabled
-until this repository has its own signed release channel.
+The fork runs its own release line, currently `0.2.0`, and is intended for
+direct GitHub distribution, not an app store. Automatic updates are
+intentionally disabled until this repository has its own signed release channel.
 
 The app currently includes:
 
@@ -34,6 +34,8 @@ The app currently includes:
 - drag-and-drop audio transcription, including Ogg/Opus voice notes;
 - transcription history with microphone/file filters;
 - optional automatic clipboard copy and paste;
+- a custom accent color for the interface and the recording bar;
+- audio ducking that lowers other playback while recording;
 - optional AI post-processing through a provider configured by the user.
 
 Speech recognition runs locally. AI post-processing is the exception: when it

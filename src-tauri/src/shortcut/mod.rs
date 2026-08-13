@@ -24,7 +24,7 @@ use crate::settings::APPLE_INTELLIGENCE_DEFAULT_MODEL_ID;
 use crate::settings::{
     self, get_settings, AutoSubmitKey, ClipboardHandling, KeyboardImplementation, LLMPrompt,
     OverlayPosition, OverlayStyle, PasteMethod, ShortcutBinding, SoundTheme, Theme, TypingTool,
-    APPLE_INTELLIGENCE_PROVIDER_ID,
+    VoiceActionBackend, APPLE_INTELLIGENCE_PROVIDER_ID,
 };
 use crate::tray;
 
@@ -392,8 +392,10 @@ fn register_all_shortcuts_for_implementation(
             continue;
         }
 
-        // Skip post-processing shortcut when the feature is disabled
-        if id == "transcribe_with_post_process" && !current_settings.post_process_enabled {
+        // AI shortcuts share the post-processing feature switch.
+        if matches!(id.as_str(), "transcribe_with_post_process" | "voice_action")
+            && !current_settings.post_process_enabled
+        {
             continue;
         }
 
@@ -531,6 +533,38 @@ pub fn change_theme_setting(app: AppHandle, theme: String) -> Result<(), String>
     settings::write_settings(&app, settings);
     #[cfg(target_os = "windows")]
     apply_window_theme(&app, parsed);
+    Ok(())
+}
+
+/// Set (or clear) the user-picked accent color. `color` is a `#rrggbb` hex
+/// string; `None`/invalid clears it back to the built-in accent. The visual
+/// override is applied on the frontend from this persisted value.
+#[tauri::command]
+#[specta::specta]
+pub fn change_accent_color_setting(
+    app: AppHandle,
+    color: Option<String>,
+) -> Result<(), String> {
+    let valid = color.filter(|c| {
+        let bytes = c.as_bytes();
+        bytes.len() == 7
+            && bytes[0] == b'#'
+            && bytes[1..].iter().all(|b| b.is_ascii_hexdigit())
+    });
+    let mut settings = settings::get_settings(&app);
+    settings.accent_color = valid;
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+/// Toggle the animated rainbow accent. Cosmetic only; the frontend runs the
+/// animation and falls back to `accent_color` when this is turned off.
+#[tauri::command]
+#[specta::specta]
+pub fn change_rgb_mode_setting(app: AppHandle, enabled: bool) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.rgb_mode = enabled;
+    settings::write_settings(&app, settings);
     Ok(())
 }
 
@@ -929,16 +963,14 @@ pub fn change_post_process_enabled_setting(app: AppHandle, enabled: bool) -> Res
     settings.post_process_enabled = enabled;
     settings::write_settings(&app, settings.clone());
 
-    // Register or unregister the post-processing shortcut
-    if let Some(binding) = settings
-        .bindings
-        .get("transcribe_with_post_process")
-        .cloned()
-    {
-        if enabled {
-            let _ = register_shortcut(&app, binding);
-        } else {
-            let _ = unregister_shortcut(&app, binding);
+    // Register or unregister both AI-backed shortcuts.
+    for binding_id in ["transcribe_with_post_process", "voice_action"] {
+        if let Some(binding) = settings.bindings.get(binding_id).cloned() {
+            if enabled {
+                let _ = register_shortcut(&app, binding);
+            } else {
+                let _ = unregister_shortcut(&app, binding);
+            }
         }
     }
 
@@ -1177,6 +1209,44 @@ pub fn set_post_process_selected_prompt(app: AppHandle, id: String) -> Result<()
 pub fn change_mute_while_recording_setting(app: AppHandle, enabled: bool) -> Result<(), String> {
     let mut settings = settings::get_settings(&app);
     settings.mute_while_recording = enabled;
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_voice_action_backend_setting(app: AppHandle, backend: String) -> Result<(), String> {
+    let backend = match backend.as_str() {
+        "api" => VoiceActionBackend::Api,
+        "codex_cli" => VoiceActionBackend::CodexCli,
+        "claude_cli" => VoiceActionBackend::ClaudeCli,
+        _ => return Err(format!("Unknown Voice Action backend: {backend}")),
+    };
+
+    let mut settings = settings::get_settings(&app);
+    settings.voice_action_backend = backend;
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_voice_action_include_clipboard_setting(
+    app: AppHandle,
+    enabled: bool,
+) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.voice_action_include_clipboard = enabled;
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_voice_action_context_setting(app: AppHandle, context: String) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    // Deliberately never logged: this is the user's personal background text.
+    settings.voice_action_context = context.into();
     settings::write_settings(&app, settings);
     Ok(())
 }

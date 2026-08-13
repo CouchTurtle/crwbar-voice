@@ -207,6 +207,10 @@
           "transcribe_with_post_process": {
             "name": "Tecla de Post Procesamiento",
             "description": "Opcional: Una tecla de acceso rápido dedicada que siempre aplica post procesamiento con IA a tu transcripción."
+          },
+          "voice_action": {
+            "name": "Voice Action Shortcut",
+            "description": "Speak an instruction and generate text using optional context and your selected AI backend."
           }
         },
         "errors": {
@@ -432,6 +436,33 @@
         "cancel": "Cancelar",
         "selectToEdit": "Selecciona un prompt arriba para ver y editar sus detalles.",
         "createFirst": "Haz clic en 'Crear Nuevo Prompt' arriba para crear tu primer prompt de post procesamiento."
+      },
+      "voiceAction": {
+        "title": "Voice Actions",
+        "backend": {
+          "title": "AI Backend",
+          "description": "Use the configured API provider or an installed, signed-in Codex or Claude CLI.",
+          "options": {
+            "api": "Configured API",
+            "codexCli": "Codex CLI",
+            "claudeCli": "Claude Code CLI"
+          }
+        },
+        "clipboardContext": {
+          "label": "Include Clipboard Context",
+          "description": "Send the current text clipboard as source material for commands such as ‘Write an email from this’."
+        },
+        "context": {
+          "title": "Persistent Context",
+          "description": "Optional background that is included with every Voice Action, such as your role, company, preferred writing style, or wording to avoid. It is never used for normal transcriptions.",
+          "placeholder": "Example: I work at … Keep emails concise, friendly, and direct.",
+          "storage": "Saved as you type, stored locally on this device, and only sent with Voice Actions — never with normal transcriptions.",
+          "clear": "Clear"
+        },
+        "privacy": "Your spoken instruction and any enabled context are sent to the selected AI service. Clipboard context is off by default."
+      },
+      "enable": {
+        "title": "AI Features"
       }
     },
     "history": {
@@ -518,8 +549,8 @@
         "description": "Habilitar refinamiento de texto impulsado por IA después de la transcripción"
       },
       "muteWhileRecording": {
-        "label": "Silenciar Durante la Grabación",
-        "description": "Silenciar el audio del sistema durante la grabación"
+        "label": "Bajar el Audio Durante la Grabación",
+        "description": "Reduce gradualmente el audio del sistema y luego lo restaura"
       },
       "appendTrailingSpace": {
         "label": "Agregar Espacio Final",
@@ -553,6 +584,19 @@
         "button": "Vista previa",
         "noNotes": "No se encontraron notas de la versión incluidas",
         "error": "No se pudo mostrar la vista previa de las notas de la versión"
+      }
+    },
+    "appearance": {
+      "title": "Apariencia",
+      "accent": {
+        "title": "Color de acento",
+        "description": "Elige un color de acento propio para los botones, la barra de grabación y los resaltados. «Restablecer» vuelve al naranja predeterminado.",
+        "reset": "Restablecer"
+      },
+      "rgbMode": {
+        "label": "Emil Mode",
+        "description": "Hace que el color de acento recorra el arcoíris. Anula el color de acento mientras está activo.",
+        "boosted": "Velocidad doble activa"
       }
     },
     "about": {
@@ -653,7 +697,10 @@
     "dropFile": "Soltar archivo",
     "dropHint": "Suelta aquí un archivo de audio para transcribirlo",
     "transcribing": "Transcribiendo...",
-    "processing": "Procesando..."
+    "processing": "Procesando...",
+    "voiceTranscribing": "Transcribiendo solicitud...",
+    "voiceProcessing": "Pensando y escribiendo...",
+    "voiceDone": "Respuesta de IA pegada"
   },
   "whatsNew": {
     "title": "Nuevo en crwbar voice v{{version}}"

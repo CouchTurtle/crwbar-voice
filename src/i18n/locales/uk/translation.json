@@ -189,6 +189,10 @@
           "transcribe_with_post_process": {
             "name": "Гаряча клавіша постобробки",
             "description": "Необов'язково: Спеціальна гаряча клавіша, яка завжди застосовує AI-постобробку до вашої транскрипції."
+          },
+          "voice_action": {
+            "name": "Voice Action Shortcut",
+            "description": "Speak an instruction and generate text using optional context and your selected AI backend."
           }
         },
         "errors": {
@@ -432,6 +436,33 @@
         "cancel": "Скасувати",
         "selectToEdit": "Оберіть промпт вище для перегляду та редагування його деталей.",
         "createFirst": "Натисніть «Створити новий промпт» вище, щоб створити ваш перший промпт постобробки."
+      },
+      "voiceAction": {
+        "title": "Voice Actions",
+        "backend": {
+          "title": "AI Backend",
+          "description": "Use the configured API provider or an installed, signed-in Codex or Claude CLI.",
+          "options": {
+            "api": "Configured API",
+            "codexCli": "Codex CLI",
+            "claudeCli": "Claude Code CLI"
+          }
+        },
+        "clipboardContext": {
+          "label": "Include Clipboard Context",
+          "description": "Send the current text clipboard as source material for commands such as ‘Write an email from this’."
+        },
+        "context": {
+          "title": "Persistent Context",
+          "description": "Optional background that is included with every Voice Action, such as your role, company, preferred writing style, or wording to avoid. It is never used for normal transcriptions.",
+          "placeholder": "Example: I work at … Keep emails concise, friendly, and direct.",
+          "storage": "Saved as you type, stored locally on this device, and only sent with Voice Actions — never with normal transcriptions.",
+          "clear": "Clear"
+        },
+        "privacy": "Your spoken instruction and any enabled context are sent to the selected AI service. Clipboard context is off by default."
+      },
+      "enable": {
+        "title": "AI Features"
       }
     },
     "history": {
@@ -518,8 +549,8 @@
         "description": "Увімкнути покращення тексту за допомогою AI після транскрипції"
       },
       "muteWhileRecording": {
-        "label": "Вимкнути звук під час запису",
-        "description": "Вимикати системний звук під час запису"
+        "label": "Зменшувати гучність під час запису",
+        "description": "Плавно зменшує системну гучність, а потім відновлює її"
       },
       "appendTrailingSpace": {
         "label": "Додавати пробіл в кінці",
@@ -553,6 +584,19 @@
         "button": "Перегляд",
         "noNotes": "Вбудовані примітки до випуску не знайдено",
         "error": "Не вдалося переглянути примітки до випуску"
+      }
+    },
+    "appearance": {
+      "title": "Вигляд",
+      "accent": {
+        "title": "Акцентний колір",
+        "description": "Виберіть власний акцентний колір для кнопок, панелі запису та виділень. «Скинути» повертає помаранчевий за умовчанням.",
+        "reset": "Скинути"
+      },
+      "rgbMode": {
+        "label": "Emil Mode",
+        "description": "Плавно проводить акцентний колір крізь веселку. Поки увімкнено, замінює акцентний колір.",
+        "boosted": "Подвійна швидкість увімкнена"
       }
     },
     "about": {
@@ -653,7 +697,10 @@
     "dropFile": "Перетягніть файл",
     "dropHint": "Перетягніть сюди аудіофайл для транскрибування",
     "transcribing": "Обробка...",
-    "processing": "Постобробка..."
+    "processing": "Постобробка...",
+    "voiceTranscribing": "Транскрибую запит...",
+    "voiceProcessing": "Думаю та пишу...",
+    "voiceDone": "Відповідь ШІ вставлено"
   },
   "whatsNew": {
     "title": "Нове в crwbar voice v{{version}}"

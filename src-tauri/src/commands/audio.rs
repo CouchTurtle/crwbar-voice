@@ -34,6 +34,50 @@ pub fn check_custom_sounds(app: AppHandle) -> CustomSounds {
     }
 }
 
+/// Imports one short WAV as the local-only custom feedback theme. The same
+/// confirm sound is used for recording start and stop; the source file stays
+/// outside the repository and can therefore be a personal sound the user owns.
+#[tauri::command]
+#[specta::specta]
+pub fn import_custom_sound_theme(
+    app: AppHandle,
+    source_path: String,
+) -> Result<CustomSounds, String> {
+    let source = std::path::PathBuf::from(&source_path);
+    if !source.is_file() {
+        return Err(format!("Sound file does not exist: {}", source.display()));
+    }
+
+    let is_wav = source
+        .extension()
+        .and_then(|extension| extension.to_str())
+        .is_some_and(|extension| extension.eq_ignore_ascii_case("wav"));
+    if !is_wav {
+        return Err("Custom feedback sounds must be WAV files".to_string());
+    }
+
+    // Validate the container before replacing an existing custom theme.
+    hound::WavReader::open(&source)
+        .map_err(|error| format!("Could not read the WAV file: {error}"))?;
+
+    let data_dir = crate::portable::app_data_dir(&app)
+        .map_err(|error| format!("Could not resolve the app data directory: {error}"))?;
+    std::fs::create_dir_all(&data_dir)
+        .map_err(|error| format!("Could not create {}: {error}", data_dir.display()))?;
+
+    for file_name in ["custom_start.wav", "custom_stop.wav"] {
+        let destination = data_dir.join(file_name);
+        std::fs::copy(&source, &destination).map_err(|error| {
+            format!(
+                "Could not import the sound as {}: {error}",
+                destination.display()
+            )
+        })?;
+    }
+
+    Ok(check_custom_sounds(app))
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, Type)]
 pub struct AudioDevice {
     pub index: String,

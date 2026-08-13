@@ -189,6 +189,10 @@
           "transcribe_with_post_process": {
             "name": "Snabbkommando för efterbearbetning",
             "description": "Valfritt: En dedikerad snabbknapp som alltid tillämpar AI-efterbearbetning på din transkription."
+          },
+          "voice_action": {
+            "name": "Voice Action Shortcut",
+            "description": "Speak an instruction and generate text using optional context and your selected AI backend."
           }
         },
         "errors": {
@@ -432,6 +436,33 @@
         "cancel": "Avbryt",
         "selectToEdit": "Välj en prompt ovan för att visa och redigera dess detaljer.",
         "createFirst": "Klicka på 'Skapa ny prompt' ovan för att skapa din första prompt för efterbearbetning."
+      },
+      "voiceAction": {
+        "title": "Voice Actions",
+        "backend": {
+          "title": "AI Backend",
+          "description": "Use the configured API provider or an installed, signed-in Codex or Claude CLI.",
+          "options": {
+            "api": "Configured API",
+            "codexCli": "Codex CLI",
+            "claudeCli": "Claude Code CLI"
+          }
+        },
+        "clipboardContext": {
+          "label": "Include Clipboard Context",
+          "description": "Send the current text clipboard as source material for commands such as ‘Write an email from this’."
+        },
+        "context": {
+          "title": "Persistent Context",
+          "description": "Optional background that is included with every Voice Action, such as your role, company, preferred writing style, or wording to avoid. It is never used for normal transcriptions.",
+          "placeholder": "Example: I work at … Keep emails concise, friendly, and direct.",
+          "storage": "Saved as you type, stored locally on this device, and only sent with Voice Actions — never with normal transcriptions.",
+          "clear": "Clear"
+        },
+        "privacy": "Your spoken instruction and any enabled context are sent to the selected AI service. Clipboard context is off by default."
+      },
+      "enable": {
+        "title": "AI Features"
       }
     },
     "history": {
@@ -518,8 +549,8 @@
         "description": "Aktivera AI-driven textförfining efter transkription"
       },
       "muteWhileRecording": {
-        "label": "Ljudlös under inspelning",
-        "description": "Stäng av systemljudet under inspelning"
+        "label": "Sänk ljudet under inspelning",
+        "description": "Tonar ned systemljudet och återställer det efter inspelningen"
       },
       "appendTrailingSpace": {
         "label": "Lägg till avslutande mellanslag",
@@ -553,6 +584,19 @@
         "button": "Förhandsvisa",
         "noNotes": "Ingen medföljande versionsinformation hittades",
         "error": "Det gick inte att förhandsvisa versionsinformationen"
+      }
+    },
+    "appearance": {
+      "title": "Utseende",
+      "accent": {
+        "title": "Accentfärg",
+        "description": "Välj en egen accentfärg för knappar, inspelningsraden och markeringar. ”Återställ” återgår till standardorange.",
+        "reset": "Återställ"
+      },
+      "rgbMode": {
+        "label": "Emil Mode",
+        "description": "Låter accentfärgen löpa genom regnbågen. Åsidosätter accentfärgen så länge det är på.",
+        "boosted": "Dubbel hastighet aktiv"
       }
     },
     "about": {
@@ -653,7 +697,10 @@
     "dropFile": "Släpp fil",
     "dropHint": "Släpp en ljudfil här för att transkribera den",
     "transcribing": "Transkriberar...",
-    "processing": "Bearbetar..."
+    "processing": "Bearbetar...",
+    "voiceTranscribing": "Transkriberar begäran...",
+    "voiceProcessing": "Tänker och skriver...",
+    "voiceDone": "AI-svar inklistrat"
   },
   "whatsNew": {
     "title": "Nytt i crwbar voice v{{version}}"

@@ -207,6 +207,10 @@
           "transcribe_with_post_process": {
             "name": "Son İşlem Kısayolu",
             "description": "İsteğe bağlı: Transkripsiyonunuza her zaman AI son işleme uygulayan özel bir kısayol tuşu."
+          },
+          "voice_action": {
+            "name": "Voice Action Shortcut",
+            "description": "Speak an instruction and generate text using optional context and your selected AI backend."
           }
         },
         "errors": {
@@ -432,6 +436,33 @@
         "cancel": "İptal",
         "selectToEdit": "Ayrıntılarını görüntülemek ve düzenlemek için yukarıdan bir prompt seçin.",
         "createFirst": "İlk son işlem prompt'unuzu oluşturmak için yukarıdaki “Yeni Prompt Oluştur” seçeneğine tıklayın."
+      },
+      "voiceAction": {
+        "title": "Voice Actions",
+        "backend": {
+          "title": "AI Backend",
+          "description": "Use the configured API provider or an installed, signed-in Codex or Claude CLI.",
+          "options": {
+            "api": "Configured API",
+            "codexCli": "Codex CLI",
+            "claudeCli": "Claude Code CLI"
+          }
+        },
+        "clipboardContext": {
+          "label": "Include Clipboard Context",
+          "description": "Send the current text clipboard as source material for commands such as ‘Write an email from this’."
+        },
+        "context": {
+          "title": "Persistent Context",
+          "description": "Optional background that is included with every Voice Action, such as your role, company, preferred writing style, or wording to avoid. It is never used for normal transcriptions.",
+          "placeholder": "Example: I work at … Keep emails concise, friendly, and direct.",
+          "storage": "Saved as you type, stored locally on this device, and only sent with Voice Actions — never with normal transcriptions.",
+          "clear": "Clear"
+        },
+        "privacy": "Your spoken instruction and any enabled context are sent to the selected AI service. Clipboard context is off by default."
+      },
+      "enable": {
+        "title": "AI Features"
       }
     },
     "history": {
@@ -518,8 +549,8 @@
         "description": "Transkripsiyon sonrası yapay zekâ destekli metin iyileştirmeyi etkinleştirir"
       },
       "muteWhileRecording": {
-        "label": "Kayıt Sırasında Sessize Al",
-        "description": "Kayıt sırasında sistem sesini kapatır"
+        "label": "Kayıt Sırasında Sesi Azalt",
+        "description": "Sistem sesini yavaşça azaltır ve kayıt sonrası geri yükler"
       },
       "appendTrailingSpace": {
         "label": "Sonuna Boşluk Ekle",
@@ -553,6 +584,19 @@
         "button": "Önizle",
         "noNotes": "Paketlenmiş sürüm notu bulunamadı",
         "error": "Sürüm notları önizlenemedi"
+      }
+    },
+    "appearance": {
+      "title": "Görünüm",
+      "accent": {
+        "title": "Vurgu rengi",
+        "description": "Düğmeler, kayıt çubuğu ve vurgular için kendi vurgu renginizi seçin. “Sıfırla” varsayılan turuncuya döner.",
+        "reset": "Sıfırla"
+      },
+      "rgbMode": {
+        "label": "Emil Mode",
+        "description": "Vurgu rengini gökkuşağı boyunca sürekli değiştirir. Açıkken vurgu rengini geçersiz kılar.",
+        "boosted": "Çift hız etkin"
       }
     },
     "about": {
@@ -653,7 +697,10 @@
     "dropFile": "Dosyayı bırak",
     "dropHint": "Yazıya dökmek için ses dosyasını buraya bırakın",
     "transcribing": "Transkribe ediliyor...",
-    "processing": "İşleniyor..."
+    "processing": "İşleniyor...",
+    "voiceTranscribing": "İstek yazıya dökülüyor...",
+    "voiceProcessing": "Düşünüyor ve yazıyor...",
+    "voiceDone": "Yapay zekâ yanıtı yapıştırıldı"
   },
   "whatsNew": {
     "title": "crwbar voice v{{version}} yenilikleri"

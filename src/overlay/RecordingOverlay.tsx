@@ -1,5 +1,6 @@
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWebview } from "@tauri-apps/api/webview";
+import { Sparkles } from "lucide-react";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./RecordingOverlay.css";
@@ -13,6 +14,7 @@ import type {
 import BuiltStateIcon from "@/components/icons/BuiltStateIcon";
 import i18n, { syncLanguageFromSettings } from "@/i18n";
 import { getLanguageDirection } from "@/lib/utils/rtl";
+import { applyRgbMode } from "@/lib/utils/theme";
 
 type OverlayState =
   | "recording"
@@ -20,6 +22,10 @@ type OverlayState =
   | "transcribing"
   | "processing"
   | "done";
+type OverlayMode = "transcription" | "voice_action";
+type OverlayDisplayEvent =
+  | OverlayState
+  | { state: OverlayState; mode?: OverlayMode };
 
 // Number of reactive bars in the waveform (the simple, smoothed style shared by
 // every overlay form). Mic levels arrive as 16 FFT buckets; we take the first N.
@@ -27,15 +33,16 @@ const WAVE_BARS = 9;
 // Lift quieter speech without changing the recorded audio or VAD sensitivity.
 // A faster attack makes syllables read clearly; the slower release keeps the
 // waveform fluid instead of snapping back to its resting height.
-const WAVE_VISUAL_GAIN = 1.45;
-const WAVE_ATTACK = 0.48;
-const WAVE_RELEASE = 0.22;
-const WAVE_HEIGHT_CURVE = 0.6;
+const WAVE_VISUAL_GAIN = 2.25;
+const WAVE_ATTACK = 0.62;
+const WAVE_RELEASE = 0.18;
+const WAVE_HEIGHT_CURVE = 0.5;
 
 const RecordingOverlay: React.FC = () => {
   const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
   const [state, setState] = useState<OverlayState>("recording");
+  const [mode, setMode] = useState<OverlayMode>("transcription");
   const [levels, setLevels] = useState<number[]>(Array(WAVE_BARS).fill(0));
   const [streamText, setStreamText] = useState<StreamTextEvent>({
     committed: "",
@@ -75,7 +82,13 @@ const RecordingOverlay: React.FC = () => {
   useEffect(() => {
     const setupEventListeners = async () => {
       const unlistenShow = await listen("show-overlay", async (event) => {
-        const overlayState = event.payload as OverlayState;
+        const payload = event.payload as OverlayDisplayEvent;
+        const overlayState =
+          typeof payload === "string" ? payload : payload.state;
+        const overlayMode =
+          typeof payload === "string"
+            ? "transcription"
+            : (payload.mode ?? "transcription");
         await syncLanguageFromSettings();
         // The Live panel flows downward from a top overlay and upward from a
         // bottom one; read the placement so the layout can flip to match.
@@ -87,6 +100,10 @@ const RecordingOverlay: React.FC = () => {
             );
             dragDropEnabledRef.current =
               settings.data.drag_drop_enabled ?? false;
+            applyRgbMode(
+              settings.data.rgb_mode ?? false,
+              settings.data.accent_color ?? null,
+            );
             if (overlayState === "done") {
               setDoneCopied(
                 settings.data.clipboard_handling === "copy_to_clipboard",
@@ -96,6 +113,7 @@ const RecordingOverlay: React.FC = () => {
         } catch {
           // Keep the previous/default placement if settings can't be read.
         }
+        setMode(overlayMode);
         setState(overlayState);
         if (overlayState === "recording" || overlayState === "streaming") {
           setStreamText({ committed: "", tentative: "" });
@@ -215,6 +233,7 @@ const RecordingOverlay: React.FC = () => {
 
   const fmtTime = (s: number) =>
     `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+  const isVoiceAction = mode === "voice_action";
 
   // ---- Shared building blocks (one visual language for every overlay form) ----
   const waveform = (
@@ -250,15 +269,23 @@ const RecordingOverlay: React.FC = () => {
     </button>
   );
 
+  // Reuse the exact Sparkles mark from the AI settings navigation. A shared
+  // symbol reads as one product language; a one-off text badge did not.
+  const aiMark = <Sparkles className="sai-icon" aria-hidden="true" />;
+
   // recording mark (left) | waveform (center) | timer + cancel (right) — same
   // structure for pill & panel, so the Live morph is a pure width change.
   const listeningRow = (showTimer: boolean, showCancel: boolean) => (
     <div className="sbase">
       <div className="sbase-l">
-        <BuiltStateIcon
-          state="recording"
-          className="sstate-icon srecording-icon"
-        />
+        {isVoiceAction ? (
+          aiMark
+        ) : (
+          <BuiltStateIcon
+            state="recording"
+            className="sstate-icon srecording-icon"
+          />
+        )}
       </div>
       {waveform}
       <div className="sbase-r">
@@ -281,7 +308,9 @@ const RecordingOverlay: React.FC = () => {
         <BuiltStateIcon state="done" className="sstate-icon" />
       </div>
       <span className="swork-label">
-        {t(doneCopied ? "overlay.copied" : "overlay.done")}
+        {isVoiceAction
+          ? t("overlay.voiceDone")
+          : t(doneCopied ? "overlay.copied" : "overlay.done")}
       </span>
       <div className="sbase-r">
         <button
@@ -350,10 +379,14 @@ const RecordingOverlay: React.FC = () => {
   const workingRow = (label: string, showCancel: boolean) => (
     <div className="sbase">
       <div className="sbase-l">
-        <BuiltStateIcon
-          state="transcribing"
-          className="sstate-icon sworking-icon"
-        />
+        {isVoiceAction ? (
+          aiMark
+        ) : (
+          <BuiltStateIcon
+            state="transcribing"
+            className="sstate-icon sworking-icon"
+          />
+        )}
       </div>
       <span className="swork-label">{label}</span>
       <div className="sbase-r">{showCancel && cancelBtn}</div>
@@ -376,7 +409,9 @@ const RecordingOverlay: React.FC = () => {
       <div dir={direction} className={`ov-stage ${position}`}>
         <div
           key={session}
-          className={`scard ${open ? "open" : ""} ${collapsed ? "working" : ""} ${
+          className={`scard ${isVoiceAction ? "voice-action" : ""} ${
+            open ? "open" : ""
+          } ${collapsed ? "working" : ""} ${
             isVisible ? "" : "leaving"
           } ${dragActive ? "dragging" : ""}`}
         >
@@ -401,9 +436,13 @@ const RecordingOverlay: React.FC = () => {
           </div>
           {working
             ? workingRow(
-                workKind === "polishing"
-                  ? t("overlay.processing")
-                  : t("overlay.transcribing"),
+                isVoiceAction
+                  ? workKind === "polishing"
+                    ? t("overlay.voiceProcessing")
+                    : t("overlay.voiceTranscribing")
+                  : workKind === "polishing"
+                    ? t("overlay.processing")
+                    : t("overlay.transcribing"),
                 true,
               )
             : listeningRow(open, true)}
@@ -420,7 +459,11 @@ const RecordingOverlay: React.FC = () => {
         dir={direction}
         className={`ov-stage ${position} ov-fade ${isVisible ? "show" : ""}`}
       >
-        <div className="scard compact cdone">{doneRow}</div>
+        <div
+          className={`scard compact cdone ${isVoiceAction ? "voice-action" : ""}`}
+        >
+          {doneRow}
+        </div>
       </div>
     );
   }
@@ -430,9 +473,13 @@ const RecordingOverlay: React.FC = () => {
   // its width between them; the cancel button is in both rows so it stays put.
   const working = state === "transcribing" || state === "processing";
   const workLabel =
-    state === "processing"
-      ? t("overlay.processing")
-      : t("overlay.transcribing");
+    isVoiceAction
+      ? state === "processing"
+        ? t("overlay.voiceProcessing")
+        : t("overlay.voiceTranscribing")
+      : state === "processing"
+        ? t("overlay.processing")
+        : t("overlay.transcribing");
 
   return (
     <div
@@ -440,7 +487,7 @@ const RecordingOverlay: React.FC = () => {
       className={`ov-stage ${position} ov-fade ${isVisible ? "show" : ""}`}
     >
       <div
-        className={`scard compact ${
+        className={`scard compact ${isVoiceAction ? "voice-action" : ""} ${
           (working && isVisible) || dragActive ? "cworking" : ""
         } ${dragActive ? "dragging cdrop" : ""}`}
       >

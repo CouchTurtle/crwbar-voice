@@ -1085,7 +1085,7 @@ checksum = "460fbee9c2c2f33933d720630a6a0bac33ba7053db5344fac858d4b8952d77d5"
 
 [[package]]
 name = "crwbar-voice"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "audiopus",
@@ -6845,6 +6845,7 @@ dependencies = [
  "libc",
  "mio 1.1.1",
  "pin-project-lite",
+ "signal-hook-registry",
  "socket2",
  "tokio-macros",
  "windows-sys 0.61.2",

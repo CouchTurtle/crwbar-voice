@@ -12,20 +12,32 @@ use crate::settings::{get_settings, AppSettings};
 use crate::utils;
 use log::{debug, error, info, warn};
 use std::path::Path;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 use tauri::Manager;
 
 const STREAM_IDLE_TIMEOUT: Duration = Duration::from_secs(30);
 const VAD_THRESHOLD: f32 = 0.3;
+const AUDIO_DUCKING_RATIO: f32 = 0.2;
 
+// Ducking fade: quick enough that music dips promptly when recording starts and
+// returns without a long tail, but smooth enough (12 steps) that it reads as a
+// duck rather than an abrupt pause. Tuned between the original slow fade
+// (260/720ms) and an over-aggressive one (70/180ms).
+#[cfg(target_os = "macos")]
+const DUCK_FADE_DURATION: Duration = Duration::from_millis(140);
+#[cfg(target_os = "macos")]
+const RESTORE_FADE_DURATION: Duration = Duration::from_millis(400);
+#[cfg(target_os = "macos")]
+const AUDIO_FADE_STEPS: u32 = 12;
+
+#[cfg(not(target_os = "macos"))]
 fn set_mute(mute: bool) {
     // Expected behavior:
     // - Windows: works on most systems using standard audio drivers.
     // - Linux: works on many systems (PipeWire, PulseAudio, ALSA),
     //   but some distros may lack the tools used.
-    // - macOS: works on most standard setups via AppleScript.
     // If unsupported, fails silently.
 
     #[cfg(target_os = "windows")]
@@ -97,16 +109,151 @@ fn set_mute(mute: bool) {
             .args(["set", "Master", amixer_state])
             .output();
     }
+}
 
-    #[cfg(target_os = "macos")]
-    {
-        use std::process::Command;
-        let script = format!(
-            "set volume output muted {}",
-            if mute { "true" } else { "false" }
-        );
-        let _ = Command::new("osascript").args(["-e", &script]).output();
+#[cfg(test)]
+mod tests {
+    use super::{ducked_volume, interpolated_volume};
+
+    #[test]
+    fn ducking_uses_twenty_percent_without_silencing_nonzero_audio() {
+        assert_eq!(ducked_volume(100), 20);
+        assert_eq!(ducked_volume(50), 10);
+        assert_eq!(ducked_volume(3), 1);
+        assert_eq!(ducked_volume(0), 0);
     }
+
+    #[test]
+    fn volume_interpolation_reaches_both_fade_directions() {
+        assert_eq!(interpolated_volume(80, 16, 0, 4), 80);
+        assert_eq!(interpolated_volume(80, 16, 2, 4), 48);
+        assert_eq!(interpolated_volume(80, 16, 4, 4), 16);
+
+        assert_eq!(interpolated_volume(16, 80, 2, 4), 48);
+        assert_eq!(interpolated_volume(16, 80, 4, 4), 80);
+    }
+}
+
+#[cfg(target_os = "macos")]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct SystemAudioSnapshot {
+    volume: u8,
+    muted: bool,
+}
+
+fn ducked_volume(original: u8) -> u8 {
+    if original == 0 {
+        return 0;
+    }
+
+    ((original as f32 * AUDIO_DUCKING_RATIO).round() as u8).max(1)
+}
+
+fn interpolated_volume(from: u8, to: u8, step: u32, total_steps: u32) -> u8 {
+    if total_steps == 0 || step >= total_steps {
+        return to;
+    }
+
+    let progress = step as f32 / total_steps as f32;
+    let value = from as f32 + (to as f32 - from as f32) * progress;
+    value.round().clamp(0.0, 100.0) as u8
+}
+
+#[cfg(target_os = "macos")]
+fn read_system_audio() -> Option<SystemAudioSnapshot> {
+    use std::process::Command;
+
+    let script = "set currentSettings to get volume settings\nreturn ((output volume of currentSettings) as text) & \",\" & ((output muted of currentSettings) as text)";
+    let output = Command::new("osascript")
+        .args(["-e", script])
+        .output()
+        .ok()?;
+
+    if !output.status.success() {
+        warn!(
+            "Failed to read macOS system audio: {}",
+            String::from_utf8_lossy(&output.stderr).trim()
+        );
+        return None;
+    }
+
+    let raw = String::from_utf8_lossy(&output.stdout);
+    let (volume, muted) = raw.trim().split_once(',')?;
+    Some(SystemAudioSnapshot {
+        volume: volume.trim().parse::<u8>().ok()?.min(100),
+        muted: muted.trim().eq_ignore_ascii_case("true"),
+    })
+}
+
+#[cfg(target_os = "macos")]
+fn set_system_volume(volume: u8) -> bool {
+    use std::process::Command;
+
+    Command::new("osascript")
+        .args([
+            "-e",
+            &format!("set volume output volume {}", volume.min(100)),
+        ])
+        .output()
+        .map(|output| output.status.success())
+        .unwrap_or(false)
+}
+
+#[cfg(target_os = "macos")]
+fn set_system_muted(muted: bool) -> bool {
+    use std::process::Command;
+
+    Command::new("osascript")
+        .args([
+            "-e",
+            &format!(
+                "set volume output muted {}",
+                if muted { "true" } else { "false" }
+            ),
+        ])
+        .output()
+        .map(|output| output.status.success())
+        .unwrap_or(false)
+}
+
+#[cfg(target_os = "macos")]
+fn fade_system_volume(
+    from: u8,
+    to: u8,
+    duration: Duration,
+    generation: &AtomicU64,
+    expected_generation: u64,
+    command_lock: &Mutex<()>,
+) -> bool {
+    if from == to {
+        let _command = command_lock.lock().unwrap();
+        return generation.load(Ordering::Acquire) == expected_generation && set_system_volume(to);
+    }
+
+    let step_delay = duration / AUDIO_FADE_STEPS;
+    for step in 1..=AUDIO_FADE_STEPS {
+        if generation.load(Ordering::Acquire) != expected_generation {
+            return false;
+        }
+
+        let command = command_lock.lock().unwrap();
+        if generation.load(Ordering::Acquire) != expected_generation {
+            return false;
+        }
+
+        let volume = interpolated_volume(from, to, step, AUDIO_FADE_STEPS);
+        if !set_system_volume(volume) {
+            warn!("Failed to set macOS system volume while fading audio");
+            return false;
+        }
+        drop(command);
+
+        if step < AUDIO_FADE_STEPS {
+            std::thread::sleep(step_delay);
+        }
+    }
+
+    generation.load(Ordering::Acquire) == expected_generation
 }
 
 const WHISPER_SAMPLE_RATE: usize = 16000;
@@ -182,7 +329,15 @@ pub struct AudioRecordingManager {
     recorder: Arc<Mutex<Option<AudioRecorder>>>,
     is_open: Arc<Mutex<bool>>,
     is_recording: Arc<Mutex<bool>>,
+    audio_suppression_allowed: Arc<AtomicBool>,
+    #[cfg(not(target_os = "macos"))]
     did_mute: Arc<Mutex<bool>>,
+    #[cfg(target_os = "macos")]
+    audio_ducking_snapshot: Arc<Mutex<Option<SystemAudioSnapshot>>>,
+    #[cfg(target_os = "macos")]
+    audio_ducking_generation: Arc<AtomicU64>,
+    #[cfg(target_os = "macos")]
+    system_audio_command_lock: Arc<Mutex<()>>,
     close_generation: Arc<AtomicU64>,
     cancel_generation: Arc<AtomicU64>,
     stream_router: Arc<StreamRouter>,
@@ -217,7 +372,15 @@ impl AudioRecordingManager {
             recorder: Arc::new(Mutex::new(None)),
             is_open: Arc::new(Mutex::new(false)),
             is_recording: Arc::new(Mutex::new(false)),
+            audio_suppression_allowed: Arc::new(AtomicBool::new(false)),
+            #[cfg(not(target_os = "macos"))]
             did_mute: Arc::new(Mutex::new(false)),
+            #[cfg(target_os = "macos")]
+            audio_ducking_snapshot: Arc::new(Mutex::new(None)),
+            #[cfg(target_os = "macos")]
+            audio_ducking_generation: Arc::new(AtomicU64::new(0)),
+            #[cfg(target_os = "macos")]
+            system_audio_command_lock: Arc::new(Mutex::new(())),
             close_generation: Arc::new(AtomicU64::new(0)),
             cancel_generation: Arc::new(AtomicU64::new(0)),
             stream_router,
@@ -324,25 +487,170 @@ impl AudioRecordingManager {
 
     /* ---------- microphone life-cycle -------------------------------------- */
 
-    /// Applies mute if mute_while_recording is enabled and stream is open
-    pub fn apply_mute(&self) {
+    /// Lowers system audio while an actual recording is active. On macOS this
+    /// preserves the original output volume and fades down instead of muting.
+    /// Other platforms retain the previous best-effort mute fallback until
+    /// their volume APIs are implemented and verified.
+    pub fn apply_audio_suppression(&self) {
         let settings = get_settings(&self.app_handle);
-        let mut did_mute_guard = self.did_mute.lock().unwrap();
+        if !settings.mute_while_recording
+            || !self.audio_suppression_allowed.load(Ordering::Acquire)
+            || !*self.is_recording.lock().unwrap()
+        {
+            return;
+        }
 
-        if settings.mute_while_recording && *self.is_open.lock().unwrap() {
+        #[cfg(target_os = "macos")]
+        {
+            // Keep the first pre-ducking snapshot until restoration completes.
+            // A second recording that starts during the fade-up reuses this
+            // baseline, so quick back-to-back recordings cannot ratchet the
+            // user's volume progressively lower.
+            let (current, original, generation) = {
+                let mut snapshot = self.audio_ducking_snapshot.lock().unwrap();
+                let Some(current) = read_system_audio() else {
+                    return;
+                };
+                if current.muted || current.volume == 0 {
+                    debug!("System audio already silent; skipping audio ducking");
+                    return;
+                }
+                let original = match *snapshot {
+                    Some(existing) => existing,
+                    None => {
+                        *snapshot = Some(current);
+                        current
+                    }
+                };
+                let generation = self.audio_ducking_generation.fetch_add(1, Ordering::AcqRel) + 1;
+                (current, original, generation)
+            };
+
+            let target = ducked_volume(original.volume);
+            let generation_counter = Arc::clone(&self.audio_ducking_generation);
+            let command_lock = Arc::clone(&self.system_audio_command_lock);
+
+            std::thread::spawn(move || {
+                if fade_system_volume(
+                    current.volume,
+                    target,
+                    DUCK_FADE_DURATION,
+                    &generation_counter,
+                    generation,
+                    &command_lock,
+                ) {
+                    debug!(
+                        "System audio ducked from {}% to {}%",
+                        original.volume, target
+                    );
+                }
+            });
+        }
+
+        #[cfg(not(target_os = "macos"))]
+        {
+            let mut did_mute_guard = self.did_mute.lock().unwrap();
             set_mute(true);
             *did_mute_guard = true;
-            debug!("Mute applied");
+            debug!("System audio muted");
         }
     }
 
-    /// Removes mute if it was applied
-    pub fn remove_mute(&self) {
-        let mut did_mute_guard = self.did_mute.lock().unwrap();
-        if *did_mute_guard {
-            set_mute(false);
-            *did_mute_guard = false;
-            debug!("Mute removed");
+    /// Restores the exact system-audio state captured before recording. A
+    /// generation token makes an in-progress fade yield to a newer recording.
+    pub fn restore_system_audio(&self) {
+        // Stop any delayed start-feedback thread from applying suppression
+        // after a very short recording has already ended.
+        self.audio_suppression_allowed
+            .store(false, Ordering::Release);
+
+        #[cfg(target_os = "macos")]
+        {
+            let (original, generation) = {
+                let snapshot = self.audio_ducking_snapshot.lock().unwrap();
+                let Some(original) = *snapshot else {
+                    return;
+                };
+                let generation = self.audio_ducking_generation.fetch_add(1, Ordering::AcqRel) + 1;
+                (original, generation)
+            };
+
+            let from = read_system_audio()
+                .map(|current| current.volume)
+                .unwrap_or_else(|| ducked_volume(original.volume));
+            let generation_counter = Arc::clone(&self.audio_ducking_generation);
+            let snapshot = Arc::clone(&self.audio_ducking_snapshot);
+            let command_lock = Arc::clone(&self.system_audio_command_lock);
+
+            std::thread::spawn(move || {
+                if !fade_system_volume(
+                    from,
+                    original.volume,
+                    RESTORE_FADE_DURATION,
+                    &generation_counter,
+                    generation,
+                    &command_lock,
+                ) {
+                    return;
+                }
+
+                let mut snapshot = snapshot.lock().unwrap();
+                if generation_counter.load(Ordering::Acquire) != generation {
+                    return;
+                }
+
+                // Pin the endpoint and original mute state after interpolation,
+                // then release the snapshot only if no newer fade superseded us.
+                let _command = command_lock.lock().unwrap();
+                if generation_counter.load(Ordering::Acquire) != generation {
+                    return;
+                }
+                let _ = set_system_volume(original.volume);
+                let _ = set_system_muted(original.muted);
+                *snapshot = None;
+                debug!("System audio restored to {}%", original.volume);
+            });
+        }
+
+        #[cfg(not(target_os = "macos"))]
+        {
+            let mut did_mute_guard = self.did_mute.lock().unwrap();
+            if *did_mute_guard {
+                set_mute(false);
+                *did_mute_guard = false;
+                debug!("System audio unmuted");
+            }
+        }
+    }
+
+    /// Synchronous safety net for process shutdown, where an asynchronous fade
+    /// would be terminated before it could restore the user's output level.
+    pub fn restore_system_audio_immediately(&self) {
+        self.audio_suppression_allowed
+            .store(false, Ordering::Release);
+
+        #[cfg(target_os = "macos")]
+        {
+            self.audio_ducking_generation.fetch_add(1, Ordering::AcqRel);
+            let original = self.audio_ducking_snapshot.lock().unwrap().take();
+            if let Some(original) = original {
+                let _command = self.system_audio_command_lock.lock().unwrap();
+                let _ = set_system_volume(original.volume);
+                let _ = set_system_muted(original.muted);
+                debug!(
+                    "System audio immediately restored to {}% for shutdown",
+                    original.volume
+                );
+            }
+        }
+
+        #[cfg(not(target_os = "macos"))]
+        {
+            let mut did_mute = self.did_mute.lock().unwrap();
+            if *did_mute {
+                set_mute(false);
+                *did_mute = false;
+            }
         }
     }
 
@@ -375,9 +683,12 @@ impl AudioRecordingManager {
 
         let start_time = Instant::now();
 
-        // Don't mute immediately - caller will handle muting after audio feedback
-        let mut did_mute_guard = self.did_mute.lock().unwrap();
-        *did_mute_guard = false;
+        // Don't suppress system audio immediately; the caller waits until the
+        // optional start feedback has played.
+        #[cfg(not(target_os = "macos"))]
+        {
+            *self.did_mute.lock().unwrap() = false;
+        }
 
         // Get the selected device from settings, considering clamshell mode.
         // No pre-flight enumeration here: when nothing is configured the
@@ -434,11 +745,7 @@ impl AudioRecordingManager {
             return;
         }
 
-        let mut did_mute_guard = self.did_mute.lock().unwrap();
-        if *did_mute_guard {
-            set_mute(false);
-        }
-        *did_mute_guard = false;
+        self.restore_system_audio();
 
         if let Some(rec) = self.recorder.lock().unwrap().as_mut() {
             // If still recording, stop first.
@@ -500,6 +807,8 @@ impl AudioRecordingManager {
             if let Some(rec) = self.recorder.lock().unwrap().as_ref() {
                 if rec.start(vad_policy).is_ok() {
                     *self.is_recording.lock().unwrap() = true;
+                    self.audio_suppression_allowed
+                        .store(true, Ordering::Release);
                     *state = RecordingState::Recording {
                         binding_id: binding_id.to_string(),
                     };
@@ -621,6 +930,9 @@ impl AudioRecordingManager {
     /// Cancel any ongoing recording without returning audio samples
     pub fn cancel_recording(&self) {
         self.cancel_generation.fetch_add(1, Ordering::AcqRel);
+        // Cancellation can leave the microphone stream open for lazy reuse, so
+        // restore system audio independently of stream shutdown.
+        self.restore_system_audio();
         let mut state = self.state.lock().unwrap();
 
         match *state {

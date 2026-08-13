@@ -207,6 +207,10 @@
           "transcribe_with_post_process": {
             "name": "后处理快捷键",
             "description": "可选：一个专用快捷键，始终对您的转录应用 AI 后处理。"
+          },
+          "voice_action": {
+            "name": "Voice Action Shortcut",
+            "description": "Speak an instruction and generate text using optional context and your selected AI backend."
           }
         },
         "errors": {
@@ -432,6 +436,33 @@
         "cancel": "取消",
         "selectToEdit": "选择上方的提示词以查看和编辑其详细信息。",
         "createFirst": "点击上方的「创建新提示词」来创建您的第一个后处理提示词。"
+      },
+      "voiceAction": {
+        "title": "Voice Actions",
+        "backend": {
+          "title": "AI Backend",
+          "description": "Use the configured API provider or an installed, signed-in Codex or Claude CLI.",
+          "options": {
+            "api": "Configured API",
+            "codexCli": "Codex CLI",
+            "claudeCli": "Claude Code CLI"
+          }
+        },
+        "clipboardContext": {
+          "label": "Include Clipboard Context",
+          "description": "Send the current text clipboard as source material for commands such as ‘Write an email from this’."
+        },
+        "context": {
+          "title": "Persistent Context",
+          "description": "Optional background that is included with every Voice Action, such as your role, company, preferred writing style, or wording to avoid. It is never used for normal transcriptions.",
+          "placeholder": "Example: I work at … Keep emails concise, friendly, and direct.",
+          "storage": "Saved as you type, stored locally on this device, and only sent with Voice Actions — never with normal transcriptions.",
+          "clear": "Clear"
+        },
+        "privacy": "Your spoken instruction and any enabled context are sent to the selected AI service. Clipboard context is off by default."
+      },
+      "enable": {
+        "title": "AI Features"
       }
     },
     "history": {
@@ -518,8 +549,8 @@
         "description": "启用转录后的 AI 文本优化"
       },
       "muteWhileRecording": {
-        "label": "录制时静音",
-        "description": "录制期间静音系统音频"
+        "label": "录制时降低音量",
+        "description": "录制时逐渐降低系统音量，结束后恢复"
       },
       "appendTrailingSpace": {
         "label": "追加尾部空格",
@@ -553,6 +584,19 @@
         "button": "预览",
         "noNotes": "未找到内置发行说明",
         "error": "无法预览发行说明"
+      }
+    },
+    "appearance": {
+      "title": "外观",
+      "accent": {
+        "title": "强调色",
+        "description": "为按钮、录音条和高亮元素选择自定义强调色。“重置”会恢复默认的橙色。",
+        "reset": "重置"
+      },
+      "rgbMode": {
+        "label": "Emil Mode",
+        "description": "让强调色不断循环变换彩虹色。开启时会覆盖所选强调色。",
+        "boosted": "双倍速度已启用"
       }
     },
     "about": {
@@ -653,7 +697,10 @@
     "dropFile": "放下文件",
     "dropHint": "将音频文件放到此处进行转录",
     "transcribing": "正在转录...",
-    "processing": "处理中..."
+    "processing": "处理中...",
+    "voiceTranscribing": "正在转录指令...",
+    "voiceProcessing": "正在思考并撰写...",
+    "voiceDone": "已粘贴 AI 回复"
   },
   "whatsNew": {
     "title": "crwbar voice v{{version}} 新功能"

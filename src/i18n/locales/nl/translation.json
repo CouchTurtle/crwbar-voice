@@ -189,6 +189,10 @@
           "transcribe_with_post_process": {
             "name": "Sneltoets voor naverwerking",
             "description": "Optioneel: Een specifieke sneltoets die altijd AI-naverwerking toepast op je transcriptie."
+          },
+          "voice_action": {
+            "name": "Voice Action Shortcut",
+            "description": "Speak an instruction and generate text using optional context and your selected AI backend."
           }
         },
         "errors": {
@@ -432,6 +436,33 @@
         "cancel": "Annuleren",
         "selectToEdit": "Selecteer hierboven een prompt om de details te bekijken en te bewerken.",
         "createFirst": "Klik hierboven op 'Nieuwe prompt maken' om je eerste naverwerkingsprompt aan te maken."
+      },
+      "voiceAction": {
+        "title": "Voice Actions",
+        "backend": {
+          "title": "AI Backend",
+          "description": "Use the configured API provider or an installed, signed-in Codex or Claude CLI.",
+          "options": {
+            "api": "Configured API",
+            "codexCli": "Codex CLI",
+            "claudeCli": "Claude Code CLI"
+          }
+        },
+        "clipboardContext": {
+          "label": "Include Clipboard Context",
+          "description": "Send the current text clipboard as source material for commands such as ‘Write an email from this’."
+        },
+        "context": {
+          "title": "Persistent Context",
+          "description": "Optional background that is included with every Voice Action, such as your role, company, preferred writing style, or wording to avoid. It is never used for normal transcriptions.",
+          "placeholder": "Example: I work at … Keep emails concise, friendly, and direct.",
+          "storage": "Saved as you type, stored locally on this device, and only sent with Voice Actions — never with normal transcriptions.",
+          "clear": "Clear"
+        },
+        "privacy": "Your spoken instruction and any enabled context are sent to the selected AI service. Clipboard context is off by default."
+      },
+      "enable": {
+        "title": "AI Features"
       }
     },
     "history": {
@@ -525,8 +556,8 @@
         "description": "Schakel AI-gestuurde tekstverfijning in na transcriptie"
       },
       "muteWhileRecording": {
-        "label": "Dempen tijdens opname",
-        "description": "Systeemgeluid dempen tijdens het opnemen"
+        "label": "Audio zachter tijdens opname",
+        "description": "Laat systeemgeluid geleidelijk zakken en herstelt het daarna"
       },
       "appendTrailingSpace": {
         "label": "Spatie achteraan toevoegen",
@@ -553,6 +584,19 @@
       "recordingBuffer": {
         "title": "Extra opnamebuffer",
         "description": "Extra tijd (in milliseconden) om te blijven opnemen nadat je de toets loslaat, om naloopaudio op te vangen. 0 = geen extra buffer."
+      }
+    },
+    "appearance": {
+      "title": "Weergave",
+      "accent": {
+        "title": "Accentkleur",
+        "description": "Kies een eigen accentkleur voor knoppen, de opnamebalk en accenten. 'Herstellen' zet het standaard oranje terug.",
+        "reset": "Herstellen"
+      },
+      "rgbMode": {
+        "label": "Emil Mode",
+        "description": "Laat de accentkleur doorlopend door de regenboog lopen. Overschrijft de accentkleur zolang dit aanstaat.",
+        "boosted": "Dubbele snelheid actief"
       }
     },
     "about": {
@@ -656,6 +700,9 @@
     "dropFile": "Bestand neerzetten",
     "dropHint": "Zet hier een audiobestand neer om het te transcriberen",
     "transcribing": "Transcriberen...",
-    "processing": "Verwerken..."
+    "processing": "Verwerken...",
+    "voiceTranscribing": "Opdracht transcriberen...",
+    "voiceProcessing": "Denken en schrijven...",
+    "voiceDone": "AI-antwoord geplakt"
   }
 }

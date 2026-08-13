@@ -160,6 +160,25 @@
   border-radius: 18px;
 }
 
+/* Voice Actions are agentic work, not plain transcription. Keep the same visual
+   system, but make the mode unmistakable with the same Sparkles mark used by
+   the AI settings navigation. */
+.scard.voice-action {
+  border-color: color-mix(in srgb, var(--s-accent) 52%, var(--s-border));
+  background: color-mix(in srgb, var(--s-accent) 5%, var(--s-surface));
+}
+.sai-icon {
+  display: block;
+  width: 19px;
+  height: 19px;
+  color: var(--s-accent);
+  stroke-width: 1.9;
+  flex: none;
+}
+.scard.voice-action .swork-label {
+  color: color-mix(in srgb, var(--color-text) 82%, var(--s-accent));
+}
+
 /* Compact form: two fixed widths so the recording→working change is an animatable
    width transition (intrinsic max-content can't be transitioned, and every label
    is short enough to fit the resting pill, so content-sizing produced no visible

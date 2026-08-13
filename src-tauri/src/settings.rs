@@ -106,6 +106,15 @@ pub struct PostProcessProvider {
     pub supports_structured_output: bool,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Type, Default)]
+#[serde(rename_all = "snake_case")]
+pub enum VoiceActionBackend {
+    #[default]
+    Api,
+    CodexCli,
+    ClaudeCli,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Type)]
 #[serde(rename_all = "lowercase")]
 pub enum OverlayPosition {
@@ -329,6 +338,38 @@ impl std::ops::DerefMut for SecretMap {
     }
 }
 
+/// A user-authored string that must never reach the log file. Serializes as a
+/// plain string (so the stored settings and the TypeScript bindings are
+/// unchanged), but its `Debug` output only reports the length. `AppSettings`
+/// derives `Debug` and is dumped wholesale at startup, so personal free text
+/// needs the same treatment `SecretMap` gives API keys.
+#[derive(Clone, Default, PartialEq, Serialize, Deserialize, Type)]
+#[serde(transparent)]
+pub struct RedactedString(String);
+
+impl fmt::Debug for RedactedString {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.0.is_empty() {
+            f.write_str("\"\"")
+        } else {
+            write!(f, "[REDACTED {} chars]", self.0.chars().count())
+        }
+    }
+}
+
+impl std::ops::Deref for RedactedString {
+    type Target = str;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl From<String> for RedactedString {
+    fn from(value: String) -> Self {
+        Self(value)
+    }
+}
+
 /* still handy for composing the initial JSON in the store ------------- */
 /// The container-level `serde(default)` (backed by the `Default` impl below)
 /// guarantees every field — including ones added in the future — falls back to
@@ -424,6 +465,17 @@ pub struct AppSettings {
     #[serde(default)]
     pub post_process_selected_prompt_id: Option<String>,
     #[serde(default)]
+    pub voice_action_backend: VoiceActionBackend,
+    #[serde(default = "default_voice_action_include_clipboard")]
+    pub voice_action_include_clipboard: bool,
+    /// Persistent background the user configures once (Settings → Voice
+    /// Actions) and that is sent with every Voice Action. Defaults to an empty
+    /// string; when empty, Voice Actions behave exactly as before.
+    #[serde(default)]
+    pub voice_action_context: RedactedString,
+    #[serde(default)]
+    // Keep this persisted key for compatibility with existing installations.
+    // On macOS it now enables faded audio ducking instead of hard muting.
     pub mute_while_recording: bool,
     #[serde(default)]
     pub append_trailing_space: bool,
@@ -431,6 +483,15 @@ pub struct AppSettings {
     pub app_language: String,
     #[serde(default = "default_theme")]
     pub theme: Theme,
+    /// User-picked accent color as a `#rrggbb` hex string. `None` keeps the
+    /// built-in crw.bar orange. Overrides `--color-logo-primary` /
+    /// `--color-background-ui` at runtime (see `lib/utils/theme.ts`).
+    #[serde(default)]
+    pub accent_color: Option<String>,
+    /// Cycle the accent colour through the hue wheel continuously. Purely
+    /// cosmetic; overrides `accent_color` while enabled.
+    #[serde(default)]
+    pub rgb_mode: bool,
     #[serde(default)]
     pub experimental_enabled: bool,
     #[serde(default)]
@@ -580,6 +641,10 @@ fn default_theme() -> Theme {
 }
 
 fn default_post_process_enabled() -> bool {
+    false
+}
+
+fn default_voice_action_include_clipboard() -> bool {
     false
 }
 
@@ -829,6 +894,27 @@ pub fn get_default_settings() -> AppSettings {
             current_binding: default_post_process_shortcut.to_string(),
         },
     );
+
+    #[cfg(target_os = "windows")]
+    let default_voice_action_shortcut = "ctrl+alt+space";
+    #[cfg(target_os = "macos")]
+    let default_voice_action_shortcut = "option+command+space";
+    #[cfg(target_os = "linux")]
+    let default_voice_action_shortcut = "ctrl+alt+space";
+    #[cfg(not(any(target_os = "windows", target_os = "macos", target_os = "linux")))]
+    let default_voice_action_shortcut = "alt+command+space";
+
+    bindings.insert(
+        "voice_action".to_string(),
+        ShortcutBinding {
+            id: "voice_action".to_string(),
+            name: "Voice Action".to_string(),
+            description: "Uses your voice and optional context to generate text with AI."
+                .to_string(),
+            default_binding: default_voice_action_shortcut.to_string(),
+            current_binding: default_voice_action_shortcut.to_string(),
+        },
+    );
     bindings.insert(
         "cancel".to_string(),
         ShortcutBinding {
@@ -879,10 +965,15 @@ pub fn get_default_settings() -> AppSettings {
         post_process_models: default_post_process_models(),
         post_process_prompts: default_post_process_prompts(),
         post_process_selected_prompt_id: None,
+        voice_action_backend: VoiceActionBackend::default(),
+        voice_action_include_clipboard: default_voice_action_include_clipboard(),
+        voice_action_context: RedactedString::default(),
         mute_while_recording: false,
         append_trailing_space: false,
         app_language: default_app_language(),
         theme: default_theme(),
+        accent_color: None,
+        rgb_mode: false,
         experimental_enabled: false,
         lazy_stream_close: false,
         keyboard_implementation: KeyboardImplementation::default(),
@@ -1136,8 +1227,25 @@ mod tests {
             .expect("all AppSettings fields need serde defaults");
         assert!(settings.push_to_talk);
         assert!(!settings.audio_feedback);
+        assert_eq!(settings.voice_action_backend, VoiceActionBackend::Api);
+        assert!(!settings.voice_action_include_clipboard);
         // Bindings default to empty; the load path merges the real defaults in.
         assert!(settings.bindings.is_empty());
+    }
+
+    #[test]
+    fn default_settings_include_a_distinct_voice_action_shortcut() {
+        let settings = get_default_settings();
+        let voice_action = settings
+            .bindings
+            .get("voice_action")
+            .expect("Voice Action binding should exist");
+        let transcribe = settings.bindings.get("transcribe").unwrap();
+
+        assert_ne!(
+            voice_action.current_binding, transcribe.current_binding,
+            "Voice Actions must not shadow normal dictation by default"
+        );
     }
 
     /// Frozen snapshot of a real v0.9.0-era settings store, as written to
@@ -1488,5 +1596,38 @@ mod tests {
         let out = format!("{:?}", map);
         assert!(!out.contains("secret"));
         assert!(out.contains("[REDACTED]"));
+    }
+
+    #[test]
+    fn debug_output_redacts_voice_action_context() {
+        let mut settings = get_default_settings();
+        settings.voice_action_context =
+            "my-name-is-secret and I dislike synergy".to_string().into();
+
+        // `load_or_create_app_settings` debug-dumps the whole struct into
+        // handy.log, so the personal context must not survive formatting.
+        let debug_output = format!("{:?}", settings);
+
+        assert!(!debug_output.contains("my-name-is-secret"));
+        assert!(!debug_output.contains("synergy"));
+        assert!(debug_output.contains("[REDACTED 39 chars]"));
+    }
+
+    #[test]
+    fn voice_action_context_defaults_to_empty_and_round_trips() {
+        let settings = get_default_settings();
+        assert!(settings.voice_action_context.is_empty());
+        assert_eq!(format!("{:?}", settings.voice_action_context), "\"\"");
+
+        // Stores written before this setting existed must load as empty, not fail.
+        let legacy = serde_json::json!({ "onboarding_completed": true });
+        let loaded: AppSettings = serde_json::from_value(legacy).unwrap();
+        assert!(loaded.voice_action_context.is_empty());
+
+        // Serializes as a plain JSON string, so existing stores stay readable.
+        let mut settings = get_default_settings();
+        settings.voice_action_context = "hello".to_string().into();
+        let value = serde_json::to_value(&settings).unwrap();
+        assert_eq!(value["voice_action_context"], serde_json::json!("hello"));
     }
 }

@@ -23,8 +23,10 @@ pub fn init_shortcuts(app: &AppHandle) {
         if id == "cancel" {
             continue; // Skip cancel shortcut, it will be registered dynamically
         }
-        // Skip post-processing shortcut when the feature is disabled
-        if id == "transcribe_with_post_process" && !user_settings.post_process_enabled {
+        // AI shortcuts share the post-processing feature switch.
+        if matches!(id.as_str(), "transcribe_with_post_process" | "voice_action")
+            && !user_settings.post_process_enabled
+        {
             continue;
         }
         let binding = user_settings

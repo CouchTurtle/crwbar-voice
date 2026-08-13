@@ -68,6 +68,13 @@ const EMIT_THROTTLE_MS: u64 = 33; // ~30 FPS
 static OVERLAY_GEN: AtomicU64 = AtomicU64::new(0);
 const DONE_OVERLAY_MS: u64 = 3500;
 
+#[derive(Clone, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct OverlayDisplayEvent {
+    state: String,
+    mode: String,
+}
+
 #[cfg(target_os = "macos")]
 const OVERLAY_TOP_OFFSET: f64 = 46.0;
 #[cfg(any(target_os = "windows", target_os = "linux"))]
@@ -378,7 +385,7 @@ pub fn create_recording_overlay(app_handle: &AppHandle) {
     }
 }
 
-fn show_overlay_state(app_handle: &AppHandle, state: &str) {
+fn show_overlay_state_with_mode(app_handle: &AppHandle, state: &str, mode: &str) {
     // Any state change invalidates a pending "done" auto-hide timer.
     OVERLAY_GEN.fetch_add(1, Ordering::Relaxed);
 
@@ -417,16 +424,32 @@ fn show_overlay_state(app_handle: &AppHandle, state: &str) {
         #[cfg(target_os = "windows")]
         force_overlay_topmost(&overlay_window);
 
-        let _ = overlay_window.emit("show-overlay", state);
+        let _ = overlay_window.emit(
+            "show-overlay",
+            OverlayDisplayEvent {
+                state: state.to_string(),
+                mode: mode.to_string(),
+            },
+        );
         log::debug!(
-            "overlay '{}': set_size={:?} pos_calc={:?} set_pos={:?} show={:?}",
+            "overlay '{}' ({}): set_size={:?} pos_calc={:?} set_pos={:?} show={:?}",
             state,
+            mode,
             size_elapsed,
             pos_calc_elapsed,
             set_pos_elapsed,
             show_elapsed
         );
     }
+}
+
+fn show_overlay_state(app_handle: &AppHandle, state: &str) {
+    show_overlay_state_with_mode(app_handle, state, "transcription");
+}
+
+/// Shows an overlay state that is visibly identified as an AI Voice Action.
+pub fn show_voice_action_overlay(app_handle: &AppHandle, state: &str) {
+    show_overlay_state_with_mode(app_handle, state, "voice_action");
 }
 
 /// Shows the recording overlay window with fade-in animation

@@ -186,6 +186,10 @@
           "transcribe_with_post_process": {
             "name": "مفتاح المعالجة اللاحقة",
             "description": "اختياري: مفتاح اختصار مخصص يطبق دائماً المعالجة اللاحقة بالذكاء الاصطناعي على التفريغ الصوتي."
+          },
+          "voice_action": {
+            "name": "Voice Action Shortcut",
+            "description": "Speak an instruction and generate text using optional context and your selected AI backend."
           }
         },
         "errors": {
@@ -411,6 +415,33 @@
         "cancel": "إلغاء",
         "selectToEdit": ".اختر مطالبة أعلاه لعرض وتعديل تفاصيلها",
         "createFirst": ".انقر على 'إنشاء مطالبة جديدة' أعلاه لإنشاء أول مطالبة معالجة لاحقة لك"
+      },
+      "voiceAction": {
+        "title": "Voice Actions",
+        "backend": {
+          "title": "AI Backend",
+          "description": "Use the configured API provider or an installed, signed-in Codex or Claude CLI.",
+          "options": {
+            "api": "Configured API",
+            "codexCli": "Codex CLI",
+            "claudeCli": "Claude Code CLI"
+          }
+        },
+        "clipboardContext": {
+          "label": "Include Clipboard Context",
+          "description": "Send the current text clipboard as source material for commands such as ‘Write an email from this’."
+        },
+        "context": {
+          "title": "Persistent Context",
+          "description": "Optional background that is included with every Voice Action, such as your role, company, preferred writing style, or wording to avoid. It is never used for normal transcriptions.",
+          "placeholder": "Example: I work at … Keep emails concise, friendly, and direct.",
+          "storage": "Saved as you type, stored locally on this device, and only sent with Voice Actions — never with normal transcriptions.",
+          "clear": "Clear"
+        },
+        "privacy": "Your spoken instruction and any enabled context are sent to the selected AI service. Clipboard context is off by default."
+      },
+      "enable": {
+        "title": "AI Features"
       }
     },
     "history": {
@@ -497,8 +528,8 @@
         "description": "تمكين تحسين النص المدعوم بالذكاء الاصطناعي بعد التفريغ الصوتي"
       },
       "muteWhileRecording": {
-        "label": "كتم الصوت أثناء التسجيل",
-        "description": "كتم صوت النظام أثناء التسجيل"
+        "label": "خفض الصوت أثناء التسجيل",
+        "description": "خفض صوت النظام تدريجيًا أثناء التسجيل ثم استعادته"
       },
       "appendTrailingSpace": {
         "label": "إضافة مسافة تابعة",
@@ -532,6 +563,19 @@
         "button": "معاينة",
         "noNotes": "لم يتم العثور على ملاحظات إصدار مضمنة",
         "error": "تعذرت معاينة ملاحظات الإصدار"
+      }
+    },
+    "appearance": {
+      "title": "المظهر",
+      "accent": {
+        "title": "لون التمييز",
+        "description": "اختر لون تمييز مخصصًا للأزرار وشريط التسجيل والعناصر البارزة. تعيد \"إعادة تعيين\" اللون البرتقالي الافتراضي.",
+        "reset": "إعادة تعيين"
+      },
+      "rgbMode": {
+        "label": "Emil Mode",
+        "description": "يبدّل لون التمييز عبر ألوان الطيف باستمرار. يتجاوز لون التمييز أثناء تشغيله.",
+        "boosted": "السرعة المضاعفة مفعّلة"
       }
     },
     "about": {
@@ -653,7 +697,10 @@
     "dropFile": "أفلت الملف",
     "dropHint": "أفلت ملفًا صوتيًا هنا لنسخه",
     "transcribing": "...جاري التفريغ",
-    "processing": "...جاري المعالجة"
+    "processing": "...جاري المعالجة",
+    "voiceTranscribing": "...جاري نسخ الطلب",
+    "voiceProcessing": "...أفكر وأكتب",
+    "voiceDone": "تم لصق رد الذكاء الاصطناعي"
   },
   "whatsNew": {
     "title": "الجديد في crwbar voice v{{version}}"

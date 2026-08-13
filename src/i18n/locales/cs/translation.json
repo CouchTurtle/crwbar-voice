@@ -207,6 +207,10 @@
           "transcribe_with_post_process": {
             "name": "Klávesa pro následné zpracování",
             "description": "Volitelné: Vyhrazená klávesová zkratka, která vždy použije AI následné zpracování na váš přepis."
+          },
+          "voice_action": {
+            "name": "Voice Action Shortcut",
+            "description": "Speak an instruction and generate text using optional context and your selected AI backend."
           }
         },
         "errors": {
@@ -432,6 +436,33 @@
         "cancel": "Zrušit",
         "selectToEdit": "Vyberte výše prompt, abyste zobrazili a upravili jeho podrobnosti.",
         "createFirst": "Klikněte nahoře na 'Vytvořit nový prompt' a vytvořte svůj první prompt pro následné zpracování."
+      },
+      "voiceAction": {
+        "title": "Voice Actions",
+        "backend": {
+          "title": "AI Backend",
+          "description": "Use the configured API provider or an installed, signed-in Codex or Claude CLI.",
+          "options": {
+            "api": "Configured API",
+            "codexCli": "Codex CLI",
+            "claudeCli": "Claude Code CLI"
+          }
+        },
+        "clipboardContext": {
+          "label": "Include Clipboard Context",
+          "description": "Send the current text clipboard as source material for commands such as ‘Write an email from this’."
+        },
+        "context": {
+          "title": "Persistent Context",
+          "description": "Optional background that is included with every Voice Action, such as your role, company, preferred writing style, or wording to avoid. It is never used for normal transcriptions.",
+          "placeholder": "Example: I work at … Keep emails concise, friendly, and direct.",
+          "storage": "Saved as you type, stored locally on this device, and only sent with Voice Actions — never with normal transcriptions.",
+          "clear": "Clear"
+        },
+        "privacy": "Your spoken instruction and any enabled context are sent to the selected AI service. Clipboard context is off by default."
+      },
+      "enable": {
+        "title": "AI Features"
       }
     },
     "history": {
@@ -518,8 +549,8 @@
         "description": "Povolit AI vylepšení textu po přepisu"
       },
       "muteWhileRecording": {
-        "label": "Ztlumit při nahrávání",
-        "description": "Ztlumit systémový zvuk během nahrávání"
+        "label": "Ztišit zvuk při nahrávání",
+        "description": "Plynule ztiší systémový zvuk a po nahrávání ho obnoví"
       },
       "appendTrailingSpace": {
         "label": "Přidat koncovou mezeru",
@@ -553,6 +584,19 @@
         "button": "Náhled",
         "noNotes": "Nebyly nalezeny žádné přibalené poznámky k vydání",
         "error": "Nepodařilo se zobrazit náhled poznámek k vydání"
+      }
+    },
+    "appearance": {
+      "title": "Vzhled",
+      "accent": {
+        "title": "Barva zvýraznění",
+        "description": "Zvolte vlastní barvu zvýraznění pro tlačítka, lištu nahrávání a zvýraznění. „Obnovit“ vrátí výchozí oranžovou.",
+        "reset": "Obnovit"
+      },
+      "rgbMode": {
+        "label": "Emil Mode",
+        "description": "Nechá barvu zvýraznění plynule procházet duhou. Dokud je zapnutý, přepíše zvolenou barvu.",
+        "boosted": "Dvojnásobná rychlost aktivní"
       }
     },
     "about": {
@@ -653,7 +697,10 @@
     "dropFile": "Pustit soubor",
     "dropHint": "Pusťte sem zvukový soubor pro přepis",
     "transcribing": "Přepisuji...",
-    "processing": "Zpracovávám..."
+    "processing": "Zpracovávám...",
+    "voiceTranscribing": "Přepisuji požadavek...",
+    "voiceProcessing": "Přemýšlím a píšu...",
+    "voiceDone": "Odpověď AI vložena"
   },
   "whatsNew": {
     "title": "Novinky v crwbar voice v{{version}}"

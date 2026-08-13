@@ -11,7 +11,7 @@
     "general": "General",
     "models": "Models",
     "advanced": "Advanced",
-    "postProcessing": "Post Process",
+    "postProcessing": "AI & Voice Actions",
     "history": "History",
     "debug": "Debug",
     "about": "About"
@@ -189,6 +189,10 @@
           "transcribe_with_post_process": {
             "name": "Post-Processing Hotkey",
             "description": "Optional: A dedicated hotkey that always applies AI post-processing to your transcription."
+          },
+          "voice_action": {
+            "name": "Voice Action Shortcut",
+            "description": "Speak an instruction and generate text using optional context and your selected AI backend."
           }
         },
         "errors": {
@@ -381,8 +385,35 @@
       }
     },
     "postProcessing": {
+      "enable": {
+        "title": "AI Features"
+      },
       "hotkey": {
-        "title": "Hotkey"
+        "title": "Post-Processing Hotkey"
+      },
+      "voiceAction": {
+        "title": "Voice Actions",
+        "privacy": "Your spoken instruction and any enabled context are sent to the selected AI service. Clipboard context is off by default.",
+        "backend": {
+          "title": "AI Backend",
+          "description": "Use the configured API provider or an installed, signed-in Codex or Claude CLI.",
+          "options": {
+            "api": "Configured API",
+            "codexCli": "Codex CLI",
+            "claudeCli": "Claude Code CLI"
+          }
+        },
+        "clipboardContext": {
+          "label": "Include Clipboard Context",
+          "description": "Send the current text clipboard as source material for commands such as ‘Write an email from this’."
+        },
+        "context": {
+          "title": "Persistent Context",
+          "description": "Optional background that is included with every Voice Action, such as your role, company, preferred writing style, or wording to avoid. It is never used for normal transcriptions.",
+          "placeholder": "Example: I work at … Keep emails concise, friendly, and direct.",
+          "storage": "Saved as you type, stored locally on this device, and only sent with Voice Actions — never with normal transcriptions.",
+          "clear": "Clear"
+        }
       },
       "api": {
         "title": "API (OpenAI Compatible)",
@@ -521,12 +552,12 @@
         "description": "Microphone to use when laptop lid is closed"
       },
       "postProcessingToggle": {
-        "label": "Post Processing",
-        "description": "Enable AI-powered text refinement after transcription"
+        "label": "AI Features",
+        "description": "Enable AI post-processing and Voice Actions"
       },
       "muteWhileRecording": {
-        "label": "Mute While Recording",
-        "description": "Mute system audio during recording"
+        "label": "Lower Audio While Recording",
+        "description": "Fade system audio down while recording, then restore it"
       },
       "appendTrailingSpace": {
         "label": "Append Trailing Space",
@@ -553,6 +584,19 @@
       "recordingBuffer": {
         "title": "Extra Recording Buffer",
         "description": "Extra time (in milliseconds) to keep recording after you release the key, to capture trailing audio. 0 = no extra buffer."
+      }
+    },
+    "appearance": {
+      "title": "Appearance",
+      "accent": {
+        "title": "Accent color",
+        "description": "Pick a custom accent color for buttons, the recording bar, and highlights. Reset returns to the default orange.",
+        "reset": "Reset"
+      },
+      "rgbMode": {
+        "label": "Emil Mode",
+        "description": "Cycle the accent color through the rainbow. Overrides the accent color while it is on.",
+        "boosted": "Double speed active"
       }
     },
     "about": {
@@ -652,6 +696,9 @@
   "overlay": {
     "transcribing": "Transcribing...",
     "processing": "Processing...",
+    "voiceTranscribing": "Transcribing request...",
+    "voiceProcessing": "Thinking & writing...",
+    "voiceDone": "AI response pasted",
     "done": "Done",
     "copied": "Copied",
     "copyAgain": "Copy again",
