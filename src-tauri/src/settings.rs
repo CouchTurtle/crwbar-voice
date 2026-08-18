@@ -185,9 +185,9 @@ impl DuckingSpeed {
     pub fn fade_millis(self) -> (u64, u64) {
         match self {
             DuckingSpeed::Instant => (0, 0),
-            DuckingSpeed::Fast => (70, 180),
-            DuckingSpeed::Normal => (140, 400),
-            DuckingSpeed::Smooth => (300, 800),
+            DuckingSpeed::Fast => (60, 150),
+            DuckingSpeed::Normal => (180, 500),
+            DuckingSpeed::Smooth => (450, 1000),
         }
     }
 }

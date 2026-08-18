@@ -965,12 +965,24 @@ impl ShortcutAction for TranscribeAction {
         if is_always_on {
             // Always-on mode: Play audio feedback immediately, then apply mute after sound finishes
             debug!("Always-on mode: Playing audio feedback immediately");
+            #[cfg(not(target_os = "macos"))]
             let rm_clone = Arc::clone(&rm);
             let app_clone = app.clone();
             // The blocking helper exits immediately if audio feedback is disabled,
             // so we can always reuse this thread to ensure mute happens right after playback.
+            // On macOS suppression is a volume fade, so it starts the instant the
+            // shortcut fires and merely plays the start sound a little quieter —
+            // waiting for playback first delayed ducking by the sound's length.
+            // Other platforms hard-mute, which would swallow the sound entirely,
+            // so there suppression still runs after it.
+            #[cfg(target_os = "macos")]
+            {
+                let rm_duck = Arc::clone(&rm);
+                std::thread::spawn(move || rm_duck.apply_audio_suppression());
+            }
             std::thread::spawn(move || {
                 play_feedback_sound_blocking(&app_clone, SoundType::Start);
+                #[cfg(not(target_os = "macos"))]
                 rm_clone.apply_audio_suppression();
             });
 
@@ -988,13 +1000,23 @@ impl ShortcutAction for TranscribeAction {
                     debug!("Recording started in {:?}", recording_start_time.elapsed());
                     // Small delay to ensure microphone stream is active
                     let app_clone = app.clone();
+                    #[cfg(not(target_os = "macos"))]
                     let rm_clone = Arc::clone(&rm);
+                    // Duck immediately on macOS (a fade, see the always-on path);
+                    // the 100ms delay below exists for the microphone stream and
+                    // must not hold up ducking.
+                    #[cfg(target_os = "macos")]
+                    {
+                        let rm_duck = Arc::clone(&rm);
+                        std::thread::spawn(move || rm_duck.apply_audio_suppression());
+                    }
                     std::thread::spawn(move || {
                         std::thread::sleep(std::time::Duration::from_millis(100));
                         debug!("Handling delayed audio feedback/mute sequence");
                         // Helper handles disabled audio feedback by returning early, so we reuse it
                         // to keep mute sequencing consistent in every mode.
                         play_feedback_sound_blocking(&app_clone, SoundType::Start);
+                        #[cfg(not(target_os = "macos"))]
                         rm_clone.apply_audio_suppression();
                     });
                 }
