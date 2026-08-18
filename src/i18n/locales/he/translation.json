@@ -252,6 +252,16 @@
       "volume": {
         "title": "עוצמת קול",
         "description": "כוונן את עוצמת צלילי המשוב"
+      },
+      "duckingSpeed": {
+        "title": "מהירות העמעום",
+        "description": "באיזו מהירות שאר השמע נחלש עם תחילת ההקלטה וחוזר בסיומה.",
+        "options": {
+          "instant": "מיידי",
+          "fast": "מהיר",
+          "normal": "רגיל",
+          "smooth": "רך"
+        }
       }
     },
     "advanced": {

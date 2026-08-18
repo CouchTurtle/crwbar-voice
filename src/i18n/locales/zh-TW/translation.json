@@ -252,6 +252,16 @@
       "volume": {
         "title": "音量",
         "description": "調整聲音回饋的音量"
+      },
+      "duckingSpeed": {
+        "title": "閃避速度",
+        "description": "開始錄音時其他音訊降低的速度，以及結束後恢復的速度。",
+        "options": {
+          "instant": "立即",
+          "fast": "快",
+          "normal": "正常",
+          "smooth": "平滑"
+        }
       }
     },
     "advanced": {

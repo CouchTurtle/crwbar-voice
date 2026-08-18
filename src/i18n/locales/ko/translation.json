@@ -234,6 +234,16 @@
       "volume": {
         "title": "볼륨",
         "description": "오디오 피드백 사운드의 볼륨 조절"
+      },
+      "duckingSpeed": {
+        "title": "더킹 속도",
+        "description": "녹음을 시작할 때 다른 오디오가 얼마나 빨리 줄어들고 끝난 뒤 돌아오는지.",
+        "options": {
+          "instant": "즉시",
+          "fast": "빠르게",
+          "normal": "보통",
+          "smooth": "부드럽게"
+        }
       }
     },
     "models": {

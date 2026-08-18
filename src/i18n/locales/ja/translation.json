@@ -252,6 +252,16 @@
       "volume": {
         "title": "音量",
         "description": "オーディオフィードバックの音量を調整"
+      },
+      "duckingSpeed": {
+        "title": "ダッキング速度",
+        "description": "録音開始時に他の音声をどれくらい速く下げ、終了後に戻すか。",
+        "options": {
+          "instant": "即時",
+          "fast": "速い",
+          "normal": "標準",
+          "smooth": "なめらか"
+        }
       }
     },
     "advanced": {

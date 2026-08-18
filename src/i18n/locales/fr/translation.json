@@ -252,6 +252,16 @@
       "volume": {
         "title": "Volume",
         "description": "Ajuster le volume du signal sonore"
+      },
+      "duckingSpeed": {
+        "title": "Vitesse d'atténuation",
+        "description": "À quelle vitesse les autres sons sont atténués au début de l'enregistrement puis rétablis.",
+        "options": {
+          "instant": "Immédiate",
+          "fast": "Rapide",
+          "normal": "Normale",
+          "smooth": "Douce"
+        }
       }
     },
     "advanced": {

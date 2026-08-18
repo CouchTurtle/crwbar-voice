@@ -252,6 +252,16 @@
       "volume": {
         "title": "Lautstärke",
         "description": "Lautstärke der Audio-Feedback-Töne anpassen"
+      },
+      "duckingSpeed": {
+        "title": "Ducking-Geschwindigkeit",
+        "description": "Wie schnell andere Audioquellen beim Aufnahmestart aus- und danach wieder eingeblendet werden.",
+        "options": {
+          "instant": "Sofort",
+          "fast": "Schnell",
+          "normal": "Normal",
+          "smooth": "Sanft"
+        }
       }
     },
     "advanced": {

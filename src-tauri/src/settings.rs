@@ -164,6 +164,34 @@ pub enum PasteMethod {
     ExternalScript,
 }
 
+/// How quickly other audio is faded down when recording starts, and back up
+/// when it ends. Timing only — the ducked volume level itself is fixed.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Type, Default)]
+#[serde(rename_all = "snake_case")]
+pub enum DuckingSpeed {
+    /// Jump straight to the target volume with no fade.
+    Instant,
+    Fast,
+    #[default]
+    Normal,
+    Smooth,
+}
+
+impl DuckingSpeed {
+    /// Fade durations in milliseconds as `(duck down, restore up)`. Restoring is
+    /// deliberately slower than ducking: dropping other audio quickly keeps it
+    /// out of the recording, while easing it back is less jarring once you stop.
+    /// `Instant` yields `(0, 0)`, which the fade helper applies in one step.
+    pub fn fade_millis(self) -> (u64, u64) {
+        match self {
+            DuckingSpeed::Instant => (0, 0),
+            DuckingSpeed::Fast => (70, 180),
+            DuckingSpeed::Normal => (140, 400),
+            DuckingSpeed::Smooth => (300, 800),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Type, Default)]
 #[serde(rename_all = "snake_case")]
 pub enum ClipboardHandling {
@@ -477,6 +505,9 @@ pub struct AppSettings {
     // Keep this persisted key for compatibility with existing installations.
     // On macOS it now enables faded audio ducking instead of hard muting.
     pub mute_while_recording: bool,
+    /// Fade speed used by audio ducking (see `mute_while_recording`).
+    #[serde(default)]
+    pub audio_ducking_speed: DuckingSpeed,
     #[serde(default)]
     pub append_trailing_space: bool,
     #[serde(default = "default_app_language")]
@@ -969,6 +1000,7 @@ pub fn get_default_settings() -> AppSettings {
         voice_action_include_clipboard: default_voice_action_include_clipboard(),
         voice_action_context: RedactedString::default(),
         mute_while_recording: false,
+        audio_ducking_speed: DuckingSpeed::default(),
         append_trailing_space: false,
         app_language: default_app_language(),
         theme: default_theme(),

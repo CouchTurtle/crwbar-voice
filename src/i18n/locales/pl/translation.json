@@ -252,6 +252,16 @@
       "volume": {
         "title": "Głośność",
         "description": "Dostosuj głośność dźwięków informacyjnych"
+      },
+      "duckingSpeed": {
+        "title": "Szybkość wyciszania",
+        "description": "Jak szybko pozostały dźwięk jest ściszany na początku nagrywania i przywracany po jego zakończeniu.",
+        "options": {
+          "instant": "Natychmiast",
+          "fast": "Szybko",
+          "normal": "Normalnie",
+          "smooth": "Łagodnie"
+        }
       }
     },
     "advanced": {

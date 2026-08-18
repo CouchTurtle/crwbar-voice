@@ -22,7 +22,8 @@ use tauri_plugin_autostart::ManagerExt;
 #[cfg(all(target_os = "macos", target_arch = "aarch64"))]
 use crate::settings::APPLE_INTELLIGENCE_DEFAULT_MODEL_ID;
 use crate::settings::{
-    self, get_settings, AutoSubmitKey, ClipboardHandling, KeyboardImplementation, LLMPrompt,
+    self, get_settings, AutoSubmitKey, ClipboardHandling, DuckingSpeed, KeyboardImplementation,
+    LLMPrompt,
     OverlayPosition, OverlayStyle, PasteMethod, ShortcutBinding, SoundTheme, Theme, TypingTool,
     VoiceActionBackend, APPLE_INTELLIGENCE_PROVIDER_ID,
 };
@@ -1200,6 +1201,26 @@ pub fn set_post_process_selected_prompt(app: AppHandle, id: String) -> Result<()
     }
 
     settings.post_process_selected_prompt_id = Some(id);
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+/// Set how quickly audio ducking fades other playback down and back up.
+#[tauri::command]
+#[specta::specta]
+pub fn change_audio_ducking_speed_setting(app: AppHandle, speed: String) -> Result<(), String> {
+    let parsed = match speed.as_str() {
+        "instant" => DuckingSpeed::Instant,
+        "fast" => DuckingSpeed::Fast,
+        "normal" => DuckingSpeed::Normal,
+        "smooth" => DuckingSpeed::Smooth,
+        other => {
+            warn!("Invalid ducking speed '{}', defaulting to normal", other);
+            DuckingSpeed::Normal
+        }
+    };
+    let mut settings = settings::get_settings(&app);
+    settings.audio_ducking_speed = parsed;
     settings::write_settings(&app, settings);
     Ok(())
 }

@@ -252,6 +252,16 @@
       "volume": {
         "title": "Volume",
         "description": "Pas het volume van de geluidsfeedback aan"
+      },
+      "duckingSpeed": {
+        "title": "Dempsnelheid",
+        "description": "Hoe snel andere audio wordt weggedraaid bij het starten van een opname en weer terugkomt.",
+        "options": {
+          "instant": "Direct",
+          "fast": "Snel",
+          "normal": "Normaal",
+          "smooth": "Zacht"
+        }
       }
     },
     "advanced": {

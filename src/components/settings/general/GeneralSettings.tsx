@@ -13,6 +13,7 @@ import { AudioFeedback } from "../AudioFeedback";
 import { useSettings } from "../../../hooks/useSettings";
 import { VolumeSlider } from "../VolumeSlider";
 import { AudioDucking } from "../AudioDucking";
+import { AudioDuckingSpeed } from "../AudioDuckingSpeed";
 import { SoundPicker } from "../SoundPicker";
 import { AccentColorPicker } from "../AccentColorPicker";
 import { RgbModeToggle } from "../RgbModeToggle";
@@ -22,6 +23,7 @@ export const GeneralSettings: React.FC = () => {
   const { t } = useTranslation();
   const { audioFeedbackEnabled, getSetting } = useSettings();
   const pushToTalk = getSetting("push_to_talk");
+  const duckingEnabled = getSetting("mute_while_recording") ?? false;
   const isLinux = type() === "linux";
   return (
     <div className="max-w-3xl w-full mx-auto space-y-6">
@@ -55,6 +57,11 @@ export const GeneralSettings: React.FC = () => {
       <SettingsGroup title={t("settings.sound.title")}>
         <MicrophoneSelector descriptionMode="tooltip" grouped={true} />
         <AudioDucking descriptionMode="tooltip" grouped={true} />
+        <AudioDuckingSpeed
+          descriptionMode="tooltip"
+          grouped={true}
+          disabled={!duckingEnabled}
+        />
         <AudioFeedback descriptionMode="tooltip" grouped={true} />
         <SoundPicker
           label={t("settings.debug.soundTheme.label")}

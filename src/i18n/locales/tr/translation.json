@@ -252,6 +252,16 @@
       "volume": {
         "title": "Ses Seviyesi",
         "description": "Sesli geri bildirimlerin ses seviyesini ayarlayın"
+      },
+      "duckingSpeed": {
+        "title": "Kısma hızı",
+        "description": "Kayıt başlarken diğer sesin ne kadar hızlı kısılacağı ve bitince geri yükseleceği.",
+        "options": {
+          "instant": "Anında",
+          "fast": "Hızlı",
+          "normal": "Normal",
+          "smooth": "Yumuşak"
+        }
       }
     },
     "advanced": {

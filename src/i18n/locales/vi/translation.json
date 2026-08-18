@@ -252,6 +252,16 @@
       "volume": {
         "title": "Âm lượng",
         "description": "Điều chỉnh âm lượng của âm thanh phản hồi"
+      },
+      "duckingSpeed": {
+        "title": "Tốc độ giảm âm",
+        "description": "Âm thanh khác được giảm nhanh thế nào khi bắt đầu ghi và trở lại sau khi kết thúc.",
+        "options": {
+          "instant": "Tức thì",
+          "fast": "Nhanh",
+          "normal": "Bình thường",
+          "smooth": "Mượt"
+        }
       }
     },
     "advanced": {

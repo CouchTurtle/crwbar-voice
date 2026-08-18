@@ -252,6 +252,16 @@
       "volume": {
         "title": "Volume",
         "description": "Regola il volume del feedback audio"
+      },
+      "duckingSpeed": {
+        "title": "Velocità di attenuazione",
+        "description": "Quanto rapidamente gli altri audio si abbassano all'avvio della registrazione e risalgono alla fine.",
+        "options": {
+          "instant": "Immediata",
+          "fast": "Veloce",
+          "normal": "Normale",
+          "smooth": "Morbida"
+        }
       }
     },
     "advanced": {

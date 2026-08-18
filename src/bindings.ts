@@ -360,6 +360,17 @@ async changeMuteWhileRecordingSetting(enabled: boolean) : Promise<Result<null, s
     else return { status: "error", error: e  as any };
 }
 },
+/**
+ * Set how quickly audio ducking fades other playback down and back up.
+ */
+async changeAudioDuckingSpeedSetting(speed: string) : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("change_audio_ducking_speed_setting", { speed }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async changeVoiceActionBackendSetting(backend: string) : Promise<Result<null, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("change_voice_action_backend_setting", { backend }) };
@@ -1003,7 +1014,11 @@ whats_new_last_seen_version?: string; selected_model?: string; onboarding_comple
  * Actions) and that is sent with every Voice Action. Defaults to an empty
  * string; when empty, Voice Actions behave exactly as before.
  */
-voice_action_context?: RedactedString; mute_while_recording?: boolean; append_trailing_space?: boolean; app_language?: string; theme?: Theme; 
+voice_action_context?: RedactedString; mute_while_recording?: boolean; 
+/**
+ * Fade speed used by audio ducking (see `mute_while_recording`).
+ */
+audio_ducking_speed?: DuckingSpeed; append_trailing_space?: boolean; app_language?: string; theme?: Theme; 
 /**
  * User-picked accent color as a `#rrggbb` hex string. `None` keeps the
  * built-in crw.bar orange. Overrides `--color-logo-primary` /
@@ -1032,6 +1047,15 @@ export type AvailableAccelerators = { transcribe: string[]; ort: string[]; gpu_d
 export type BindingResponse = { success: boolean; binding: ShortcutBinding | null; error: string | null }
 export type ClipboardHandling = "dont_modify" | "copy_to_clipboard"
 export type CustomSounds = { start: boolean; stop: boolean }
+/**
+ * How quickly other audio is faded down when recording starts, and back up
+ * when it ends. Timing only — the ducked volume level itself is fixed.
+ */
+export type DuckingSpeed = 
+/**
+ * Jump straight to the target volume with no fade.
+ */
+"instant" | "fast" | "normal" | "smooth"
 export type EngineType = 
 /**
  * Any GGML/GGUF model loaded through transcribe-cpp (Whisper, Parakeet,

@@ -252,6 +252,16 @@
       "volume": {
         "title": "Volym",
         "description": "Justera volymen för ljudåterkopplingsljud"
+      },
+      "duckingSpeed": {
+        "title": "Dämpningshastighet",
+        "description": "Hur snabbt annat ljud tonas ner när inspelningen börjar och tillbaka när den slutar.",
+        "options": {
+          "instant": "Direkt",
+          "fast": "Snabb",
+          "normal": "Normal",
+          "smooth": "Mjuk"
+        }
       }
     },
     "advanced": {

@@ -252,6 +252,16 @@
       "volume": {
         "title": "Volume",
         "description": "Adjust the volume of audio feedback sounds"
+      },
+      "duckingSpeed": {
+        "title": "Ducking speed",
+        "description": "How quickly other audio fades down when recording starts and back up when it ends.",
+        "options": {
+          "instant": "Instant",
+          "fast": "Fast",
+          "normal": "Normal",
+          "smooth": "Smooth"
+        }
       }
     },
     "advanced": {

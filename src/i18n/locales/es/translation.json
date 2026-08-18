@@ -252,6 +252,16 @@
       "volume": {
         "title": "Volumen",
         "description": "Ajusta el volumen de los sonidos de retroalimentación de audio"
+      },
+      "duckingSpeed": {
+        "title": "Velocidad de atenuación",
+        "description": "Con qué rapidez se atenúa el resto del audio al empezar a grabar y vuelve al terminar.",
+        "options": {
+          "instant": "Inmediata",
+          "fast": "Rápida",
+          "normal": "Normal",
+          "smooth": "Suave"
+        }
       }
     },
     "advanced": {

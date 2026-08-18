@@ -252,6 +252,16 @@
       "volume": {
         "title": "Hlasitost",
         "description": "Upravte hlasitost zvukové odezvy"
+      },
+      "duckingSpeed": {
+        "title": "Rychlost ztlumení",
+        "description": "Jak rychle se ostatní zvuk ztlumí při zahájení nahrávání a vrátí po jeho skončení.",
+        "options": {
+          "instant": "Okamžitě",
+          "fast": "Rychle",
+          "normal": "Normálně",
+          "smooth": "Plynule"
+        }
       }
     },
     "advanced": {

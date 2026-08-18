@@ -15,22 +15,27 @@ use std::path::Path;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
-use tauri::Manager;
+use tauri::{AppHandle, Manager};
 
 const STREAM_IDLE_TIMEOUT: Duration = Duration::from_secs(30);
 const VAD_THRESHOLD: f32 = 0.3;
 const AUDIO_DUCKING_RATIO: f32 = 0.2;
 
-// Ducking fade: quick enough that music dips promptly when recording starts and
-// returns without a long tail, but smooth enough (12 steps) that it reads as a
-// duck rather than an abrupt pause. Tuned between the original slow fade
-// (260/720ms) and an over-aggressive one (70/180ms).
-#[cfg(target_os = "macos")]
-const DUCK_FADE_DURATION: Duration = Duration::from_millis(140);
-#[cfg(target_os = "macos")]
-const RESTORE_FADE_DURATION: Duration = Duration::from_millis(400);
+// Ducking fade timings come from the `audio_ducking_speed` setting; the step
+// count stays fixed so every speed keeps the same smoothness and only the
+// duration changes.
 #[cfg(target_os = "macos")]
 const AUDIO_FADE_STEPS: u32 = 12;
+
+/// `(duck down, restore up)` fade durations for the configured speed.
+#[cfg(target_os = "macos")]
+fn ducking_fade_durations(app: &AppHandle) -> (Duration, Duration) {
+    let (down_ms, up_ms) = get_settings(app).audio_ducking_speed.fade_millis();
+    (
+        Duration::from_millis(down_ms),
+        Duration::from_millis(up_ms),
+    )
+}
 
 #[cfg(not(target_os = "macos"))]
 fn set_mute(mute: bool) {
@@ -226,6 +231,13 @@ fn fade_system_volume(
     command_lock: &Mutex<()>,
 ) -> bool {
     if from == to {
+        let _command = command_lock.lock().unwrap();
+        return generation.load(Ordering::Acquire) == expected_generation && set_system_volume(to);
+    }
+
+    // `Instant` passes a zero duration: apply it in a single step instead of
+    // spawning AUDIO_FADE_STEPS `osascript` processes back to back.
+    if duration.is_zero() {
         let _command = command_lock.lock().unwrap();
         return generation.load(Ordering::Acquire) == expected_generation && set_system_volume(to);
     }
@@ -527,6 +539,7 @@ impl AudioRecordingManager {
             };
 
             let target = ducked_volume(original.volume);
+            let (duck_fade, _) = ducking_fade_durations(&self.app_handle);
             let generation_counter = Arc::clone(&self.audio_ducking_generation);
             let command_lock = Arc::clone(&self.system_audio_command_lock);
 
@@ -534,7 +547,7 @@ impl AudioRecordingManager {
                 if fade_system_volume(
                     current.volume,
                     target,
-                    DUCK_FADE_DURATION,
+                    duck_fade,
                     &generation_counter,
                     generation,
                     &command_lock,
@@ -575,6 +588,7 @@ impl AudioRecordingManager {
                 (original, generation)
             };
 
+            let (_, restore_fade) = ducking_fade_durations(&self.app_handle);
             let from = read_system_audio()
                 .map(|current| current.volume)
                 .unwrap_or_else(|| ducked_volume(original.volume));
@@ -586,7 +600,7 @@ impl AudioRecordingManager {
                 if !fade_system_volume(
                     from,
                     original.volume,
-                    RESTORE_FADE_DURATION,
+                    restore_fade,
                     &generation_counter,
                     generation,
                     &command_lock,

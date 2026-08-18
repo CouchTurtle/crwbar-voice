@@ -141,6 +141,8 @@ const settingUpdaters: {
     commands.setPostProcessSelectedPrompt(value as string),
   mute_while_recording: (value) =>
     commands.changeMuteWhileRecordingSetting(value as boolean),
+  audio_ducking_speed: (value) =>
+    commands.changeAudioDuckingSpeedSetting(value as string),
   voice_action_backend: (value) =>
     commands.changeVoiceActionBackendSetting(value as string),
   voice_action_include_clipboard: (value) =>
