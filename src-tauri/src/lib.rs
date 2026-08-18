@@ -144,6 +144,21 @@ fn should_force_show_permissions_window(app: &AppHandle) -> bool {
         }
     }
 
+    #[cfg(target_os = "macos")]
+    {
+        // Global shortcuts need accessibility access. Without it the app would
+        // sit in the menu bar with a dead hotkey and no way to find out why, so
+        // surface the window — and with it the permission screen — instead.
+        if !tauri::async_runtime::block_on(
+            tauri_plugin_macos_permissions::check_accessibility_permission(),
+        ) {
+            log::info!(
+                "Accessibility permission is missing; showing the main window so it can be granted"
+            );
+            return true;
+        }
+    }
+
     false
 }
 
@@ -214,7 +229,20 @@ fn initialize_core_logic(app_handle: &AppHandle) {
     // the permission prompts live.
     {
         let settings = settings::get_settings(app_handle);
-        if settings.start_hidden && settings.onboarding_completed {
+        // `initialize_shortcuts` records that it ran even when registration
+        // failed, so attempting it without accessibility access would leave the
+        // hotkey dead *and* make the frontend's later retry a no-op. Skip it in
+        // that case; the window is forced open (see
+        // `should_force_show_permissions_window`) so the frontend can take over
+        // once the permission is granted.
+        #[cfg(target_os = "macos")]
+        let permitted = tauri::async_runtime::block_on(
+            tauri_plugin_macos_permissions::check_accessibility_permission(),
+        );
+        #[cfg(not(target_os = "macos"))]
+        let permitted = true;
+
+        if settings.start_hidden && settings.onboarding_completed && permitted {
             if let Err(e) = commands::initialize_enigo(app_handle.clone()) {
                 log::warn!("Hidden start: could not initialize input simulation: {e}");
             }
