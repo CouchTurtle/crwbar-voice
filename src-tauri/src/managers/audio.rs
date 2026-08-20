@@ -31,10 +31,7 @@ const AUDIO_FADE_STEPS: u32 = 12;
 #[cfg(target_os = "macos")]
 fn ducking_fade_durations(app: &AppHandle) -> (Duration, Duration) {
     let (down_ms, up_ms) = get_settings(app).audio_ducking_speed.fade_millis();
-    (
-        Duration::from_millis(down_ms),
-        Duration::from_millis(up_ms),
-    )
+    (Duration::from_millis(down_ms), Duration::from_millis(up_ms))
 }
 
 #[cfg(not(target_os = "macos"))]

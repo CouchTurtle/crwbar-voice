@@ -472,14 +472,13 @@ const RecordingOverlay: React.FC = () => {
   // text mark + label (transcribing / processing). Never both. The pill animates
   // its width between them; the cancel button is in both rows so it stays put.
   const working = state === "transcribing" || state === "processing";
-  const workLabel =
-    isVoiceAction
-      ? state === "processing"
-        ? t("overlay.voiceProcessing")
-        : t("overlay.voiceTranscribing")
-      : state === "processing"
-        ? t("overlay.processing")
-        : t("overlay.transcribing");
+  const workLabel = isVoiceAction
+    ? state === "processing"
+      ? t("overlay.voiceProcessing")
+      : t("overlay.voiceTranscribing")
+    : state === "processing"
+      ? t("overlay.processing")
+      : t("overlay.transcribing");
 
   return (
     <div

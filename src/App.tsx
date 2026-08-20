@@ -142,7 +142,8 @@ function App() {
         if (!file) return;
         // Read the setting per drop so toggling it takes effect immediately.
         void commands.getAppSettings().then((settings) => {
-          if (settings.status !== "ok" || !settings.data.drag_drop_enabled) return;
+          if (settings.status !== "ok" || !settings.data.drag_drop_enabled)
+            return;
           void commands.transcribeFile(file).then((result) => {
             if (result.status === "error") toast.error(String(result.error));
           });

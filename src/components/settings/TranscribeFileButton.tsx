@@ -33,7 +33,10 @@ export const TranscribeFileButton: React.FC = React.memo(() => {
         multiple: false,
         directory: false,
         filters: [
-          { name: t("settings.general.importFile.filter"), extensions: AUDIO_EXTENSIONS },
+          {
+            name: t("settings.general.importFile.filter"),
+            extensions: AUDIO_EXTENSIONS,
+          },
         ],
       });
       if (typeof selected !== "string") return;

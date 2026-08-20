@@ -1990,7 +1990,11 @@ mod tests {
         let audio = vec![0.1f32; MAX_TRANSCRIBE_CHUNK_SAMPLES * 3 + 5_000];
         let chunks = super::split_for_transcription(&audio);
 
-        assert!(chunks.len() >= 4, "expected several chunks, got {}", chunks.len());
+        assert!(
+            chunks.len() >= 4,
+            "expected several chunks, got {}",
+            chunks.len()
+        );
         for chunk in &chunks {
             assert!(
                 chunk.len() <= MAX_TRANSCRIBE_CHUNK_SAMPLES,

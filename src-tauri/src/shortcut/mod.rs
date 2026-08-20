@@ -23,9 +23,8 @@ use tauri_plugin_autostart::ManagerExt;
 use crate::settings::APPLE_INTELLIGENCE_DEFAULT_MODEL_ID;
 use crate::settings::{
     self, get_settings, AutoSubmitKey, ClipboardHandling, DuckingSpeed, KeyboardImplementation,
-    LLMPrompt,
-    OverlayPosition, OverlayStyle, PasteMethod, ShortcutBinding, SoundTheme, Theme, TypingTool,
-    VoiceActionBackend, APPLE_INTELLIGENCE_PROVIDER_ID,
+    LLMPrompt, OverlayPosition, OverlayStyle, PasteMethod, ShortcutBinding, SoundTheme, Theme,
+    TypingTool, VoiceActionBackend, APPLE_INTELLIGENCE_PROVIDER_ID,
 };
 use crate::tray;
 
@@ -542,15 +541,10 @@ pub fn change_theme_setting(app: AppHandle, theme: String) -> Result<(), String>
 /// override is applied on the frontend from this persisted value.
 #[tauri::command]
 #[specta::specta]
-pub fn change_accent_color_setting(
-    app: AppHandle,
-    color: Option<String>,
-) -> Result<(), String> {
+pub fn change_accent_color_setting(app: AppHandle, color: Option<String>) -> Result<(), String> {
     let valid = color.filter(|c| {
         let bytes = c.as_bytes();
-        bytes.len() == 7
-            && bytes[0] == b'#'
-            && bytes[1..].iter().all(|b| b.is_ascii_hexdigit())
+        bytes.len() == 7 && bytes[0] == b'#' && bytes[1..].iter().all(|b| b.is_ascii_hexdigit())
     });
     let mut settings = settings::get_settings(&app);
     settings.accent_color = valid;
