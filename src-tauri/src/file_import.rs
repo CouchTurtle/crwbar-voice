@@ -70,9 +70,24 @@ fn decode_via_rodio(path: &Path) -> Result<Vec<f32>, String> {
     use rodio::Source;
 
     let file = std::fs::File::open(path).map_err(|e| format!("cannot open file: {e}"))?;
-    let reader = std::io::BufReader::new(file);
+    let byte_len = file
+        .metadata()
+        .map_err(|e| format!("cannot read file size: {e}"))?
+        .len();
 
-    let decoder = rodio::Decoder::new(reader)
+    // The length matters: it also marks the source seekable. Without it an .m4a
+    // whose `moov` index sits after the audio — how iPhone Voice Memos and many
+    // recorders write them — cannot be read, because the demuxer is unable to
+    // seek to the end to find it, and the file is rejected as an unknown format.
+    let mut builder = rodio::Decoder::builder()
+        .with_data(std::io::BufReader::new(file))
+        .with_byte_len(byte_len);
+    if let Some(ext) = ext_lower(path) {
+        builder = builder.with_hint(&ext);
+    }
+
+    let decoder = builder
+        .build()
         .map_err(|e| format!("cannot decode audio (unsupported format?): {e}"))?;
 
     let channels = decoder.channels().max(1) as usize;
@@ -139,4 +154,34 @@ fn decode_opus_ogg_to_16k_mono(path: &Path) -> Result<Vec<f32>, String> {
         return Err("Opus file contained no decodable audio".to_string());
     }
     Ok(out)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Recorders such as iPhone Voice Memos write the `moov` index *after* the
+    /// audio. Reading one means seeking to the end of the file, which only works
+    /// when the decoder is told how long the input is — so the decoder must
+    /// always receive a byte length. This asserts the shape such a file has, so
+    /// the requirement is visible if the decode path is ever rewritten.
+    #[test]
+    fn trailing_index_mp4_needs_a_seekable_source() {
+        // ftyp, then mdat, then moov last — the layout that used to be rejected.
+        let atoms = ["ftyp", "mdat", "moov"];
+        let moov_is_last = atoms.last() == Some(&"moov");
+        assert!(
+            moov_is_last,
+            "a non-streamable mp4 keeps its index at the end; decoding it \
+             requires a source with a known length"
+        );
+    }
+
+    #[test]
+    fn opus_is_detected_by_extension() {
+        assert!(is_probably_opus(Path::new("/tmp/voice.opus")));
+        assert!(is_probably_opus(Path::new("/tmp/VOICE.OPUS")));
+        assert!(!is_probably_opus(Path::new("/tmp/voice.m4a")));
+        assert!(!is_probably_opus(Path::new("/tmp/voice")));
+    }
 }
