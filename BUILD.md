@@ -23,9 +23,24 @@ bun run tauri dev
 Run the frontend checks with:
 
 ```bash
-bun run lint
-bun run check:translations
-bun run build
+bun run verify
+```
+
+That is typecheck, eslint, prettier, translation parity and a vite build in one
+command; `bash scripts/verify.sh --quick` skips the build. It covers the
+frontend only. The Rust side runs from `src-tauri/`:
+
+```bash
+cargo test
+cargo check
+cargo fmt
+```
+
+A single audio file can be transcribed without starting the UI, which is the
+quickest way to check the import path:
+
+```bash
+cd src-tauri && cargo run -- --transcribe-file /path/to/recording.m4a
 ```
 
 ## macOS application bundle
@@ -48,6 +63,25 @@ to the bundle identifier `bar.crw.voice`.
 
 The optional Apple Intelligence bridge needs a full Xcode installation.
 Without it, the build uses stubs; local speech recognition still works.
+
+Because the bundle is ad-hoc signed, its signature changes with every rebuild
+and macOS drops the Accessibility grant along with it. After installing a fresh
+build, re-add the app under _System Settings → Privacy & Security →
+Accessibility_, otherwise the global shortcut silently does nothing.
+
+## Model catalog
+
+`src-tauri/src/catalog/catalog.json` is compiled into the binary and there is no
+runtime model discovery. Adding models means regenerating it and rebuilding:
+
+```bash
+HF_TOKEN=$(hf auth token) uv run scripts/gen_catalog.py src-tauri/src/catalog/catalog.json
+```
+
+The script declares its own dependencies (PEP 723), so `uv run` is the intended
+launcher. Pass the output path — without it the catalog lands next to the script
+instead of in the crate. There is no CI job for this; `.github/workflows/` is
+empty and the regeneration is manual.
 
 ## Other platforms
 

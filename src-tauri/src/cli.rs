@@ -28,10 +28,11 @@ pub struct CliArgs {
     #[arg(long)]
     pub debug: bool,
 
-    /// Transcribe this WAV (16 kHz mono) headlessly and exit. Runs the same
-    /// batch transcription path as the app — no mic, no VAD, no download
-    /// (the model must already be installed).
-    #[arg(short = 'f', long, value_name = "WAV")]
+    /// Transcribe this audio file headlessly and exit. Accepts every format the
+    /// app imports (wav / mp3 / m4a / flac / ogg / opus) and runs the same batch
+    /// transcription path — no mic, no VAD, no download (the model must already
+    /// be installed).
+    #[arg(short = 'f', long, value_name = "FILE")]
     pub transcribe_file: Option<PathBuf>,
 
     /// Model id to load for --transcribe-file (default: the selected model).

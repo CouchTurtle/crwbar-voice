@@ -6,7 +6,8 @@ dropped into the app and transcribed locally.
 
 This is mostly a personal fork of Handy. I added some features that i wanted:
 
-- audio files and voice notes can be dropped onto the recording bar;
+- audio files and voice notes can be dropped onto the recording bar or the
+  main window, or picked from _General_;
 - a finished transcription can be copied to the clipboard automatically;
 - microphone and file transcriptions are easier to distinguish in the history;
 - the app has its own bundle identity, icon, tray states, and recording overlay.
@@ -23,7 +24,7 @@ and tray assets, and is not affiliated with or endorsed by the Handy project.
 
 ## Current status
 
-The fork runs its own release line, currently `0.2.0`, and is intended for
+The fork runs its own release line, currently `0.2.1`, and is intended for
 direct GitHub distribution, not an app store. Automatic updates are
 intentionally disabled until this repository has its own signed release channel.
 
@@ -31,11 +32,15 @@ The app currently includes:
 
 - global push-to-talk or toggle-to-talk transcription;
 - local Whisper-, Parakeet-, and other compatible speech models;
-- drag-and-drop audio transcription, including Ogg/Opus voice notes;
+- audio file transcription, by drag-and-drop or from a file picker, covering
+  WAV, MP3, M4A (AAC and Apple Lossless), FLAC, OGG/OGA and OPUS — WhatsApp
+  voice notes and iPhone voice memos included;
+- long recordings transcribed in pieces, so a talk-length file finishes instead
+  of exhausting memory;
 - transcription history with microphone/file filters;
 - optional automatic clipboard copy and paste;
 - a custom accent color for the interface and the recording bar;
-- audio ducking that lowers other playback while recording;
+- audio ducking that lowers other playback while recording, at a speed you pick;
 - optional AI post-processing through a provider configured by the user.
 
 Speech recognition runs locally. AI post-processing is the exception: when it
@@ -59,6 +64,10 @@ Build the frontend or a desktop bundle with:
 bun run build
 bun run tauri build
 ```
+
+Before pushing, `bun run verify` runs the frontend gate (typecheck, lint,
+formatting, translation parity, build). The backend tests live in `src-tauri`
+and run with `cargo test`.
 
 On macOS, a locally built or unsigned GitHub app may require a one-time
 Gatekeeper confirmation and its own microphone/accessibility permissions.
