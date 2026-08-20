@@ -88,6 +88,9 @@ pub async fn transcribe_file(app: AppHandle, path: String) -> Result<String, Str
     let (raw_text, samples) = match work {
         Ok(Ok(v)) => v,
         Ok(Err(e)) => {
+            // Log as well as surface it: a toast the user dismisses is otherwise
+            // the only record, which makes decode failures impossible to diagnose.
+            log::error!("File transcription failed for {}: {}", path, e);
             crate::utils::hide_recording_overlay(&app);
             let _ = app.emit("transcription-error", e.clone());
             return Err(e);

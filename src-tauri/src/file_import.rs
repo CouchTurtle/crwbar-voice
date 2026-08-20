@@ -3,9 +3,11 @@
 //!
 //! The mic-recording path already produces 16 kHz mono; this module is the
 //! equivalent entry point for files a user drags onto the overlay. Common
-//! formats (wav / mp3 / m4a-aac / flac / ogg-vorbis) go through rodio's bundled
-//! Symphonia decoders; Ogg **Opus** (WhatsApp voice notes) has no Symphonia
-//! codec, so it is demuxed with `ogg` and decoded with libopus via `audiopus`.
+//! formats (wav / mp3 / m4a / flac / ogg-vorbis) go through rodio's bundled
+//! Symphonia decoders — including ALAC, which Apple Voice Memos use in Lossless
+//! mode and which the `symphonia` dependency in Cargo.toml enables. Ogg **Opus**
+//! (WhatsApp voice notes) has no Symphonia codec, so it is demuxed with `ogg`
+//! and decoded with libopus via `audiopus`.
 
 use std::path::Path;
 use std::time::Duration;

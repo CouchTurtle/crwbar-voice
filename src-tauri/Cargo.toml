@@ -64,6 +64,14 @@ rodio = { git = "https://github.com/cjpais/rodio.git" }
 # library required at build or run time).
 ogg = "0.9"
 audiopus = "0.3.0-rc.0"
+# Adds ALAC (Apple Lossless) to the Symphonia decoders rodio already uses. Cargo
+# unifies features across the shared `symphonia` dependency, so enabling it here
+# is enough for rodio's probe to accept Voice Memos recorded in Lossless;
+# `isomp4` is the .m4a container they arrive in.
+symphonia = { version = "0.5.5", default-features = false, features = [
+  "alac",
+  "isomp4",
+] }
 reqwest = { version = "0.12", features = ["json", "stream"] }
 futures-util = "0.3"
 rustfft = "6.4.0"
