@@ -1,6 +1,6 @@
 [package]
 name = "crwbar-voice"
-version = "0.2.0"
+version = "0.2.1"
 description = "Private, local-first speech transcription"
 authors = ["crwbar contributors", "CJ Pais and Handy contributors"]
 edition = "2021"
