@@ -259,6 +259,60 @@ pub struct TranscriptionManager {
     active_engine_lease: Arc<AtomicU64>,
 }
 
+/// Longest audio handed to the engine in a single call (2 minutes at 16 kHz).
+/// Backends allocate in proportion to this, so it bounds peak memory.
+const MAX_TRANSCRIBE_CHUNK_SAMPLES: usize = 16_000 * 120;
+/// How far before a hard cut to look for a quieter place to split, so chunk
+/// boundaries tend to land between words rather than inside one.
+const CHUNK_BACKTRACK_SAMPLES: usize = 16_000 * 10;
+/// Window scored when looking for that quiet spot (50 ms).
+const CHUNK_WINDOW_SAMPLES: usize = 16_000 / 20;
+
+/// Split `audio` into engine-sized pieces, cutting at the quietest point within
+/// [`CHUNK_BACKTRACK_SAMPLES`] before each hard limit. Returns one slice when the
+/// input already fits.
+fn split_for_transcription(audio: &[f32]) -> Vec<&[f32]> {
+    if audio.len() <= MAX_TRANSCRIBE_CHUNK_SAMPLES {
+        return vec![audio];
+    }
+
+    let mut chunks = Vec::new();
+    let mut start = 0;
+
+    while start < audio.len() {
+        if audio.len() - start <= MAX_TRANSCRIBE_CHUNK_SAMPLES {
+            chunks.push(&audio[start..]);
+            break;
+        }
+
+        let hard_end = start + MAX_TRANSCRIBE_CHUNK_SAMPLES;
+        let search_start = hard_end
+            .saturating_sub(CHUNK_BACKTRACK_SAMPLES)
+            .max(start + CHUNK_WINDOW_SAMPLES);
+
+        // Quietest 50 ms window in the search range; cut through its middle.
+        let mut cut = hard_end;
+        let mut quietest = f32::MAX;
+        let mut window = search_start;
+        while window + CHUNK_WINDOW_SAMPLES <= hard_end {
+            let energy: f32 = audio[window..window + CHUNK_WINDOW_SAMPLES]
+                .iter()
+                .map(|sample| sample * sample)
+                .sum();
+            if energy < quietest {
+                quietest = energy;
+                cut = window + CHUNK_WINDOW_SAMPLES / 2;
+            }
+            window += CHUNK_WINDOW_SAMPLES;
+        }
+
+        chunks.push(&audio[start..cut]);
+        start = cut;
+    }
+
+    chunks
+}
+
 impl TranscriptionManager {
     pub fn new(app_handle: &AppHandle, model_manager: Arc<ModelManager>) -> Result<Self> {
         let manager = Self {
@@ -1121,6 +1175,36 @@ impl TranscriptionManager {
             return Ok(String::new());
         }
 
+        // Engine memory scales with the length of a single call. A 19-minute
+        // recording made the Parakeet/Nemotron backend request a 12.6 GB Metal
+        // buffer; the allocation failed and the process died on the unchecked
+        // result. Long audio is therefore transcribed in pieces and stitched
+        // back together.
+        if audio.len() > MAX_TRANSCRIBE_CHUNK_SAMPLES {
+            let chunks = split_for_transcription(&audio);
+            debug!(
+                "Audio is {:.1}s; transcribing in {} chunks",
+                audio.len() as f64 / 16_000.0,
+                chunks.len()
+            );
+
+            let mut parts: Vec<String> = Vec::with_capacity(chunks.len());
+            for (index, chunk) in chunks.iter().enumerate() {
+                debug!(
+                    "Transcribing chunk {}/{} ({:.1}s)",
+                    index + 1,
+                    chunks.len(),
+                    chunk.len() as f64 / 16_000.0
+                );
+                let text = self.transcribe(chunk.to_vec())?;
+                let text = text.trim();
+                if !text.is_empty() {
+                    parts.push(text.to_string());
+                }
+            }
+            return Ok(parts.join(" "));
+        }
+
         // Check if model is loaded, if not try to load it
         {
             // If the model is loading, wait for it to complete.
@@ -1893,6 +1977,53 @@ mod tests {
 
     fn languages(codes: &[&str]) -> Vec<String> {
         codes.iter().map(|code| (*code).to_string()).collect()
+    }
+
+    #[test]
+    fn short_audio_is_not_split() {
+        let audio = vec![0.0f32; MAX_TRANSCRIBE_CHUNK_SAMPLES];
+        assert_eq!(super::split_for_transcription(&audio).len(), 1);
+    }
+
+    #[test]
+    fn long_audio_is_split_into_engine_sized_pieces() {
+        let audio = vec![0.1f32; MAX_TRANSCRIBE_CHUNK_SAMPLES * 3 + 5_000];
+        let chunks = super::split_for_transcription(&audio);
+
+        assert!(chunks.len() >= 4, "expected several chunks, got {}", chunks.len());
+        for chunk in &chunks {
+            assert!(
+                chunk.len() <= MAX_TRANSCRIBE_CHUNK_SAMPLES,
+                "a chunk exceeded the engine limit: {}",
+                chunk.len()
+            );
+        }
+        // Splitting must neither drop nor duplicate samples.
+        assert_eq!(chunks.iter().map(|c| c.len()).sum::<usize>(), audio.len());
+    }
+
+    #[test]
+    fn split_prefers_the_quietest_point() {
+        // Loud everywhere except a short silence shortly before the hard limit,
+        // which is where the cut should land.
+        let mut audio = vec![0.5f32; MAX_TRANSCRIBE_CHUNK_SAMPLES * 2];
+        let silence_at = MAX_TRANSCRIBE_CHUNK_SAMPLES - 16_000 * 5;
+        for sample in audio
+            .iter_mut()
+            .skip(silence_at)
+            .take(super::CHUNK_WINDOW_SAMPLES)
+        {
+            *sample = 0.0;
+        }
+
+        let first = super::split_for_transcription(&audio)[0].len();
+        let distance = first.abs_diff(silence_at + super::CHUNK_WINDOW_SAMPLES / 2);
+        assert!(
+            distance <= super::CHUNK_WINDOW_SAMPLES,
+            "cut at {} was not near the silence at {}",
+            first,
+            silence_at
+        );
     }
 
     #[test]
