@@ -211,6 +211,12 @@
       "pushToTalk": {
         "label": "לחץ כדי לדבר",
         "description": "החזק כדי להקליט, שחרר כדי לעצור"
+      },
+      "importFile": {
+        "button": "Choose audio file…",
+        "busy": "Transcribing…",
+        "filter": "Audio",
+        "error": "Could not transcribe the selected file."
       }
     },
     "models": {

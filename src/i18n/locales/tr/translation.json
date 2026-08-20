@@ -229,6 +229,12 @@
       "pushToTalk": {
         "label": "Bas Konuş",
         "description": "Kaydetmek için basılı tutun, durdurmak için bırakın"
+      },
+      "importFile": {
+        "button": "Choose audio file…",
+        "busy": "Transcribing…",
+        "filter": "Audio",
+        "error": "Could not transcribe the selected file."
       }
     },
     "sound": {

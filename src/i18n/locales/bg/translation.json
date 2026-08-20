@@ -211,6 +211,12 @@
       "pushToTalk": {
         "label": "Натискане за говорене",
         "description": "Задръжте за запис, пуснете за спиране"
+      },
+      "importFile": {
+        "button": "Choose audio file…",
+        "busy": "Transcribing…",
+        "filter": "Audio",
+        "error": "Could not transcribe the selected file."
       }
     },
     "models": {

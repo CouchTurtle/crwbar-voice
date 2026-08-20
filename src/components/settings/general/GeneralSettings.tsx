@@ -17,6 +17,7 @@ import { AudioDuckingSpeed } from "../AudioDuckingSpeed";
 import { SoundPicker } from "../SoundPicker";
 import { AccentColorPicker } from "../AccentColorPicker";
 import { RgbModeToggle } from "../RgbModeToggle";
+import { TranscribeFileButton } from "../TranscribeFileButton";
 import { ModelSettingsCard } from "./ModelSettingsCard";
 
 export const GeneralSettings: React.FC = () => {
@@ -43,13 +44,16 @@ export const GeneralSettings: React.FC = () => {
           most users learn a file can be dropped onto it (and that it's opt-in). */}
       <div className="flex items-start gap-3 rounded-lg border border-mid-gray/20 bg-logo-primary/5 p-4">
         <Upload className="w-5 h-5 shrink-0 mt-0.5 text-logo-primary" />
-        <div className="text-left">
+        <div className="text-left flex-1">
           <p className="text-sm font-medium text-text">
             {t("settings.general.dropTip.title")}
           </p>
           <p className="text-sm text-text/60 mt-0.5">
             {t("settings.general.dropTip.body")}
           </p>
+          <div className="mt-3">
+            <TranscribeFileButton />
+          </div>
         </div>
       </div>
 

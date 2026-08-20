@@ -211,6 +211,12 @@
       "pushToTalk": {
         "label": "按住說話",
         "description": "按住錄製，放開停止"
+      },
+      "importFile": {
+        "button": "Choose audio file…",
+        "busy": "Transcribing…",
+        "filter": "Audio",
+        "error": "Could not transcribe the selected file."
       }
     },
     "models": {

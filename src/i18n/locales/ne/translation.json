@@ -211,6 +211,12 @@
       "pushToTalk": {
         "label": "पुश टु टक",
         "description": "रेकर्ड गर्न थिचिराख्नुहोस्, रोक्न छोड्नुहोस्"
+      },
+      "importFile": {
+        "button": "Choose audio file…",
+        "busy": "Transcribing…",
+        "filter": "Audio",
+        "error": "Could not transcribe the selected file."
       }
     },
     "models": {

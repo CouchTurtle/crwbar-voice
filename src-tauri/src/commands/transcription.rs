@@ -49,12 +49,9 @@ pub fn unload_model_manually(
 #[tauri::command]
 #[specta::specta]
 pub async fn transcribe_file(app: AppHandle, path: String) -> Result<String, String> {
-    // Opt-in feature — ignore drops entirely unless the user enabled it. The
-    // overlay also gates the drop UI, so this is defense in depth.
-    if !get_settings(&app).drag_drop_enabled {
-        return Ok(String::new());
-    }
-
+    // Deliberately ungated: this is reached either from the file picker (an
+    // explicit user action) or from a drop, and the drop sites themselves honour
+    // the `drag_drop_enabled` setting.
     let file_path = std::path::PathBuf::from(&path);
     if !file_path.exists() {
         return Err(format!("File not found: {}", path));

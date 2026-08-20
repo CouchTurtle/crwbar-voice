@@ -211,6 +211,12 @@
       "pushToTalk": {
         "label": "Утримувати для запису (Push To Talk)",
         "description": "Утримуйте для запису, відпустіть для зупинки"
+      },
+      "importFile": {
+        "button": "Choose audio file…",
+        "busy": "Transcribing…",
+        "filter": "Audio",
+        "error": "Could not transcribe the selected file."
       }
     },
     "models": {

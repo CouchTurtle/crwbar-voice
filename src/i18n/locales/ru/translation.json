@@ -229,6 +229,12 @@
       "pushToTalk": {
         "label": "Нажми и говори",
         "description": "Удерживайте, чтобы записать, отпустите, чтобы остановить"
+      },
+      "importFile": {
+        "button": "Choose audio file…",
+        "busy": "Transcribing…",
+        "filter": "Audio",
+        "error": "Could not transcribe the selected file."
       }
     },
     "sound": {

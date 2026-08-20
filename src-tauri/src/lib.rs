@@ -425,38 +425,17 @@ fn run_headless_transcription(app: &AppHandle, args: &CliArgs) -> i32 {
         }
     }
 
-    let Some(wav) = args.transcribe_file.clone() else {
+    let Some(input) = args.transcribe_file.clone() else {
         return 0;
     };
 
-    // read_wav_samples reads 16-bit int samples and does no validation; the app
-    // only ever saves 16 kHz mono 16-bit PCM, so reject anything else rather than
-    // transcribe garbage / mis-time / mis-decode.
-    match hound::WavReader::open(&wav) {
-        Ok(reader) => {
-            let spec = reader.spec();
-            if spec.sample_rate != 16_000
-                || spec.channels != 1
-                || spec.bits_per_sample != 16
-                || spec.sample_format != hound::SampleFormat::Int
-            {
-                eprintln!(
-                    "error: expected 16 kHz mono 16-bit PCM WAV, got {} Hz / {} ch / {}-bit {:?}",
-                    spec.sample_rate, spec.channels, spec.bits_per_sample, spec.sample_format
-                );
-                return 2;
-            }
-        }
-        Err(e) => {
-            eprintln!("error: cannot open {}: {}", wav.display(), e);
-            return 2;
-        }
-    }
-
-    let samples = match crate::audio_toolkit::read_wav_samples(&wav) {
+    // Same decoder the drag-and-drop import uses, so the CLI accepts every
+    // format the app does (wav / mp3 / m4a / flac / ogg / opus) and always hands
+    // the engine 16 kHz mono.
+    let samples = match crate::file_import::decode_to_16k_mono(&input) {
         Ok(s) => s,
         Err(e) => {
-            eprintln!("error: failed to read {}: {}", wav.display(), e);
+            eprintln!("error: cannot decode {}: {}", input.display(), e);
             return 2;
         }
     };

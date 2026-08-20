@@ -211,6 +211,12 @@
       "pushToTalk": {
         "label": "Tryck för att tala",
         "description": "Håll ned för att spela in, släpp för att stoppa"
+      },
+      "importFile": {
+        "button": "Choose audio file…",
+        "busy": "Transcribing…",
+        "filter": "Audio",
+        "error": "Could not transcribe the selected file."
       }
     },
     "models": {

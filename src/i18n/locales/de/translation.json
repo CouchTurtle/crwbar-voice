@@ -178,7 +178,7 @@
       "title": "Allgemein",
       "dropTip": {
         "title": "Audiodatei transkribieren",
-        "body": "Zieh eine Audiodatei (WhatsApp .opus, mp3, m4a, wav …) auf die Aufnahme-Leiste, während sie sichtbar ist – statt des Mikrofons wird dann die Datei transkribiert. Aktiviere die Funktion mit dem Schalter unten."
+        "body": "Wähle unten eine Datei oder zieh eine auf dieses Fenster — WhatsApp .opus, Apple Sprachmemo .m4a, mp3, wav und mehr. Für das Ablegen muss die Option oben aktiv sein."
       },
       "dragDrop": {
         "label": "Datei-Drop transkribieren",
@@ -229,6 +229,12 @@
       "pushToTalk": {
         "label": "Push-to-Talk",
         "description": "Gedrückt halten zum Aufnehmen, loslassen zum Stoppen"
+      },
+      "importFile": {
+        "button": "Audiodatei wählen…",
+        "busy": "Transkribiere…",
+        "filter": "Audio",
+        "error": "Die gewählte Datei konnte nicht transkribiert werden."
       }
     },
     "sound": {

@@ -160,7 +160,7 @@
       "title": "General",
       "dropTip": {
         "title": "Transcribe an audio file",
-        "body": "Drag an audio file (WhatsApp .opus, mp3, m4a, wav …) onto the recording bar while it's visible – the file is transcribed instead of the microphone. Enable the feature with the toggle below."
+        "body": "Pick a file below, or drop one onto this window — WhatsApp .opus, Apple Voice Memo .m4a, mp3, wav and more. Dropping requires the setting above."
       },
       "dragDrop": {
         "label": "Transcribe dropped files",
@@ -211,6 +211,12 @@
       "pushToTalk": {
         "label": "Push To Talk",
         "description": "Hold to record, release to stop"
+      },
+      "importFile": {
+        "button": "Choose audio file…",
+        "busy": "Transcribing…",
+        "filter": "Audio",
+        "error": "Could not transcribe the selected file."
       }
     },
     "models": {

@@ -211,6 +211,12 @@
       "pushToTalk": {
         "label": "Push-to-talk",
         "description": "Ingedrukt houden om op te nemen, loslaten om te stoppen"
+      },
+      "importFile": {
+        "button": "Choose audio file…",
+        "busy": "Transcribing…",
+        "filter": "Audio",
+        "error": "Could not transcribe the selected file."
       }
     },
     "models": {

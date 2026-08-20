@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, type ReactNode } from "react";
 import { toast, Toaster } from "sonner";
 import { useTranslation } from "react-i18next";
 import { listen } from "@tauri-apps/api/event";
+import { getCurrentWebview } from "@tauri-apps/api/webview";
 import { platform } from "@tauri-apps/plugin-os";
 import {
   checkAccessibilityPermission,
@@ -127,6 +128,37 @@ function App() {
   // The technical error detail is logged to handy.log on the Rust side
   // (see actions.rs `error!("Failed to paste transcription: ...")`),
   // so we show a localized, user-friendly message here instead of the raw error.
+  // Dropping an audio file on the main window transcribes it. The recording
+  // overlay is a non-activating panel on macOS and never receives Finder drops,
+  // so this window is the dependable drop target.
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    let disposed = false;
+
+    getCurrentWebview()
+      .onDragDropEvent((event) => {
+        if (event.payload.type !== "drop") return;
+        const file = event.payload.paths?.[0];
+        if (!file) return;
+        // Read the setting per drop so toggling it takes effect immediately.
+        void commands.getAppSettings().then((settings) => {
+          if (settings.status !== "ok" || !settings.data.drag_drop_enabled) return;
+          void commands.transcribeFile(file).then((result) => {
+            if (result.status === "error") toast.error(String(result.error));
+          });
+        });
+      })
+      .then((fn) => {
+        if (disposed) fn();
+        else unlisten = fn;
+      });
+
+    return () => {
+      disposed = true;
+      if (unlisten) unlisten();
+    };
+  }, []);
+
   useEffect(() => {
     const unlisten = listen("paste-error", () => {
       toast.error(t("errors.pasteFailedTitle"), {
