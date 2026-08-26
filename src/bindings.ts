@@ -75,6 +75,18 @@ async changeAccentColorSetting(color: string | null) : Promise<Result<null, stri
 }
 },
 /**
+ * Pick a model for file transcription. An empty string clears the override, so
+ * file imports follow the selected dictation model again.
+ */
+async changeFileTranscriptionModelSetting(modelId: string | null) : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("change_file_transcription_model_setting", { modelId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
  * Toggle the animated rainbow accent. Cosmetic only; the frontend runs the
  * animation and falls back to `accent_color` when this is turned off.
  */
@@ -976,11 +988,13 @@ async isLaptop() : Promise<Result<boolean, string>> {
 export const events = __makeEvents__<{
 historyUpdatePayload: HistoryUpdatePayload,
 streamPhaseEvent: StreamPhaseEvent,
-streamTextEvent: StreamTextEvent
+streamTextEvent: StreamTextEvent,
+transcriptionProgress: TranscriptionProgress
 }>({
 historyUpdatePayload: "history-update-payload",
 streamPhaseEvent: "stream-phase-event",
-streamTextEvent: "stream-text-event"
+streamTextEvent: "stream-text-event",
+transcriptionProgress: "transcription-progress"
 })
 
 /** user-defined constants **/
@@ -1025,6 +1039,13 @@ voice_action_context?: RedactedString; mute_while_recording?: boolean;
  * Fade speed used by audio ducking (see `mute_while_recording`).
  */
 audio_ducking_speed?: DuckingSpeed; append_trailing_space?: boolean; app_language?: string; theme?: Theme; 
+/**
+ * Model to use for file transcription, overriding `selected_model`.
+ * `None` means "whatever dictation uses". A separate choice exists because
+ * the trade-off differs: dictation wants a model that keeps up live, while
+ * a recorded meeting can afford a slower, more accurate one.
+ */
+file_transcription_model?: string | null; 
 /**
  * User-picked accent color as a `#rrggbb` hex string. `None` keeps the
  * built-in crw.bar orange. Overrides `--color-logo-primary` /
@@ -1175,6 +1196,20 @@ export type StreamWorkKind = "transcribing" | "polishing"
  */
 export type Theme = "system" | "light" | "dark"
 export type TranscribeAcceleratorSetting = "auto" | "cpu" | "gpu"
+/**
+ * Progress through a chunked transcription, emitted as `transcription-progress`.
+ * 
+ * Only long audio reports progress, because only long audio is chunked — which
+ * is exactly the case where a caller needs to say something more useful than
+ * "working". `chunk: 0` marks the start, once the model is loaded and the audio
+ * is split, so a listener can time the run without counting decode and model
+ * load against the transcription rate.
+ */
+export type TranscriptionProgress = { 
+/**
+ * Chunks finished so far; `0` is the start marker.
+ */
+chunk: number; total_chunks: number; seconds_done: number; seconds_total: number }
 export type TypingTool = "auto" | "wtype" | "kwtype" | "dotool" | "ydotool" | "xdotool"
 export type VoiceActionBackend = "api" | "codex_cli" | "claude_cli"
 export type WindowsMicrophonePermissionStatus = { supported: boolean; overall_access: PermissionAccess; device_access: PermissionAccess; app_access: PermissionAccess; desktop_app_access: PermissionAccess }

@@ -731,13 +731,21 @@
     "pick": "Audiodatei wählen…",
     "pickAnother": "Weitere Datei transkribieren",
     "workingHint": "Lange Aufnahmen werden in Stücken transkribiert; eine Stunde Audio kann einige Minuten dauern.",
-    "elapsed": "{{time}} vergangen",
     "resultTitle": "Transkript",
     "copy": "Kopieren",
     "copied": "Kopiert",
     "savedToHistory": "Im Verlauf gespeichert und dort als Datei-Transkription markiert.",
     "empty": "Das Modell hat für diese Datei keinen Text geliefert.",
     "errorTitle": "Diese Datei konnte nicht transkribiert werden",
-    "unexpectedError": "Die Datei konnte nicht transkribiert werden."
+    "unexpectedError": "Die Datei konnte nicht transkribiert werden.",
+    "dropNow": "Loslassen zum Transkribieren",
+    "notAudio": "Das ist keine Audiodatei, die diese App lesen kann.",
+    "progress": "{{done}} von {{total}} transkribiert",
+    "remaining": "noch etwa {{time}}",
+    "model": {
+      "title": "Modell für Dateien",
+      "description": "Beim Diktieren muss das Modell live mithalten. Eine aufgezeichnete Besprechung muss das nicht und verträgt ein langsameres, genaueres. Ein anderes Modell hier bedeutet, dass das Diktat-Modell beim nächsten Mal neu geladen wird.",
+      "followDictation": "Wie beim Diktieren"
+    }
   }
 }

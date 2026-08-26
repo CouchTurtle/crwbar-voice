@@ -731,13 +731,21 @@
     "pick": "Choose audio file…",
     "pickAnother": "Transcribe another file",
     "workingHint": "Long recordings are transcribed in pieces, so an hour of audio can take a few minutes.",
-    "elapsed": "{{time}} elapsed",
     "resultTitle": "Transcript",
     "copy": "Copy",
     "copied": "Copied",
     "savedToHistory": "Saved to History, where it is tagged as a file transcription.",
     "empty": "The model returned no text for this file.",
     "errorTitle": "Could not transcribe this file",
-    "unexpectedError": "The file could not be transcribed."
+    "unexpectedError": "The file could not be transcribed.",
+    "dropNow": "Drop to transcribe",
+    "notAudio": "That is not an audio file this app can read.",
+    "progress": "{{done}} of {{total}} transcribed",
+    "remaining": "about {{time}} left",
+    "model": {
+      "title": "Model for files",
+      "description": "Dictation needs a model that keeps up live. A recorded meeting does not, so it can use a slower, more accurate one. Switching models here means the next dictation reloads its own.",
+      "followDictation": "Same as dictation"
+    }
   }
 }

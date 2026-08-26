@@ -514,6 +514,12 @@ pub struct AppSettings {
     pub app_language: String,
     #[serde(default = "default_theme")]
     pub theme: Theme,
+    /// Model to use for file transcription, overriding `selected_model`.
+    /// `None` means "whatever dictation uses". A separate choice exists because
+    /// the trade-off differs: dictation wants a model that keeps up live, while
+    /// a recorded meeting can afford a slower, more accurate one.
+    #[serde(default)]
+    pub file_transcription_model: Option<String>,
     /// User-picked accent color as a `#rrggbb` hex string. `None` keeps the
     /// built-in crw.bar orange. Overrides `--color-logo-primary` /
     /// `--color-background-ui` at runtime (see `lib/utils/theme.ts`).
@@ -1033,6 +1039,7 @@ pub fn get_default_settings() -> AppSettings {
         append_trailing_space: false,
         app_language: default_app_language(),
         theme: default_theme(),
+        file_transcription_model: None,
         accent_color: None,
         rgb_mode: false,
         experimental_enabled: false,

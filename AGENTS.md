@@ -184,7 +184,27 @@ Dropping a file on the overlay or the window passes `true` and behaves like
 dictation — overlay, paste into the focused app. The Transcribe tab passes
 `false`: no overlay, nothing typed anywhere, the text is returned and shown in
 the tab. An hour of meeting audio must not be typed into whatever window happens
-to have focus. Both modes always write a history entry.
+to have focus. Both modes always write a history entry, and both honour
+`file_transcription_model` (see `pick_file_model`) before falling back to the
+dictation model.
+
+**Two drop handlers share one window event.** Tauri's `onDragDropEvent` is
+window-level, not DOM-level, so a drop zone cannot claim it by hover. `App.tsx`
+and `TranscribeSettings.tsx` both listen, and `App.tsx` returns early while
+`sectionRef.current === "transcribe"`. It reads the section through a ref
+because the listener is registered once — capturing `currentSection` directly
+would freeze it at its initial value. The tab's handler is deliberately _not_
+gated on `drag_drop_enabled`: dropping onto a zone that exists only in that tab
+is as explicit as clicking its button.
+
+**The time estimate is measured, not looked up.** The catalog carries a
+`speed_score` derived from a realtime factor on a reference machine, which says
+nothing about this Mac. Instead `TranscriptionManager` emits
+`TranscriptionProgress` around each chunk, with `chunk: 0` marking the start
+_after_ decode and model load; the frontend divides audio-seconds done by
+wall-clock elapsed to get a rate this machine actually achieved. Only chunked
+(long) audio reports progress, which is the only case where a countdown earns
+its place.
 
 **Long audio must stay chunked.** Engine memory scales with the length of a
 single `transcribe()` call, not with the model. A 19-minute recording made the
@@ -232,7 +252,7 @@ skips the build. It does **not** touch Rust — run those checks yourself from
 `src-tauri/`:
 
 ```bash
-cargo test         # 152 tests at 0.3.0
+cargo test         # 154 tests at 0.3.0
 cargo check
 cargo fmt -- --check
 ```

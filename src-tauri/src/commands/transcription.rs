@@ -41,6 +41,19 @@ pub fn unload_model_manually(
         .map_err(|e| format!("Failed to unload model: {}", e))
 }
 
+/// Which model a file import runs on.
+///
+/// The override wins where it is set; otherwise files follow dictation. Loading
+/// a different model evicts the current one, so the next dictation reloads —
+/// that is the cost of choosing separately, not a bug.
+fn pick_file_model(override_id: Option<&str>, selected: &str) -> String {
+    override_id
+        .map(str::trim)
+        .filter(|id| !id.is_empty())
+        .unwrap_or(selected)
+        .to_string()
+}
+
 /// Transcribe an audio file.
 ///
 /// Decodes the file to 16 kHz mono, runs the currently selected model, and always
@@ -81,7 +94,14 @@ pub async fn transcribe_file(
             let samples = crate::file_import::decode_to_16k_mono(&file_path)?;
 
             let tm = app_for_work.state::<Arc<TranscriptionManager>>();
-            let model_id = get_settings(&app_for_work).selected_model;
+            // The file override wins where it is set; otherwise files follow the
+            // dictation model. Loading a different one evicts the current model,
+            // so the next dictation reloads — the cost of the choice.
+            let settings = get_settings(&app_for_work);
+            let model_id = pick_file_model(
+                settings.file_transcription_model.as_deref(),
+                &settings.selected_model,
+            );
             if model_id.trim().is_empty() {
                 return Err("No transcription model selected. Pick one in the app first.".into());
             }
@@ -167,4 +187,24 @@ pub async fn transcribe_file(
     }
 
     Ok(final_text)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::pick_file_model;
+
+    #[test]
+    fn file_model_falls_back_to_the_dictation_model() {
+        assert_eq!(pick_file_model(None, "parakeet"), "parakeet");
+        assert_eq!(pick_file_model(Some(""), "parakeet"), "parakeet");
+        assert_eq!(pick_file_model(Some("   "), "parakeet"), "parakeet");
+    }
+
+    #[test]
+    fn file_model_override_wins() {
+        assert_eq!(
+            pick_file_model(Some("whisper-large"), "parakeet"),
+            "whisper-large"
+        );
+    }
 }

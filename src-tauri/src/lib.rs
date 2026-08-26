@@ -551,6 +551,7 @@ pub fn run(cli_args: CliArgs) {
             shortcut::change_sound_theme_setting,
             shortcut::change_theme_setting,
             shortcut::change_accent_color_setting,
+            shortcut::change_file_transcription_model_setting,
             shortcut::change_rgb_mode_setting,
             shortcut::change_start_hidden_setting,
             shortcut::change_autostart_setting,
@@ -665,6 +666,7 @@ pub fn run(cli_args: CliArgs) {
             managers::history::HistoryUpdatePayload,
             managers::transcription::StreamTextEvent,
             managers::transcription::StreamPhaseEvent,
+            managers::transcription::TranscriptionProgress,
         ]);
 
     #[cfg(debug_assertions)] // <- Only export on non-release builds

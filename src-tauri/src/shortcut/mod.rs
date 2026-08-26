@@ -578,6 +578,20 @@ pub fn change_accent_color_setting(app: AppHandle, color: Option<String>) -> Res
     Ok(())
 }
 
+/// Pick a model for file transcription. An empty string clears the override, so
+/// file imports follow the selected dictation model again.
+#[tauri::command]
+#[specta::specta]
+pub fn change_file_transcription_model_setting(
+    app: AppHandle,
+    model_id: Option<String>,
+) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.file_transcription_model = model_id.filter(|id| !id.trim().is_empty());
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
 /// Toggle the animated rainbow accent. Cosmetic only; the frontend runs the
 /// animation and falls back to `accent_color` when this is turned off.
 #[tauri::command]

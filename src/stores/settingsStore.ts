@@ -158,6 +158,8 @@ const settingUpdaters: {
   theme: (value) => commands.changeThemeSetting(value as string),
   accent_color: (value) =>
     commands.changeAccentColorSetting(value as string | null),
+  file_transcription_model: (value) =>
+    commands.changeFileTranscriptionModelSetting(value as string | null),
   rgb_mode: (value) => commands.changeRgbModeSetting(value as boolean),
   experimental_enabled: (value) =>
     commands.changeExperimentalEnabledSetting(value as boolean),

@@ -1,6 +1,13 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { open } from "@tauri-apps/plugin-dialog";
+import { getCurrentWebview } from "@tauri-apps/api/webview";
 import {
   AlertCircle,
   Check,
@@ -9,9 +16,13 @@ import {
   Loader2,
   Upload,
 } from "lucide-react";
-import { commands } from "@/bindings";
+import { commands, events } from "@/bindings";
 import { Button } from "../../ui/Button";
+import { Dropdown } from "../../ui/Dropdown";
+import { SettingContainer } from "../../ui/SettingContainer";
 import { SettingsGroup } from "../../ui/SettingsGroup";
+import { useSettings } from "../../../hooks/useSettings";
+import { useModelStore } from "../../../stores/modelStore";
 
 /** Audio containers the importer can decode (see `file_import.rs`). */
 const AUDIO_EXTENSIONS = [
@@ -26,36 +37,43 @@ const AUDIO_EXTENSIONS = [
   "opus",
 ];
 
+/** Sentinel for "no override" — an empty value cannot round-trip a Dropdown. */
+const FOLLOW_DICTATION = "__follow_dictation__";
+
 type Phase =
   | { status: "idle" }
   | { status: "running"; fileName: string }
   | { status: "done"; fileName: string; text: string }
   | { status: "error"; fileName: string; message: string };
 
+interface Progress {
+  secondsDone: number;
+  secondsTotal: number;
+  /** Wall-clock ms at which this run's first chunk began. */
+  startedAt: number;
+}
+
 const fileNameOf = (path: string) => path.split(/[\\/]/).pop() || path;
 
-const formatElapsed = (seconds: number) => {
-  const minutes = Math.floor(seconds / 60);
-  const rest = seconds % 60;
-  return `${minutes}:${String(rest).padStart(2, "0")}`;
+const hasAudioExtension = (path: string) => {
+  const ext = path.split(".").pop()?.toLowerCase();
+  return !!ext && AUDIO_EXTENSIONS.includes(ext);
 };
 
-/** Counts up for as long as a transcription is running. */
-const useElapsedSeconds = (running: boolean) => {
-  const [seconds, setSeconds] = useState(0);
+const formatDuration = (seconds: number) => {
+  const safe = Math.max(0, Math.round(seconds));
+  const minutes = Math.floor(safe / 60);
+  return `${minutes}:${String(safe % 60).padStart(2, "0")}`;
+};
 
+/** Ticks once a second while a transcription is running, to drive the countdown. */
+const useTicker = (running: boolean) => {
+  const [, setTick] = useState(0);
   useEffect(() => {
     if (!running) return;
-    setSeconds(0);
-    const started = Date.now();
-    const timer = setInterval(
-      () => setSeconds(Math.floor((Date.now() - started) / 1000)),
-      1000,
-    );
+    const timer = setInterval(() => setTick((n) => n + 1), 1000);
     return () => clearInterval(timer);
   }, [running]);
-
-  return seconds;
 };
 
 /**
@@ -63,16 +81,29 @@ const useElapsedSeconds = (running: boolean) => {
  *
  * The mic path delivers text into whatever app has focus. That is wrong for a
  * recorded meeting: it can run for minutes and the result belongs here, where it
- * can be read and copied, not fired into a window that happened to be in front.
- * So this calls `transcribeFile` with `deliver: false` — no overlay, nothing
- * typed anywhere — and shows the transcript itself.
+ * can be read and copied. So this calls `transcribeFile` with `deliver: false` —
+ * no overlay, nothing typed anywhere — and shows the transcript itself.
  */
 export const TranscribeSettings: React.FC = () => {
   const { t } = useTranslation();
+  const { getSetting, updateSetting } = useSettings();
+  const models = useModelStore((state) => state.models);
+  const initialize = useModelStore((state) => state.initialize);
+
   const [phase, setPhase] = useState<Phase>({ status: "idle" });
+  const [progress, setProgress] = useState<Progress | null>(null);
+  const [dragging, setDragging] = useState(false);
   const [copied, setCopied] = useState(false);
   const copyResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const elapsed = useElapsedSeconds(phase.status === "running");
+  const runningRef = useRef(false);
+
+  const running = phase.status === "running";
+  runningRef.current = running;
+  useTicker(running);
+
+  useEffect(() => {
+    void initialize();
+  }, [initialize]);
 
   useEffect(
     () => () => {
@@ -81,37 +112,101 @@ export const TranscribeSettings: React.FC = () => {
     [],
   );
 
-  const handlePick = useCallback(async () => {
-    let selected: string | null = null;
-    try {
-      const picked = await open({
-        multiple: false,
-        directory: false,
-        filters: [
-          { name: t("transcribe.filter"), extensions: AUDIO_EXTENSIONS },
-        ],
-      });
-      if (typeof picked !== "string") return;
-      selected = picked;
-
-      const fileName = fileNameOf(selected);
+  const transcribe = useCallback(
+    async (path: string) => {
+      if (runningRef.current) return;
+      const fileName = fileNameOf(path);
+      setProgress(null);
       setPhase({ status: "running", fileName });
-
-      const result = await commands.transcribeFile(selected, false);
-      if (result.status === "error") {
-        setPhase({ status: "error", fileName, message: String(result.error) });
-        return;
+      try {
+        const result = await commands.transcribeFile(path, false);
+        if (result.status === "error") {
+          setPhase({
+            status: "error",
+            fileName,
+            message: String(result.error),
+          });
+          return;
+        }
+        setPhase({ status: "done", fileName, text: result.data });
+      } catch (error) {
+        console.error("Failed to transcribe the selected file:", error);
+        setPhase({
+          status: "error",
+          fileName,
+          message: t("transcribe.unexpectedError"),
+        });
+      } finally {
+        setProgress(null);
       }
-      setPhase({ status: "done", fileName, text: result.data });
-    } catch (error) {
-      console.error("Failed to transcribe the selected file:", error);
-      setPhase({
-        status: "error",
-        fileName: selected ? fileNameOf(selected) : "",
-        message: t("transcribe.unexpectedError"),
+    },
+    [t],
+  );
+
+  // Only long audio is chunked, so only long audio reports progress — which is
+  // exactly when a countdown is worth showing. `chunk: 0` marks the start, after
+  // decode and model load, so the rate reflects transcription alone.
+  useEffect(() => {
+    const unlisten = events.transcriptionProgress.listen((event) => {
+      const { chunk, seconds_done, seconds_total } = event.payload;
+      setProgress((current) => ({
+        secondsDone: seconds_done,
+        secondsTotal: seconds_total,
+        startedAt: chunk === 0 || !current ? Date.now() : current.startedAt,
+      }));
+    });
+    return () => {
+      void unlisten.then((fn) => fn());
+    };
+  }, []);
+
+  // The window-level handler in App.tsx stands down while this tab is open, so
+  // a drop here is unambiguous. Unlike the global one it is not gated on the
+  // drag-and-drop setting: dropping onto this zone is as explicit as clicking.
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    let disposed = false;
+
+    void getCurrentWebview()
+      .onDragDropEvent((event) => {
+        if (event.payload.type === "over") {
+          setDragging(true);
+          return;
+        }
+        setDragging(false);
+        if (event.payload.type !== "drop") return;
+        const path = event.payload.paths?.[0];
+        if (!path) return;
+        // Say so here rather than letting it fail deep inside the decoder.
+        if (!hasAudioExtension(path)) {
+          setPhase({
+            status: "error",
+            fileName: fileNameOf(path),
+            message: t("transcribe.notAudio"),
+          });
+          return;
+        }
+        void transcribe(path);
+      })
+      .then((fn) => {
+        if (disposed) fn();
+        else unlisten = fn;
       });
-    }
-  }, [t]);
+
+    return () => {
+      disposed = true;
+      unlisten?.();
+    };
+  }, [t, transcribe]);
+
+  const handlePick = useCallback(async () => {
+    const picked = await open({
+      multiple: false,
+      directory: false,
+      filters: [{ name: t("transcribe.filter"), extensions: AUDIO_EXTENSIONS }],
+    });
+    if (typeof picked === "string") await transcribe(picked);
+  }, [t, transcribe]);
 
   const handleCopy = useCallback(async (text: string) => {
     try {
@@ -124,7 +219,38 @@ export const TranscribeSettings: React.FC = () => {
     }
   }, []);
 
-  const running = phase.status === "running";
+  const modelOptions = useMemo(() => {
+    const installed = models.filter((model) => model.is_downloaded);
+    return [
+      { value: FOLLOW_DICTATION, label: t("transcribe.model.followDictation") },
+      ...installed.map((model) => ({ value: model.id, label: model.name })),
+    ];
+  }, [models, t]);
+
+  const selectedFileModel =
+    (getSetting("file_transcription_model") as string | null) ??
+    FOLLOW_DICTATION;
+
+  const handleModelChange = useCallback(
+    (value: string) => {
+      void updateSetting(
+        "file_transcription_model",
+        value === FOLLOW_DICTATION ? null : value,
+      );
+    },
+    [updateSetting],
+  );
+
+  // Measured on this machine with this model, rather than guessed from a
+  // catalogue score benchmarked on someone else's hardware.
+  const remaining = useMemo(() => {
+    if (!progress || progress.secondsDone <= 0) return null;
+    const elapsed = (Date.now() - progress.startedAt) / 1000;
+    if (elapsed <= 0) return null;
+    const rate = progress.secondsDone / elapsed;
+    if (rate <= 0) return null;
+    return (progress.secondsTotal - progress.secondsDone) / rate;
+  }, [progress]);
 
   return (
     <div className="max-w-3xl w-full mx-auto space-y-6">
@@ -140,37 +266,76 @@ export const TranscribeSettings: React.FC = () => {
                 <p className="text-sm text-text/60 mt-1">
                   {t("transcribe.workingHint")}
                 </p>
-                <p className="text-xs text-mid-gray mt-2 tabular-nums">
-                  {t("transcribe.elapsed", { time: formatElapsed(elapsed) })}
-                </p>
+
+                {progress && progress.secondsTotal > 0 && (
+                  <div className="mt-3 space-y-1.5">
+                    <div className="h-1.5 rounded-full bg-mid-gray/20 overflow-hidden">
+                      <div
+                        className="h-full bg-logo-primary transition-[width] duration-500"
+                        style={{
+                          width: `${Math.min(100, (progress.secondsDone / progress.secondsTotal) * 100)}%`,
+                        }}
+                      />
+                    </div>
+                    <p className="text-xs text-mid-gray tabular-nums">
+                      {t("transcribe.progress", {
+                        done: formatDuration(progress.secondsDone),
+                        total: formatDuration(progress.secondsTotal),
+                      })}
+                      {remaining !== null &&
+                        ` · ${t("transcribe.remaining", {
+                          time: formatDuration(remaining),
+                        })}`}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           ) : (
-            <div className="flex items-start gap-4">
-              <div className="rounded-lg bg-logo-primary/10 p-3 shrink-0">
+            <div
+              className={`rounded-lg border-2 border-dashed p-6 text-center transition-colors ${
+                dragging
+                  ? "border-logo-primary bg-logo-primary/10"
+                  : "border-mid-gray/30"
+              }`}
+            >
+              <div className="inline-flex rounded-lg bg-logo-primary/10 p-3">
                 <Upload className="w-6 h-6 text-logo-primary" />
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-base font-medium text-text">
-                  {t("transcribe.heading")}
-                </p>
-                <p className="text-sm text-text/60 mt-1">
-                  {t("transcribe.body")}
-                </p>
-                <p className="text-xs text-mid-gray mt-2">
-                  {t("transcribe.formats")}
-                </p>
-                <div className="mt-4">
-                  <Button variant="primary" size="md" onClick={handlePick}>
-                    {phase.status === "idle"
-                      ? t("transcribe.pick")
-                      : t("transcribe.pickAnother")}
-                  </Button>
-                </div>
+              <p className="text-base font-medium text-text mt-3">
+                {dragging ? t("transcribe.dropNow") : t("transcribe.heading")}
+              </p>
+              <p className="text-sm text-text/60 mt-1 max-w-md mx-auto">
+                {t("transcribe.body")}
+              </p>
+              <div className="mt-4">
+                <Button variant="primary" size="md" onClick={handlePick}>
+                  {phase.status === "idle"
+                    ? t("transcribe.pick")
+                    : t("transcribe.pickAnother")}
+                </Button>
               </div>
+              <p className="text-xs text-mid-gray mt-4">
+                {t("transcribe.formats")}
+              </p>
             </div>
           )}
         </div>
+
+        <SettingContainer
+          title={t("transcribe.model.title")}
+          description={t("transcribe.model.description")}
+          descriptionMode="tooltip"
+          grouped={true}
+          layout="horizontal"
+        >
+          <Dropdown
+            options={modelOptions}
+            selectedValue={selectedFileModel}
+            onSelect={handleModelChange}
+            disabled={running}
+          />
+        </SettingContainer>
       </SettingsGroup>
 
       {phase.status === "error" && (

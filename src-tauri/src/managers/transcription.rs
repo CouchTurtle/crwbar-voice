@@ -259,6 +259,22 @@ pub struct TranscriptionManager {
     active_engine_lease: Arc<AtomicU64>,
 }
 
+/// Progress through a chunked transcription, emitted as `transcription-progress`.
+///
+/// Only long audio reports progress, because only long audio is chunked — which
+/// is exactly the case where a caller needs to say something more useful than
+/// "working". `chunk: 0` marks the start, once the model is loaded and the audio
+/// is split, so a listener can time the run without counting decode and model
+/// load against the transcription rate.
+#[derive(Clone, Debug, Serialize, Deserialize, Type, tauri_specta::Event)]
+pub struct TranscriptionProgress {
+    /// Chunks finished so far; `0` is the start marker.
+    pub chunk: usize,
+    pub total_chunks: usize,
+    pub seconds_done: f64,
+    pub seconds_total: f64,
+}
+
 /// Longest audio handed to the engine in a single call (2 minutes at 16 kHz).
 /// Backends allocate in proportion to this, so it bounds peak memory.
 const MAX_TRANSCRIBE_CHUNK_SAMPLES: usize = 16_000 * 120;
@@ -314,6 +330,22 @@ fn split_for_transcription(audio: &[f32]) -> Vec<&[f32]> {
 }
 
 impl TranscriptionManager {
+    fn emit_progress(
+        &self,
+        chunk: usize,
+        total_chunks: usize,
+        seconds_done: f64,
+        seconds_total: f64,
+    ) {
+        let _ = TranscriptionProgress {
+            chunk,
+            total_chunks,
+            seconds_done,
+            seconds_total,
+        }
+        .emit(&self.app_handle);
+    }
+
     pub fn new(app_handle: &AppHandle, model_manager: Arc<ModelManager>) -> Result<Self> {
         let manager = Self {
             engine: Arc::new(Mutex::new(None)),
@@ -1188,6 +1220,10 @@ impl TranscriptionManager {
                 chunks.len()
             );
 
+            let seconds_total = audio.len() as f64 / 16_000.0;
+            let mut seconds_done = 0.0;
+            self.emit_progress(0, chunks.len(), 0.0, seconds_total);
+
             let mut parts: Vec<String> = Vec::with_capacity(chunks.len());
             for (index, chunk) in chunks.iter().enumerate() {
                 debug!(
@@ -1201,6 +1237,9 @@ impl TranscriptionManager {
                 if !text.is_empty() {
                     parts.push(text.to_string());
                 }
+
+                seconds_done += chunk.len() as f64 / 16_000.0;
+                self.emit_progress(index + 1, chunks.len(), seconds_done, seconds_total);
             }
             return Ok(parts.join(" "));
         }

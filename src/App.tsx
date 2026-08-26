@@ -131,6 +131,13 @@ function App() {
   // Dropping an audio file on the main window transcribes it. The recording
   // overlay is a non-activating panel on macOS and never receives Finder drops,
   // so this window is the dependable drop target.
+  // Read through a ref: the drop listener is registered once, so capturing the
+  // section directly would freeze it at "general".
+  const sectionRef = useRef<SidebarSection>(currentSection);
+  useEffect(() => {
+    sectionRef.current = currentSection;
+  }, [currentSection]);
+
   useEffect(() => {
     let unlisten: (() => void) | undefined;
     let disposed = false;
@@ -138,6 +145,10 @@ function App() {
     getCurrentWebview()
       .onDragDropEvent((event) => {
         if (event.payload.type !== "drop") return;
+        // The Transcribe tab registers its own handler and transcribes into the
+        // app instead of typing the result somewhere. Two handlers on one window
+        // event, so exactly one of them has to stand down.
+        if (sectionRef.current === "transcribe") return;
         const file = event.payload.paths?.[0];
         if (!file) return;
         // Read the setting per drop so toggling it takes effect immediately.
