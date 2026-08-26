@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import { X } from "lucide-react";
 import { listen } from "@tauri-apps/api/event";
 import { formatKeyCombination } from "../../lib/utils/keyboard";
 import { ResetButton } from "../ui/ResetButton";
@@ -244,6 +245,8 @@ export const HandyKeysShortcutInput: React.FC<HandyKeysShortcutInputProps> = ({
     );
   }
 
+  const isDisabled = !binding.current_binding.trim();
+
   // Get translated name and description for the binding
   const translatedName = t(
     `settings.general.shortcut.bindings.${shortcutId}.name`,
@@ -273,11 +276,29 @@ export const HandyKeysShortcutInput: React.FC<HandyKeysShortcutInputProps> = ({
           </div>
         ) : (
           <div
-            className="px-2 py-1 text-sm font-semibold bg-mid-gray/10 border border-mid-gray/80 hover:bg-logo-primary/10 rounded-md cursor-pointer hover:border-logo-primary"
+            className={`px-2 py-1 text-sm font-semibold border rounded-md cursor-pointer hover:bg-logo-primary/10 hover:border-logo-primary ${
+              isDisabled
+                ? "bg-transparent border-dashed border-mid-gray/50 text-text/50"
+                : "bg-mid-gray/10 border-mid-gray/80"
+            }`}
             onClick={startRecording}
           >
-            {formatKeyCombination(binding.current_binding, osType)}
+            {isDisabled
+              ? t("settings.general.shortcut.disabled")
+              : formatKeyCombination(binding.current_binding, osType)}
           </div>
+        )}
+        {/* Clearing matters for combinations the OS already means something by:
+            Option+C and Option+V type ç and √ on macOS, and a registered global
+            shortcut swallows them everywhere. */}
+        {!isDisabled && !isRecording && (
+          <ResetButton
+            onClick={() => void updateBinding(shortcutId, "")}
+            disabled={isUpdating(`binding_${shortcutId}`)}
+            ariaLabel={t("settings.general.shortcut.disable")}
+          >
+            <X className="w-4 h-4" />
+          </ResetButton>
         )}
         <ResetButton
           onClick={() => resetBinding(shortcutId)}

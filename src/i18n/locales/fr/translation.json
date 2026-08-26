@@ -14,7 +14,8 @@
     "postProcessing": "Post-traitement",
     "history": "Historique",
     "debug": "Débogage",
-    "about": "À propos"
+    "about": "À propos",
+    "transcribe": "Transcribe"
   },
   "onboarding": {
     "subtitle": "Pour commencer, choisissez un modèle de transcription",
@@ -175,10 +176,6 @@
       }
     },
     "general": {
-      "dropTip": {
-        "title": "Transcrire un fichier audio",
-        "body": "Faites glisser un fichier audio (WhatsApp .opus, mp3, m4a, wav…) sur la barre d’enregistrement lorsqu’elle est visible : le fichier sera transcrit à la place du microphone. Activez la fonction avec l’interrupteur ci-dessous."
-      },
       "dragDrop": {
         "label": "Transcrire les fichiers déposés",
         "description": "Permet de déposer un fichier audio sur la barre d’enregistrement pour le transcrire à la place du microphone."
@@ -225,7 +222,9 @@
           "restore": "Échec de la restauration du raccourci original",
           "set": "Échec de la définition du raccourci : {{error}}",
           "reset": "Échec de la réinitialisation du raccourci à sa valeur d'origine"
-        }
+        },
+        "disabled": "Off",
+        "disable": "Turn this shortcut off"
       },
       "language": {
         "title": "Langue",
@@ -237,12 +236,6 @@
       "pushToTalk": {
         "label": "Appuyer pour parler",
         "description": "Maintenez pour enregistrer, relâchez pour arrêter"
-      },
-      "importFile": {
-        "button": "Choose audio file…",
-        "busy": "Transcribing…",
-        "filter": "Audio",
-        "error": "Could not transcribe the selected file."
       }
     },
     "sound": {
@@ -728,5 +721,23 @@
   },
   "whatsNew": {
     "title": "Nouveautés de crwbar voice v{{version}}"
+  },
+  "transcribe": {
+    "title": "Transcribe a file",
+    "heading": "Transcribe an audio file",
+    "body": "Pick a recording and it is transcribed here, in the app. Nothing is typed into other windows and nothing appears on the recording bar — useful for meetings and long voice notes.",
+    "formats": "WAV, MP3, M4A, AAC, FLAC, OGG and OPUS — WhatsApp voice notes and Apple Voice Memos included.",
+    "filter": "Audio",
+    "pick": "Choose audio file…",
+    "pickAnother": "Transcribe another file",
+    "workingHint": "Long recordings are transcribed in pieces, so an hour of audio can take a few minutes.",
+    "elapsed": "{{time}} elapsed",
+    "resultTitle": "Transcript",
+    "copy": "Copy",
+    "copied": "Copied",
+    "savedToHistory": "Saved to History, where it is tagged as a file transcription.",
+    "empty": "The model returned no text for this file.",
+    "errorTitle": "Could not transcribe this file",
+    "unexpectedError": "The file could not be transcribed."
   }
 }

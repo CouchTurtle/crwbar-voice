@@ -14,7 +14,8 @@
     "postProcessing": "पोस्ट प्रोसेस",
     "history": "हिस्ट्री",
     "debug": "डिबग",
-    "about": "बारेमा"
+    "about": "बारेमा",
+    "transcribe": "Transcribe"
   },
   "onboarding": {
     "subtitle": "सुरु गर्न, एउटा ट्रान्सक्रिप्सन मोडेल छान्नुहोस्",
@@ -157,10 +158,6 @@
       "title": "{{model}} सेटिङहरू"
     },
     "general": {
-      "dropTip": {
-        "title": "अडियो फाइल ट्रान्सक्राइब गर्नुहोस्",
-        "body": "रेकर्डिङ बार देखिएको बेला अडियो फाइल (WhatsApp .opus, mp3, m4a, wav…) त्यसमा तान्नुहोस्; माइक्रोफोनको सट्टा फाइल ट्रान्सक्राइब हुनेछ। तलको स्विचबाट यो सुविधा सक्रिय गर्नुहोस्।"
-      },
       "dragDrop": {
         "label": "ड्रप गरिएका फाइल ट्रान्सक्राइब गर्नुहोस्",
         "description": "अडियो फाइललाई रेकर्डिङ बारमा तानेर माइक्रोफोनको सट्टा त्यसलाई ट्रान्सक्राइब गर्न दिन्छ।"
@@ -207,7 +204,9 @@
           "restore": "मूल सर्टकट पुनर्स्थापना गर्न सकिएन",
           "set": "सर्टकट सेट गर्न सकिएन: {{error}}",
           "reset": "सर्टकटलाई मूल मानमा रिसेट गर्न सकिएन"
-        }
+        },
+        "disabled": "Off",
+        "disable": "Turn this shortcut off"
       },
       "language": {
         "title": "भाषा",
@@ -219,12 +218,6 @@
       "pushToTalk": {
         "label": "पुश टु टक",
         "description": "रेकर्ड गर्न थिचिराख्नुहोस्, रोक्न छोड्नुहोस्"
-      },
-      "importFile": {
-        "button": "Choose audio file…",
-        "busy": "Transcribing…",
-        "filter": "Audio",
-        "error": "Could not transcribe the selected file."
       }
     },
     "models": {
@@ -728,5 +721,23 @@
     "voiceTranscribing": "अनुरोध ट्रान्सक्राइब हुँदैछ...",
     "voiceProcessing": "सोच्दै र लेख्दैछ...",
     "voiceDone": "AI को जवाफ टाँसियो"
+  },
+  "transcribe": {
+    "title": "Transcribe a file",
+    "heading": "Transcribe an audio file",
+    "body": "Pick a recording and it is transcribed here, in the app. Nothing is typed into other windows and nothing appears on the recording bar — useful for meetings and long voice notes.",
+    "formats": "WAV, MP3, M4A, AAC, FLAC, OGG and OPUS — WhatsApp voice notes and Apple Voice Memos included.",
+    "filter": "Audio",
+    "pick": "Choose audio file…",
+    "pickAnother": "Transcribe another file",
+    "workingHint": "Long recordings are transcribed in pieces, so an hour of audio can take a few minutes.",
+    "elapsed": "{{time}} elapsed",
+    "resultTitle": "Transcript",
+    "copy": "Copy",
+    "copied": "Copied",
+    "savedToHistory": "Saved to History, where it is tagged as a file transcription.",
+    "empty": "The model returned no text for this file.",
+    "errorTitle": "Could not transcribe this file",
+    "unexpectedError": "The file could not be transcribed."
   }
 }

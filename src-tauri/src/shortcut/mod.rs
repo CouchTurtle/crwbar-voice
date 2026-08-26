@@ -75,6 +75,13 @@ pub fn unregister_cancel_shortcut(app: &AppHandle) {
 }
 
 /// Register a shortcut using the appropriate implementation
+/// A cleared binding means the user switched the shortcut off. It is stored as
+/// an empty string rather than removed, so the id keeps its name, description
+/// and default and can be restored with the reset button.
+pub(crate) fn is_disabled(raw: &str) -> bool {
+    raw.trim().is_empty()
+}
+
 pub fn register_shortcut(app: &AppHandle, binding: ShortcutBinding) -> Result<(), String> {
     let settings = get_settings(app);
     match settings.keyboard_implementation {
@@ -110,11 +117,6 @@ pub fn change_binding(
     id: String,
     binding: String,
 ) -> Result<BindingResponse, String> {
-    // Reject empty bindings — every shortcut should have a value
-    if binding.trim().is_empty() {
-        return Err("Binding cannot be empty".to_string());
-    }
-
     let mut settings = settings::get_settings(&app);
 
     // Get the binding to modify, or create it from defaults if it doesn't exist
@@ -163,6 +165,20 @@ pub fn change_binding(
     if let Err(e) = unregister_shortcut(&app, binding_to_modify.clone()) {
         let error_msg = format!("Failed to unregister shortcut: {}", e);
         error!("change_binding error: {}", error_msg);
+    }
+
+    // A cleared binding is a valid state, not a broken one: unregister and stop.
+    if is_disabled(&binding) {
+        let mut disabled = binding_to_modify;
+        disabled.current_binding = String::new();
+        settings.bindings.insert(id.clone(), disabled.clone());
+        settings::write_settings(&app, settings);
+        info!("Shortcut '{}' disabled", id);
+        return Ok(BindingResponse {
+            success: true,
+            binding: Some(disabled),
+            error: None,
+        });
     }
 
     // Validate the new shortcut for the current keyboard implementation
@@ -363,6 +379,10 @@ fn unregister_all_shortcuts(app: &AppHandle, implementation: KeyboardImplementat
             continue;
         }
 
+        if is_disabled(&binding.current_binding) {
+            continue;
+        }
+
         let result = match implementation {
             KeyboardImplementation::Tauri => tauri_impl::unregister_shortcut(app, binding),
             KeyboardImplementation::HandyKeys => handy_keys::unregister_shortcut(app, binding),
@@ -404,6 +424,12 @@ fn register_all_shortcuts_for_implementation(
             .get(id)
             .cloned()
             .unwrap_or_else(|| default_binding.clone());
+
+        // Switched off by the user. Resetting it to the default here would turn
+        // it back on behind their back on every implementation switch.
+        if is_disabled(&binding.current_binding) {
+            continue;
+        }
 
         // Validate the shortcut for the target implementation
         if let Err(e) =

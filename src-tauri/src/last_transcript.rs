@@ -6,10 +6,10 @@
 //! transcription. These two entry points make it a deliberate act instead:
 //! copy it, or type it where the cursor is.
 //!
-//! Typing deliberately bypasses the clipboard rather than reusing
-//! [`crate::clipboard::paste`], which honours the user's `paste_method` and may
-//! route through the clipboard to do its job. The point of the insert shortcut
-//! is that the clipboard is left exactly as the user left it.
+//! Inserting goes through [`crate::clipboard::insert_preserving_clipboard`]
+//! rather than [`crate::clipboard::paste`]: `paste` honours a `paste_method` of
+//! `None`, which would make the shortcut silently do nothing, and the insert
+//! path has to put the clipboard back the way it found it either way.
 
 use std::sync::Arc;
 
@@ -66,16 +66,16 @@ pub fn copy_to_clipboard(app: &AppHandle) {
     }
 }
 
-/// Type the last completed transcription into whatever field has focus, without
-/// touching the clipboard.
+/// Insert the last completed transcription into whatever field has focus,
+/// leaving the clipboard as it was.
 pub fn insert_into_focused_field(app: &AppHandle) {
     let Some(text) = last_completed(app) else {
         return;
     };
 
-    match crate::clipboard::type_text_directly(&text, app) {
-        Ok(()) => info!("Typed the last transcript into the focused field."),
-        Err(err) => error!("Failed to type the last transcript: {err}"),
+    match crate::clipboard::insert_preserving_clipboard(&text, app) {
+        Ok(()) => info!("Inserted the last transcript into the focused field."),
+        Err(err) => error!("Failed to insert the last transcript: {err}"),
     }
 }
 

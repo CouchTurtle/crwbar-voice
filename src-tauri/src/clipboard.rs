@@ -542,13 +542,35 @@ fn paste_direct(
     input::paste_text_direct(enigo, text)
 }
 
-/// Type `text` into the focused field without touching the clipboard.
+/// The paste method to use when the caller needs a clipboard round-trip.
 ///
-/// [`paste`] routes through whatever `paste_method` the user configured, which
-/// may be clipboard-based (`CtrlV` and friends) or disabled entirely (`None`).
-/// The insert-last-transcript shortcut has to work regardless of that choice and
-/// must leave the clipboard alone, so it always types.
-pub fn type_text_directly(text: &str, app_handle: &AppHandle) -> Result<(), String> {
+/// `Direct`, `None` and `ExternalScript` have no paste keystroke to send, so a
+/// caller that specifically wants the save/paste/restore behaviour has to
+/// substitute one. The platform's standard combination is the safe choice.
+fn clipboard_paste_method(configured: PasteMethod) -> PasteMethod {
+    match configured {
+        method @ (PasteMethod::CtrlV | PasteMethod::CtrlShiftV | PasteMethod::ShiftInsert) => {
+            method
+        }
+        PasteMethod::Direct | PasteMethod::None | PasteMethod::ExternalScript => PasteMethod::CtrlV,
+    }
+}
+
+/// Insert `text` into the focused field and leave the clipboard as it was.
+///
+/// Typing the text one character at a time would avoid the clipboard entirely,
+/// but it is slow over transcript-length text and at the mercy of autocorrect,
+/// keyboard layout and apps that ignore synthetic key events. Going through the
+/// clipboard is instant and exact; [`paste_via_clipboard`] restores the previous
+/// contents afterwards, so the only trace is a brief window in which a clipboard
+/// manager could observe the text.
+///
+/// Unlike [`paste`] this ignores a `paste_method` that cannot paste — the point
+/// of the caller is to insert, not to honour a "do nothing" preference.
+pub fn insert_preserving_clipboard(text: &str, app_handle: &AppHandle) -> Result<(), String> {
+    let settings = get_settings(app_handle);
+    let paste_method = clipboard_paste_method(settings.paste_method);
+
     let enigo_state = app_handle
         .try_state::<EnigoState>()
         .ok_or("Enigo state not initialized")?;
@@ -557,11 +579,13 @@ pub fn type_text_directly(text: &str, app_handle: &AppHandle) -> Result<(), Stri
         .lock()
         .map_err(|e| format!("Failed to lock Enigo: {}", e))?;
 
-    paste_direct(
+    paste_via_clipboard(
         &mut enigo,
         text,
-        #[cfg(target_os = "linux")]
-        get_settings(app_handle).typing_tool,
+        app_handle,
+        &paste_method,
+        settings.paste_delay_ms,
+        settings.paste_delay_after_ms,
     )
 }
 
@@ -691,6 +715,28 @@ pub fn paste(text: String, app_handle: AppHandle) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn clipboard_paste_keeps_a_usable_paste_method() {
+        for method in [
+            PasteMethod::CtrlV,
+            PasteMethod::CtrlShiftV,
+            PasteMethod::ShiftInsert,
+        ] {
+            assert_eq!(clipboard_paste_method(method), method);
+        }
+    }
+
+    #[test]
+    fn clipboard_paste_substitutes_for_methods_that_cannot_paste() {
+        for method in [
+            PasteMethod::Direct,
+            PasteMethod::None,
+            PasteMethod::ExternalScript,
+        ] {
+            assert_eq!(clipboard_paste_method(method), PasteMethod::CtrlV);
+        }
+    }
 
     #[test]
     fn auto_submit_requires_setting_enabled() {

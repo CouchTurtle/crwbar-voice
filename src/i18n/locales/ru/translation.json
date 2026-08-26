@@ -14,7 +14,8 @@
     "postProcessing": "Постобработка",
     "history": "История",
     "debug": "Отладка",
-    "about": "О программе"
+    "about": "О программе",
+    "transcribe": "Transcribe"
   },
   "onboarding": {
     "subtitle": "Для начала выберите модель транскрипции",
@@ -175,10 +176,6 @@
       }
     },
     "general": {
-      "dropTip": {
-        "title": "Транскрибировать аудиофайл",
-        "body": "Перетащите аудиофайл (WhatsApp .opus, mp3, m4a, wav…) на панель записи, пока она видна; вместо микрофона будет транскрибирован файл. Включите функцию переключателем ниже."
-      },
       "dragDrop": {
         "label": "Транскрибировать перетащенные файлы",
         "description": "Позволяет перетащить аудиофайл на панель записи и транскрибировать его вместо микрофона."
@@ -225,7 +222,9 @@
           "restore": "Не удалось восстановить исходный ярлык",
           "set": "Не удалось установить ярлык: {{error}}",
           "reset": "Не удалось сбросить ярлык до исходного значения"
-        }
+        },
+        "disabled": "Off",
+        "disable": "Turn this shortcut off"
       },
       "language": {
         "title": "Язык",
@@ -237,12 +236,6 @@
       "pushToTalk": {
         "label": "Нажми и говори",
         "description": "Удерживайте, чтобы записать, отпустите, чтобы остановить"
-      },
-      "importFile": {
-        "button": "Choose audio file…",
-        "busy": "Transcribing…",
-        "filter": "Audio",
-        "error": "Could not transcribe the selected file."
       }
     },
     "sound": {
@@ -728,5 +721,23 @@
   },
   "whatsNew": {
     "title": "Новое в crwbar voice v{{version}}"
+  },
+  "transcribe": {
+    "title": "Transcribe a file",
+    "heading": "Transcribe an audio file",
+    "body": "Pick a recording and it is transcribed here, in the app. Nothing is typed into other windows and nothing appears on the recording bar — useful for meetings and long voice notes.",
+    "formats": "WAV, MP3, M4A, AAC, FLAC, OGG and OPUS — WhatsApp voice notes and Apple Voice Memos included.",
+    "filter": "Audio",
+    "pick": "Choose audio file…",
+    "pickAnother": "Transcribe another file",
+    "workingHint": "Long recordings are transcribed in pieces, so an hour of audio can take a few minutes.",
+    "elapsed": "{{time}} elapsed",
+    "resultTitle": "Transcript",
+    "copy": "Copy",
+    "copied": "Copied",
+    "savedToHistory": "Saved to History, where it is tagged as a file transcription.",
+    "empty": "The model returned no text for this file.",
+    "errorTitle": "Could not transcribe this file",
+    "unexpectedError": "The file could not be transcribed."
   }
 }

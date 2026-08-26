@@ -86,6 +86,8 @@ src/
 | Long audio transcribed in chunks                            | `managers/transcription.rs::split_for_transcription`                                                              |
 | Overlay "copied" confirmation with re-copy                  | overlay `done` state, `commands::copy_last_transcript`                                                            |
 | Shortcuts to copy / insert the last transcript              | `last_transcript.rs`, `actions.rs` (`copy_last_transcript`, `insert_last_transcript`)                             |
+| Shortcuts can be switched off                               | empty `current_binding`, `shortcut::is_disabled`                                                                  |
+| File transcription that stays in the app                    | `TranscribeSettings.tsx`, `transcribe_file(.., deliver: false)`                                                   |
 | History distinguishes microphone vs file                    | `managers/history.rs::source_from_file_name`                                                                      |
 | Custom accent color                                         | `settings.accent_color`, `src/lib/utils/theme.ts`, `AccentColorPicker.tsx`                                        |
 | RGB accent cycling ("Emil mode")                            | `settings.rgb_mode`, `theme.ts::startRgbMode`, `RgbModeToggle.tsx`                                                |
@@ -157,12 +159,32 @@ not seen. Defaults must also parse for _both_ backends, which
 with another default, since `register_shortcut` refuses duplicates.
 
 **Inserting text is not the same as pasting it.** `clipboard::paste` honours the
-user's `paste_method`, which may route through the clipboard or be `None`. The
-insert-last-transcript shortcut exists precisely so the clipboard stays
-untouched, so it calls `clipboard::type_text_directly` and always types. It also
-debounces on a timestamp rather than a pressed/released latch: key auto-repeat
-would otherwise type the transcript once per repeat, and a latch that never saw
-its release event would wedge the shortcut shut for good.
+user's `paste_method`, which may be `None` — that would make the
+insert-last-transcript shortcut silently do nothing. It calls
+`clipboard::insert_preserving_clipboard` instead, which substitutes a real paste
+combination for the methods that cannot paste and restores the previous
+clipboard contents afterwards. Typing the text character by character was the
+first approach and is the wrong one for transcript-length text: slow, and at the
+mercy of autocorrect, keyboard layout and apps that ignore synthetic key events.
+The shortcut also debounces on a timestamp rather than a pressed/released latch,
+because key auto-repeat would otherwise fire it once per repeat, and a latch
+that never saw its release event would wedge the shortcut shut for good.
+
+**An empty binding means "off", not "broken".** `change_binding` accepts an empty
+string and both backends return `Ok(())` without registering. That matters
+because the registration sweep validates bindings and _resets invalid ones to
+their default_ — without the `is_disabled` check in
+`register_all_shortcuts_for_implementation`, a shortcut the user switched off
+would switch itself back on the next time the keyboard implementation changed.
+Disabling exists because a global shortcut swallows its combination everywhere:
+Option+C and Option+V type ç and √ on macOS.
+
+**File imports have two modes.** `transcribe_file` takes a `deliver` flag.
+Dropping a file on the overlay or the window passes `true` and behaves like
+dictation — overlay, paste into the focused app. The Transcribe tab passes
+`false`: no overlay, nothing typed anywhere, the text is returned and shown in
+the tab. An hour of meeting audio must not be typed into whatever window happens
+to have focus. Both modes always write a history entry.
 
 **Long audio must stay chunked.** Engine memory scales with the length of a
 single `transcribe()` call, not with the model. A 19-minute recording made the
@@ -210,7 +232,7 @@ skips the build. It does **not** touch Rust — run those checks yourself from
 `src-tauri/`:
 
 ```bash
-cargo test         # 144 tests at 0.2.1
+cargo test         # 152 tests at 0.3.0
 cargo check
 cargo fmt -- --check
 ```

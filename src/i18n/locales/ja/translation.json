@@ -14,7 +14,8 @@
     "postProcessing": "後処理",
     "history": "履歴",
     "debug": "デバッグ",
-    "about": "概要"
+    "about": "概要",
+    "transcribe": "Transcribe"
   },
   "onboarding": {
     "subtitle": "開始するには、文字起こしのモデルを選択してください",
@@ -175,10 +176,6 @@
       }
     },
     "general": {
-      "dropTip": {
-        "title": "音声ファイルを文字起こし",
-        "body": "録音バーが表示されている間に音声ファイル（WhatsApp .opus、mp3、m4a、wav など）をドラッグしてください。マイクの代わりにファイルを文字起こしします。下のスイッチで機能を有効にしてください。"
-      },
       "dragDrop": {
         "label": "ドロップしたファイルを文字起こし",
         "description": "音声ファイルを録音バーにドラッグし、マイクの代わりに文字起こしできます。"
@@ -225,7 +222,9 @@
           "restore": "元のショートカットを復元できませんでした",
           "set": "ショートカットを設定できませんでした: {{error}}",
           "reset": "ショートカットを元の値にリセットできませんでした"
-        }
+        },
+        "disabled": "Off",
+        "disable": "Turn this shortcut off"
       },
       "language": {
         "title": "言語",
@@ -237,12 +236,6 @@
       "pushToTalk": {
         "label": "プッシュツートーク",
         "description": "押し続けて録音、離して停止"
-      },
-      "importFile": {
-        "button": "Choose audio file…",
-        "busy": "Transcribing…",
-        "filter": "Audio",
-        "error": "Could not transcribe the selected file."
       }
     },
     "sound": {
@@ -728,5 +721,23 @@
   },
   "whatsNew": {
     "title": "crwbar voice v{{version}} の新機能"
+  },
+  "transcribe": {
+    "title": "Transcribe a file",
+    "heading": "Transcribe an audio file",
+    "body": "Pick a recording and it is transcribed here, in the app. Nothing is typed into other windows and nothing appears on the recording bar — useful for meetings and long voice notes.",
+    "formats": "WAV, MP3, M4A, AAC, FLAC, OGG and OPUS — WhatsApp voice notes and Apple Voice Memos included.",
+    "filter": "Audio",
+    "pick": "Choose audio file…",
+    "pickAnother": "Transcribe another file",
+    "workingHint": "Long recordings are transcribed in pieces, so an hour of audio can take a few minutes.",
+    "elapsed": "{{time}} elapsed",
+    "resultTitle": "Transcript",
+    "copy": "Copy",
+    "copied": "Copied",
+    "savedToHistory": "Saved to History, where it is tagged as a file transcription.",
+    "empty": "The model returned no text for this file.",
+    "errorTitle": "Could not transcribe this file",
+    "unexpectedError": "The file could not be transcribed."
   }
 }

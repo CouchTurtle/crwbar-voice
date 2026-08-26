@@ -14,7 +14,8 @@
     "postProcessing": "Xử lý sau",
     "history": "Lịch sử",
     "debug": "Gỡ lỗi",
-    "about": "Giới thiệu"
+    "about": "Giới thiệu",
+    "transcribe": "Transcribe"
   },
   "onboarding": {
     "subtitle": "Để bắt đầu, hãy chọn một mô hình chuyển đổi giọng nói",
@@ -175,10 +176,6 @@
       }
     },
     "general": {
-      "dropTip": {
-        "title": "Chuyển lời tệp âm thanh thành văn bản",
-        "body": "Kéo một tệp âm thanh (WhatsApp .opus, mp3, m4a, wav…) vào thanh ghi âm khi thanh này đang hiển thị; tệp sẽ được chuyển thành văn bản thay cho micrô. Bật tính năng bằng công tắc bên dưới."
-      },
       "dragDrop": {
         "label": "Chuyển tệp được thả thành văn bản",
         "description": "Cho phép kéo tệp âm thanh vào thanh ghi âm để chuyển tệp thành văn bản thay cho micrô."
@@ -225,7 +222,9 @@
           "restore": "Không thể khôi phục phím tắt gốc",
           "set": "Không thể đặt phím tắt: {{error}}",
           "reset": "Không thể đặt lại phím tắt về giá trị gốc"
-        }
+        },
+        "disabled": "Off",
+        "disable": "Turn this shortcut off"
       },
       "language": {
         "title": "Ngôn ngữ",
@@ -237,12 +236,6 @@
       "pushToTalk": {
         "label": "Nhấn để nói",
         "description": "Giữ để ghi âm, thả để dừng"
-      },
-      "importFile": {
-        "button": "Choose audio file…",
-        "busy": "Transcribing…",
-        "filter": "Audio",
-        "error": "Could not transcribe the selected file."
       }
     },
     "sound": {
@@ -728,5 +721,23 @@
   },
   "whatsNew": {
     "title": "Điểm mới trong crwbar voice v{{version}}"
+  },
+  "transcribe": {
+    "title": "Transcribe a file",
+    "heading": "Transcribe an audio file",
+    "body": "Pick a recording and it is transcribed here, in the app. Nothing is typed into other windows and nothing appears on the recording bar — useful for meetings and long voice notes.",
+    "formats": "WAV, MP3, M4A, AAC, FLAC, OGG and OPUS — WhatsApp voice notes and Apple Voice Memos included.",
+    "filter": "Audio",
+    "pick": "Choose audio file…",
+    "pickAnother": "Transcribe another file",
+    "workingHint": "Long recordings are transcribed in pieces, so an hour of audio can take a few minutes.",
+    "elapsed": "{{time}} elapsed",
+    "resultTitle": "Transcript",
+    "copy": "Copy",
+    "copied": "Copied",
+    "savedToHistory": "Saved to History, where it is tagged as a file transcription.",
+    "empty": "The model returned no text for this file.",
+    "errorTitle": "Could not transcribe this file",
+    "unexpectedError": "The file could not be transcribed."
   }
 }

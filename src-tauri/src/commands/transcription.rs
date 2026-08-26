@@ -41,14 +41,24 @@ pub fn unload_model_manually(
         .map_err(|e| format!("Failed to unload model: {}", e))
 }
 
-/// Transcribe an audio file dropped onto the recording overlay.
+/// Transcribe an audio file.
 ///
-/// Decodes the file to 16 kHz mono, runs the currently selected model, then
-/// delivers the result like the mic path: best-effort paste into the focused app,
-/// optional clipboard copy, a history entry, and a completion pill.
+/// Decodes the file to 16 kHz mono, runs the currently selected model, and always
+/// writes a history entry. `deliver` decides what happens beyond that:
+///
+/// * `true` — the drop case. Behaves like the mic path: overlay while working,
+///   best-effort paste into the focused app, completion pill. Dropping a voice
+///   note on the recording bar to get it straight into a chat depends on this.
+/// * `false` — the picker case. Nothing is shown and nothing is typed anywhere.
+///   Transcribing an hour of meeting audio should not fire text into whatever
+///   window happens to have focus; the result belongs in the app.
 #[tauri::command]
 #[specta::specta]
-pub async fn transcribe_file(app: AppHandle, path: String) -> Result<String, String> {
+pub async fn transcribe_file(
+    app: AppHandle,
+    path: String,
+    deliver: bool,
+) -> Result<String, String> {
     // Deliberately ungated: this is reached either from the file picker (an
     // explicit user action) or from a drop, and the drop sites themselves honour
     // the `drag_drop_enabled` setting.
@@ -57,8 +67,11 @@ pub async fn transcribe_file(app: AppHandle, path: String) -> Result<String, Str
         return Err(format!("File not found: {}", path));
     }
 
-    // Immediate feedback in the overlay while we work.
-    crate::utils::show_transcribing_overlay(&app);
+    // Immediate feedback in the overlay while we work — only when the result is
+    // headed for another app. The picker reports progress in the window instead.
+    if deliver {
+        crate::utils::show_transcribing_overlay(&app);
+    }
 
     // Decode + model load + transcribe are blocking/CPU-bound; keep them off the
     // async reactor. Serialising the load with transcribe here mirrors the CLI path.
@@ -91,12 +104,16 @@ pub async fn transcribe_file(app: AppHandle, path: String) -> Result<String, Str
             // Log as well as surface it: a toast the user dismisses is otherwise
             // the only record, which makes decode failures impossible to diagnose.
             log::error!("File transcription failed for {}: {}", path, e);
-            crate::utils::hide_recording_overlay(&app);
+            if deliver {
+                crate::utils::hide_recording_overlay(&app);
+            }
             let _ = app.emit("transcription-error", e.clone());
             return Err(e);
         }
         Err(e) => {
-            crate::utils::hide_recording_overlay(&app);
+            if deliver {
+                crate::utils::hide_recording_overlay(&app);
+            }
             let msg = format!("Transcription task failed: {}", e);
             let _ = app.emit("transcription-error", msg.clone());
             return Err(msg);
@@ -108,7 +125,9 @@ pub async fn transcribe_file(app: AppHandle, path: String) -> Result<String, Str
     let final_text = processed.final_text;
 
     if final_text.trim().is_empty() {
-        crate::utils::hide_recording_overlay(&app);
+        if deliver {
+            crate::utils::hide_recording_overlay(&app);
+        }
         return Ok(String::new());
     }
 
@@ -134,16 +153,18 @@ pub async fn transcribe_file(app: AppHandle, path: String) -> Result<String, Str
     }
 
     // `paste` owns both text delivery and the existing clipboard-handling
-    // preference, so microphone and file transcriptions stay consistent.
-    let app_for_paste = app.clone();
-    let text_for_paste = final_text.clone();
-    app.run_on_main_thread(move || {
-        if let Err(e) = crate::utils::paste(text_for_paste, app_for_paste.clone()) {
-            log::debug!("Paste after file transcription skipped/failed: {}", e);
-        }
-        crate::utils::show_done_overlay(&app_for_paste);
-    })
-    .map_err(|e| format!("Failed to finalise on main thread: {}", e))?;
+    // preference, so dropped files and microphone recordings stay consistent.
+    if deliver {
+        let app_for_paste = app.clone();
+        let text_for_paste = final_text.clone();
+        app.run_on_main_thread(move || {
+            if let Err(e) = crate::utils::paste(text_for_paste, app_for_paste.clone()) {
+                log::debug!("Paste after file transcription skipped/failed: {}", e);
+            }
+            crate::utils::show_done_overlay(&app_for_paste);
+        })
+        .map_err(|e| format!("Failed to finalise on main thread: {}", e))?;
+    }
 
     Ok(final_text)
 }

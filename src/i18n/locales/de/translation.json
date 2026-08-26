@@ -14,7 +14,8 @@
     "postProcessing": "KI & Voice Actions",
     "history": "Verlauf",
     "debug": "Debug",
-    "about": "Info"
+    "about": "Info",
+    "transcribe": "Transkribieren"
   },
   "onboarding": {
     "subtitle": "Wähle ein Transkriptionsmodell, um loszulegen",
@@ -176,10 +177,6 @@
     },
     "general": {
       "title": "Allgemein",
-      "dropTip": {
-        "title": "Audiodatei transkribieren",
-        "body": "Wähle unten eine Datei oder zieh eine auf dieses Fenster — WhatsApp .opus, Apple Sprachmemo .m4a, mp3, wav und mehr. Für das Ablegen muss die Option oben aktiv sein."
-      },
       "dragDrop": {
         "label": "Datei-Drop transkribieren",
         "description": "Erlaubt, eine Audiodatei auf die Aufnahme-Leiste zu ziehen, um sie statt des Mikrofons zu transkribieren."
@@ -225,7 +222,9 @@
           "restore": "Ursprüngliches Tastenkürzel konnte nicht wiederhergestellt werden",
           "set": "Tastenkürzel konnte nicht gesetzt werden: {{error}}",
           "reset": "Tastenkürzel konnte nicht auf Originalwert zurückgesetzt werden"
-        }
+        },
+        "disabled": "Aus",
+        "disable": "Dieses Tastenkürzel abschalten"
       },
       "language": {
         "title": "Sprache",
@@ -237,12 +236,6 @@
       "pushToTalk": {
         "label": "Push-to-Talk",
         "description": "Gedrückt halten zum Aufnehmen, loslassen zum Stoppen"
-      },
-      "importFile": {
-        "button": "Audiodatei wählen…",
-        "busy": "Transkribiere…",
-        "filter": "Audio",
-        "error": "Die gewählte Datei konnte nicht transkribiert werden."
       }
     },
     "sound": {
@@ -728,5 +721,23 @@
   },
   "whatsNew": {
     "title": "Neu in crwbar voice v{{version}}"
+  },
+  "transcribe": {
+    "title": "Datei transkribieren",
+    "heading": "Audiodatei transkribieren",
+    "body": "Wähle eine Aufnahme — sie wird hier in der App transkribiert. Nichts wird in andere Fenster getippt und nichts erscheint auf der Aufnahmeleiste. Gedacht für Meetings und lange Sprachnachrichten.",
+    "formats": "WAV, MP3, M4A, AAC, FLAC, OGG und OPUS — auch WhatsApp-Sprachnachrichten und Apple-Sprachmemos.",
+    "filter": "Audio",
+    "pick": "Audiodatei wählen…",
+    "pickAnother": "Weitere Datei transkribieren",
+    "workingHint": "Lange Aufnahmen werden in Stücken transkribiert; eine Stunde Audio kann einige Minuten dauern.",
+    "elapsed": "{{time}} vergangen",
+    "resultTitle": "Transkript",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "savedToHistory": "Im Verlauf gespeichert und dort als Datei-Transkription markiert.",
+    "empty": "Das Modell hat für diese Datei keinen Text geliefert.",
+    "errorTitle": "Diese Datei konnte nicht transkribiert werden",
+    "unexpectedError": "Die Datei konnte nicht transkribiert werden."
   }
 }

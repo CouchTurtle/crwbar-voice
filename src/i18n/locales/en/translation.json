@@ -14,7 +14,8 @@
     "postProcessing": "AI & Voice Actions",
     "history": "History",
     "debug": "Debug",
-    "about": "About"
+    "about": "About",
+    "transcribe": "Transcribe"
   },
   "onboarding": {
     "subtitle": "To get started, choose a transcription model",
@@ -158,10 +159,6 @@
     },
     "general": {
       "title": "General",
-      "dropTip": {
-        "title": "Transcribe an audio file",
-        "body": "Pick a file below, or drop one onto this window — WhatsApp .opus, Apple Voice Memo .m4a, mp3, wav and more. Dropping requires the setting above."
-      },
       "dragDrop": {
         "label": "Transcribe dropped files",
         "description": "Lets you drag an audio file onto the recording bar to transcribe it instead of the microphone."
@@ -207,7 +204,9 @@
           "restore": "Failed to restore original shortcut",
           "set": "Failed to set shortcut: {{error}}",
           "reset": "Failed to reset shortcut to original value"
-        }
+        },
+        "disabled": "Off",
+        "disable": "Turn this shortcut off"
       },
       "language": {
         "title": "Language",
@@ -219,12 +218,6 @@
       "pushToTalk": {
         "label": "Push To Talk",
         "description": "Hold to record, release to stop"
-      },
-      "importFile": {
-        "button": "Choose audio file…",
-        "busy": "Transcribing…",
-        "filter": "Audio",
-        "error": "Could not transcribe the selected file."
       }
     },
     "models": {
@@ -728,5 +721,23 @@
     "copyAgain": "Copy again",
     "dropFile": "Drop file",
     "dropHint": "Drop an audio file here to transcribe it"
+  },
+  "transcribe": {
+    "title": "Transcribe a file",
+    "heading": "Transcribe an audio file",
+    "body": "Pick a recording and it is transcribed here, in the app. Nothing is typed into other windows and nothing appears on the recording bar — useful for meetings and long voice notes.",
+    "formats": "WAV, MP3, M4A, AAC, FLAC, OGG and OPUS — WhatsApp voice notes and Apple Voice Memos included.",
+    "filter": "Audio",
+    "pick": "Choose audio file…",
+    "pickAnother": "Transcribe another file",
+    "workingHint": "Long recordings are transcribed in pieces, so an hour of audio can take a few minutes.",
+    "elapsed": "{{time}} elapsed",
+    "resultTitle": "Transcript",
+    "copy": "Copy",
+    "copied": "Copied",
+    "savedToHistory": "Saved to History, where it is tagged as a file transcription.",
+    "empty": "The model returned no text for this file.",
+    "errorTitle": "Could not transcribe this file",
+    "unexpectedError": "The file could not be transcribed."
   }
 }

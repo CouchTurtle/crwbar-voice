@@ -870,15 +870,21 @@ async unloadModelManually() : Promise<Result<null, string>> {
 }
 },
 /**
- * Transcribe an audio file dropped onto the recording overlay.
+ * Transcribe an audio file.
  * 
- * Decodes the file to 16 kHz mono, runs the currently selected model, then
- * delivers the result like the mic path: best-effort paste into the focused app,
- * optional clipboard copy, a history entry, and a completion pill.
+ * Decodes the file to 16 kHz mono, runs the currently selected model, and always
+ * writes a history entry. `deliver` decides what happens beyond that:
+ * 
+ * * `true` — the drop case. Behaves like the mic path: overlay while working,
+ * best-effort paste into the focused app, completion pill. Dropping a voice
+ * note on the recording bar to get it straight into a chat depends on this.
+ * * `false` — the picker case. Nothing is shown and nothing is typed anywhere.
+ * Transcribing an hour of meeting audio should not fire text into whatever
+ * window happens to have focus; the result belongs in the app.
  */
-async transcribeFile(path: string) : Promise<Result<string, string>> {
+async transcribeFile(path: string, deliver: boolean) : Promise<Result<string, string>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("transcribe_file", { path }) };
+    return { status: "ok", data: await TAURI_INVOKE("transcribe_file", { path, deliver }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };

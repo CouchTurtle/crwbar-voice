@@ -188,7 +188,7 @@ const RecordingOverlay: React.FC = () => {
           // Discard any in-progress mic recording, then transcribe the file.
           commands
             .cancelOperation()
-            .finally(() => commands.transcribeFile(file));
+            .finally(() => commands.transcribeFile(file, true));
         }
       })
       .then((u) => {

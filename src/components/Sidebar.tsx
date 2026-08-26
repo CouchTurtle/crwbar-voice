@@ -1,6 +1,14 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Cog, FlaskConical, History, Info, Sparkles, Cpu } from "lucide-react";
+import {
+  Cog,
+  FlaskConical,
+  History,
+  Info,
+  Sparkles,
+  Cpu,
+  FileAudio,
+} from "lucide-react";
 import CrwbarVoiceLogo from "./icons/CrwbarVoiceLogo";
 import VoiceMark from "./icons/VoiceMark";
 import { useSettings } from "../hooks/useSettings";
@@ -12,6 +20,7 @@ import {
   AboutSettings,
   PostProcessingSettings,
   ModelsSettings,
+  TranscribeSettings,
 } from "./settings";
 
 export type SidebarSection = keyof typeof SECTIONS_CONFIG;
@@ -36,6 +45,12 @@ export const SECTIONS_CONFIG = {
     labelKey: "sidebar.general",
     icon: VoiceMark,
     component: GeneralSettings,
+    enabled: () => true,
+  },
+  transcribe: {
+    labelKey: "sidebar.transcribe",
+    icon: FileAudio,
+    component: TranscribeSettings,
     enabled: () => true,
   },
   models: {

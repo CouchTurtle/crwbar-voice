@@ -14,7 +14,8 @@
     "postProcessing": "Naverwerking",
     "history": "Geschiedenis",
     "debug": "Probleemoplossing",
-    "about": "Over crwbar voice"
+    "about": "Over crwbar voice",
+    "transcribe": "Transcribe"
   },
   "onboarding": {
     "subtitle": "Kies een transcriptiemodel om aan de slag te gaan",
@@ -157,10 +158,6 @@
       "title": "Instellingen voor {{model}}"
     },
     "general": {
-      "dropTip": {
-        "title": "Een audiobestand transcriberen",
-        "body": "Sleep een audiobestand (WhatsApp .opus, mp3, m4a, wav…) naar de opnamebalk terwijl die zichtbaar is; het bestand wordt dan getranscribeerd in plaats van de microfoon. Schakel de functie hieronder in."
-      },
       "dragDrop": {
         "label": "Neergezette bestanden transcriberen",
         "description": "Hiermee kun je een audiobestand naar de opnamebalk slepen om het te transcriberen in plaats van de microfoon."
@@ -207,7 +204,9 @@
           "restore": "Herstellen van originele sneltoets mislukt",
           "set": "Instellen van sneltoets mislukt: {{error}}",
           "reset": "Sneltoets terugzetten naar standaardwaarde mislukt"
-        }
+        },
+        "disabled": "Off",
+        "disable": "Turn this shortcut off"
       },
       "language": {
         "title": "Taal",
@@ -219,12 +218,6 @@
       "pushToTalk": {
         "label": "Push-to-talk",
         "description": "Ingedrukt houden om op te nemen, loslaten om te stoppen"
-      },
-      "importFile": {
-        "button": "Choose audio file…",
-        "busy": "Transcribing…",
-        "filter": "Audio",
-        "error": "Could not transcribe the selected file."
       }
     },
     "models": {
@@ -728,5 +721,23 @@
     "voiceTranscribing": "Opdracht transcriberen...",
     "voiceProcessing": "Denken en schrijven...",
     "voiceDone": "AI-antwoord geplakt"
+  },
+  "transcribe": {
+    "title": "Transcribe a file",
+    "heading": "Transcribe an audio file",
+    "body": "Pick a recording and it is transcribed here, in the app. Nothing is typed into other windows and nothing appears on the recording bar — useful for meetings and long voice notes.",
+    "formats": "WAV, MP3, M4A, AAC, FLAC, OGG and OPUS — WhatsApp voice notes and Apple Voice Memos included.",
+    "filter": "Audio",
+    "pick": "Choose audio file…",
+    "pickAnother": "Transcribe another file",
+    "workingHint": "Long recordings are transcribed in pieces, so an hour of audio can take a few minutes.",
+    "elapsed": "{{time}} elapsed",
+    "resultTitle": "Transcript",
+    "copy": "Copy",
+    "copied": "Copied",
+    "savedToHistory": "Saved to History, where it is tagged as a file transcription.",
+    "empty": "The model returned no text for this file.",
+    "errorTitle": "Could not transcribe this file",
+    "unexpectedError": "The file could not be transcribed."
   }
 }

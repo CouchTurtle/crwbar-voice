@@ -228,6 +228,11 @@ impl HandyKeysState {
 
     /// Register a shortcut binding
     pub fn register(&self, binding: &ShortcutBinding) -> Result<(), String> {
+        // Switched off by the user; nothing to register and nothing wrong.
+        if super::is_disabled(&binding.current_binding) {
+            return Ok(());
+        }
+
         let (tx, rx) = mpsc::channel();
         self.command_sender
             .lock()

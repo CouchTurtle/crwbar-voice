@@ -144,7 +144,7 @@ function App() {
         void commands.getAppSettings().then((settings) => {
           if (settings.status !== "ok" || !settings.data.drag_drop_enabled)
             return;
-          void commands.transcribeFile(file).then((result) => {
+          void commands.transcribeFile(file, true).then((result) => {
             if (result.status === "error") toast.error(String(result.error));
           });
         });
