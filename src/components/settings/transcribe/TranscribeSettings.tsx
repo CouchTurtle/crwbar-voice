@@ -16,6 +16,7 @@ import {
   Loader2,
   Upload,
   X,
+  ChevronDown,
 } from "lucide-react";
 import { commands, events } from "@/bindings";
 import { Button } from "../../ui/Button";
@@ -168,6 +169,7 @@ export const TranscribeSettings: React.FC = () => {
   const [phase, setPhase] = useState<Phase>({ status: "idle" });
   const [progress, setProgress] = useState<Progress | null>(null);
   const [dragging, setDragging] = useState(false);
+  const [modelListOpen, setModelListOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const copyResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const runningRef = useRef(false);
@@ -316,6 +318,14 @@ export const TranscribeSettings: React.FC = () => {
     (getSetting("file_transcription_model") as string | null) ??
     FOLLOW_DICTATION;
 
+  const selectedModel = installedModels.find(
+    (model) => model.id === selectedFileModel,
+  );
+  const selectedModelLabel =
+    selectedModel?.name ?? t("transcribe.model.followDictation");
+  const selectedModelHint =
+    selectedModel?.description ?? t("transcribe.model.followDictationHint");
+
   const handleModelChange = useCallback(
     (value: string) => {
       void updateSetting(
@@ -324,6 +334,15 @@ export const TranscribeSettings: React.FC = () => {
       );
     },
     [updateSetting],
+  );
+
+  // Picking is a one-off decision, so the list folds away again once made.
+  const selectModel = useCallback(
+    (value: string) => {
+      handleModelChange(value);
+      setModelListOpen(false);
+    },
+    [handleModelChange],
   );
 
   // Measured on this machine with this model, rather than guessed from a
@@ -423,24 +442,53 @@ export const TranscribeSettings: React.FC = () => {
         title={t("transcribe.model.title")}
         description={t("transcribe.model.description")}
       >
-        <ModelRow
-          title={t("transcribe.model.followDictation")}
-          description={t("transcribe.model.followDictationHint")}
-          selected={selectedFileModel === FOLLOW_DICTATION}
+        <button
+          type="button"
+          onClick={() => setModelListOpen((open) => !open)}
           disabled={running}
-          onSelect={() => handleModelChange(FOLLOW_DICTATION)}
-        />
-        {installedModels.map((model) => (
-          <ModelRow
-            key={model.id}
-            title={model.name}
-            description={model.description}
-            model={model}
-            selected={selectedFileModel === model.id}
-            disabled={running}
-            onSelect={() => handleModelChange(model.id)}
+          className={`w-full text-left px-4 py-3 flex items-center gap-3 transition-colors ${
+            running
+              ? "opacity-50 cursor-not-allowed"
+              : "cursor-pointer hover:bg-mid-gray/10"
+          }`}
+        >
+          <span className="flex-1 min-w-0">
+            <span className="block text-sm font-medium text-text truncate">
+              {selectedModelLabel}
+            </span>
+            <span className="block text-xs text-text/60 truncate">
+              {selectedModelHint}
+            </span>
+          </span>
+          <ChevronDown
+            className={`w-4 h-4 shrink-0 text-text/60 transition-transform ${
+              modelListOpen ? "rotate-180" : ""
+            }`}
           />
-        ))}
+        </button>
+
+        {modelListOpen && (
+          <>
+            <ModelRow
+              title={t("transcribe.model.followDictation")}
+              description={t("transcribe.model.followDictationHint")}
+              selected={selectedFileModel === FOLLOW_DICTATION}
+              disabled={running}
+              onSelect={() => selectModel(FOLLOW_DICTATION)}
+            />
+            {installedModels.map((model) => (
+              <ModelRow
+                key={model.id}
+                title={model.name}
+                description={model.description}
+                model={model}
+                selected={selectedFileModel === model.id}
+                disabled={running}
+                onSelect={() => selectModel(model.id)}
+              />
+            ))}
+          </>
+        )}
       </SettingsGroup>
 
       {phase.status === "error" && (
