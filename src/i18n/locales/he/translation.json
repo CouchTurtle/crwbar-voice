@@ -745,7 +745,9 @@
     "model": {
       "title": "Model for files",
       "description": "Dictation needs a model that keeps up live. A recorded meeting does not, so it can use a slower, more accurate one. Switching models here means the next dictation reloads its own.",
-      "followDictation": "Same as dictation"
-    }
+      "followDictation": "Same as dictation",
+      "followDictationHint": "Uses whatever model dictation is set to."
+    },
+    "cancel": "Cancel"
   }
 }

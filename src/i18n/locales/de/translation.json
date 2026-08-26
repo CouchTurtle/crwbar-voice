@@ -745,7 +745,9 @@
     "model": {
       "title": "Modell für Dateien",
       "description": "Beim Diktieren muss das Modell live mithalten. Eine aufgezeichnete Besprechung muss das nicht und verträgt ein langsameres, genaueres. Ein anderes Modell hier bedeutet, dass das Diktat-Modell beim nächsten Mal neu geladen wird.",
-      "followDictation": "Wie beim Diktieren"
-    }
+      "followDictation": "Wie beim Diktieren",
+      "followDictationHint": "Nutzt das Modell, das fürs Diktieren eingestellt ist."
+    },
+    "cancel": "Abbrechen"
   }
 }

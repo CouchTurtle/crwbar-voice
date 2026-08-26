@@ -197,6 +197,23 @@ would freeze it at its initial value. The tab's handler is deliberately _not_
 gated on `drag_drop_enabled`: dropping onto a zone that exists only in that tab
 is as explicit as clicking its button.
 
+**A live dictation can steal the engine mid-run.** `start_stream` takes the
+engine _out_ of its mutex (`lock_engine().take()`) for the duration of a
+streaming session. A chunked transcription that called `transcribe` in that
+window used to hit the `engine_guard.is_none()` guard, fail with "Model is not
+loaded", and discard every chunk it had already finished — reachable simply by
+dictating while a long file was being transcribed. The chunk loop now calls
+`wait_for_engine` before each chunk and waits it out. Do not "optimise" that
+into an error path: waiting costs a dictation's worth of seconds, failing costs
+the whole run.
+
+**Cancellation happens between chunks.** `cancel_chunked` is checked before each
+chunk and inside the engine wait, so a cancel lands even while a dictation holds
+the engine. Short audio is one engine call with nowhere to interrupt it, so it
+cannot be cancelled — and finishes faster than the button could be pressed. The
+backend reports a cancelled run as an ordinary error; the frontend suppresses it
+because it knows it asked.
+
 **The time estimate is measured, not looked up.** The catalog carries a
 `speed_score` derived from a realtime factor on a reference machine, which says
 nothing about this Mac. Instead `TranscriptionManager` emits
@@ -252,7 +269,7 @@ skips the build. It does **not** touch Rust — run those checks yourself from
 `src-tauri/`:
 
 ```bash
-cargo test         # 154 tests at 0.3.0
+cargo test         # 155 tests at 0.3.0
 cargo check
 cargo fmt -- --check
 ```

@@ -15,14 +15,14 @@ import {
   FileAudio,
   Loader2,
   Upload,
+  X,
 } from "lucide-react";
 import { commands, events } from "@/bindings";
 import { Button } from "../../ui/Button";
-import { Dropdown } from "../../ui/Dropdown";
-import { SettingContainer } from "../../ui/SettingContainer";
 import { SettingsGroup } from "../../ui/SettingsGroup";
 import { useSettings } from "../../../hooks/useSettings";
 import { useModelStore } from "../../../stores/modelStore";
+import type { ModelInfo } from "@/bindings";
 
 /** Audio containers the importer can decode (see `file_import.rs`). */
 const AUDIO_EXTENSIONS = [
@@ -37,8 +37,83 @@ const AUDIO_EXTENSIONS = [
   "opus",
 ];
 
-/** Sentinel for "no override" — an empty value cannot round-trip a Dropdown. */
+/** Sentinel for "no override"; `null` is what actually reaches the backend. */
 const FOLLOW_DICTATION = "__follow_dictation__";
+
+const ScoreBar: React.FC<{ label: string; score: number }> = ({
+  label,
+  score,
+}) => (
+  <div className="flex items-center gap-2">
+    <p className="text-[11px] text-text/50 w-14 text-end">{label}</p>
+    <div className="w-14 h-1 bg-mid-gray/20 rounded-full overflow-hidden">
+      <div
+        className="h-full bg-logo-primary rounded-full"
+        style={{ width: `${Math.round(score * 100)}%` }}
+      />
+    </div>
+  </div>
+);
+
+interface ModelRowProps {
+  title: string;
+  description: string;
+  model?: ModelInfo;
+  selected: boolean;
+  disabled: boolean;
+  onSelect: () => void;
+}
+
+const ModelRow: React.FC<ModelRowProps> = ({
+  title,
+  description,
+  model,
+  selected,
+  disabled,
+  onSelect,
+}) => {
+  const { t } = useTranslation();
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      disabled={disabled}
+      className={`w-full text-left px-4 py-3 flex items-center gap-3 transition-colors ${
+        selected ? "bg-logo-primary/10" : "hover:bg-mid-gray/10"
+      } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+    >
+      <span
+        className={`w-4 h-4 shrink-0 rounded-full border flex items-center justify-center ${
+          selected ? "border-logo-primary" : "border-mid-gray/60"
+        }`}
+      >
+        {selected && <span className="w-2 h-2 rounded-full bg-logo-primary" />}
+      </span>
+
+      <span className="flex-1 min-w-0">
+        <span className="block text-sm font-medium text-text truncate">
+          {title}
+        </span>
+        <span className="block text-xs text-text/60 truncate">
+          {description}
+        </span>
+      </span>
+
+      {model && (model.accuracy_score > 0 || model.speed_score > 0) && (
+        <span className="hidden sm:block space-y-1 shrink-0">
+          <ScoreBar
+            label={t("onboarding.modelCard.accuracy")}
+            score={model.accuracy_score}
+          />
+          <ScoreBar
+            label={t("onboarding.modelCard.speed")}
+            score={model.speed_score}
+          />
+        </span>
+      )}
+    </button>
+  );
+};
 
 type Phase =
   | { status: "idle" }
@@ -96,6 +171,9 @@ export const TranscribeSettings: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const copyResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const runningRef = useRef(false);
+  // The backend reports a cancelled run as an error. The UI asked for it, so it
+  // knows better and shows an idle tab rather than a failure.
+  const cancelledRef = useRef(false);
 
   const running = phase.status === "running";
   runningRef.current = running;
@@ -117,9 +195,11 @@ export const TranscribeSettings: React.FC = () => {
       if (runningRef.current) return;
       const fileName = fileNameOf(path);
       setProgress(null);
+      cancelledRef.current = false;
       setPhase({ status: "running", fileName });
       try {
         const result = await commands.transcribeFile(path, false);
+        if (cancelledRef.current) return;
         if (result.status === "error") {
           setPhase({
             status: "error",
@@ -130,6 +210,7 @@ export const TranscribeSettings: React.FC = () => {
         }
         setPhase({ status: "done", fileName, text: result.data });
       } catch (error) {
+        if (cancelledRef.current) return;
         console.error("Failed to transcribe the selected file:", error);
         setPhase({
           status: "error",
@@ -199,6 +280,13 @@ export const TranscribeSettings: React.FC = () => {
     };
   }, [t, transcribe]);
 
+  const handleCancel = useCallback(() => {
+    cancelledRef.current = true;
+    void commands.cancelFileTranscription();
+    setProgress(null);
+    setPhase({ status: "idle" });
+  }, []);
+
   const handlePick = useCallback(async () => {
     const picked = await open({
       multiple: false,
@@ -219,13 +307,10 @@ export const TranscribeSettings: React.FC = () => {
     }
   }, []);
 
-  const modelOptions = useMemo(() => {
-    const installed = models.filter((model) => model.is_downloaded);
-    return [
-      { value: FOLLOW_DICTATION, label: t("transcribe.model.followDictation") },
-      ...installed.map((model) => ({ value: model.id, label: model.name })),
-    ];
-  }, [models, t]);
+  const installedModels = useMemo(
+    () => models.filter((model) => model.is_downloaded),
+    [models],
+  );
 
   const selectedFileModel =
     (getSetting("file_transcription_model") as string | null) ??
@@ -260,9 +345,20 @@ export const TranscribeSettings: React.FC = () => {
             <div className="flex items-start gap-4">
               <Loader2 className="w-6 h-6 shrink-0 mt-0.5 text-logo-primary animate-spin" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-text truncate">
-                  {phase.fileName}
-                </p>
+                <div className="flex items-start gap-3">
+                  <p className="text-sm font-medium text-text truncate flex-1 min-w-0">
+                    {phase.fileName}
+                  </p>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={handleCancel}
+                    className="flex items-center gap-1 shrink-0"
+                  >
+                    <X className="w-3 h-3" />
+                    {t("transcribe.cancel")}
+                  </Button>
+                </div>
                 <p className="text-sm text-text/60 mt-1">
                   {t("transcribe.workingHint")}
                 </p>
@@ -321,21 +417,30 @@ export const TranscribeSettings: React.FC = () => {
             </div>
           )}
         </div>
+      </SettingsGroup>
 
-        <SettingContainer
-          title={t("transcribe.model.title")}
-          description={t("transcribe.model.description")}
-          descriptionMode="tooltip"
-          grouped={true}
-          layout="horizontal"
-        >
-          <Dropdown
-            options={modelOptions}
-            selectedValue={selectedFileModel}
-            onSelect={handleModelChange}
+      <SettingsGroup
+        title={t("transcribe.model.title")}
+        description={t("transcribe.model.description")}
+      >
+        <ModelRow
+          title={t("transcribe.model.followDictation")}
+          description={t("transcribe.model.followDictationHint")}
+          selected={selectedFileModel === FOLLOW_DICTATION}
+          disabled={running}
+          onSelect={() => handleModelChange(FOLLOW_DICTATION)}
+        />
+        {installedModels.map((model) => (
+          <ModelRow
+            key={model.id}
+            title={model.name}
+            description={model.description}
+            model={model}
+            selected={selectedFileModel === model.id}
             disabled={running}
+            onSelect={() => handleModelChange(model.id)}
           />
-        </SettingContainer>
+        ))}
       </SettingsGroup>
 
       {phase.status === "error" && (

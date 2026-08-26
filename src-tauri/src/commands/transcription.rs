@@ -41,6 +41,18 @@ pub fn unload_model_manually(
         .map_err(|e| format!("Failed to unload model: {}", e))
 }
 
+/// Stop a running file transcription at the next chunk boundary.
+///
+/// Only chunked (long) audio can be cancelled — a short file is a single
+/// engine call with nowhere to interrupt it, and finishes before a button
+/// could be pressed anyway.
+#[tauri::command]
+#[specta::specta]
+pub fn cancel_file_transcription(app: AppHandle) {
+    app.state::<Arc<TranscriptionManager>>()
+        .cancel_chunked_transcription();
+}
+
 /// Which model a file import runs on.
 ///
 /// The override wins where it is set; otherwise files follow dictation. Loading

@@ -257,6 +257,9 @@ pub struct TranscriptionManager {
     /// `is_model_loaded()` consults this so the model still reports "loaded"
     /// while the worker holds it.
     active_engine_lease: Arc<AtomicU64>,
+    /// Set to stop a chunked transcription between chunks. Only long audio is
+    /// chunked, which is also the only run long enough to be worth cancelling.
+    cancel_chunked: Arc<AtomicBool>,
 }
 
 /// Progress through a chunked transcription, emitted as `transcription-progress`.
@@ -283,6 +286,13 @@ const MAX_TRANSCRIBE_CHUNK_SAMPLES: usize = 16_000 * 120;
 const CHUNK_BACKTRACK_SAMPLES: usize = 16_000 * 10;
 /// Window scored when looking for that quiet spot (50 ms).
 const CHUNK_WINDOW_SAMPLES: usize = 16_000 / 20;
+
+/// How long a chunked run waits for the engine to come back before giving up.
+/// A live dictation borrows the engine for as long as someone speaks, so this
+/// has to outlast a sentence by a wide margin.
+const ENGINE_WAIT_TIMEOUT: Duration = Duration::from_secs(300);
+/// Poll interval while waiting. Coarse on purpose: nothing here is urgent.
+const ENGINE_WAIT_POLL: Duration = Duration::from_millis(250);
 
 /// Split `audio` into engine-sized pieces, cutting at the quietest point within
 /// [`CHUNK_BACKTRACK_SAMPLES`] before each hard limit. Returns one slice when the
@@ -330,6 +340,43 @@ fn split_for_transcription(audio: &[f32]) -> Vec<&[f32]> {
 }
 
 impl TranscriptionManager {
+    /// Ask a running chunked transcription to stop at the next chunk boundary.
+    /// A no-op when nothing is running; the flag is cleared when a run starts.
+    pub fn cancel_chunked_transcription(&self) {
+        self.cancel_chunked.store(true, Ordering::Release);
+    }
+
+    /// Block until the engine is back in its slot.
+    ///
+    /// A live dictation on a streaming model *takes the engine out* of the mutex
+    /// for the duration of the stream. A chunked run that simply called
+    /// `transcribe` in that window used to fail with "Model is not loaded" and
+    /// throw away every chunk it had already done. Waiting costs a dictation's
+    /// worth of seconds and loses nothing.
+    fn wait_for_engine(&self) -> Result<()> {
+        if self.lock_engine().is_some() {
+            return Ok(());
+        }
+
+        info!("Chunked transcription is waiting for the engine to be released");
+        let deadline = Instant::now() + ENGINE_WAIT_TIMEOUT;
+        while Instant::now() < deadline {
+            if self.cancel_chunked.load(Ordering::Acquire) {
+                return Ok(());
+            }
+            if self.lock_engine().is_some() {
+                debug!("Engine is available again; resuming");
+                return Ok(());
+            }
+            std::thread::sleep(ENGINE_WAIT_POLL);
+        }
+
+        Err(anyhow::anyhow!(
+            "The transcription engine stayed busy for {}s; giving up.",
+            ENGINE_WAIT_TIMEOUT.as_secs()
+        ))
+    }
+
     fn emit_progress(
         &self,
         chunk: usize,
@@ -363,6 +410,7 @@ impl TranscriptionManager {
             next_stream_worker_id: Arc::new(AtomicU64::new(1)),
             active_stream_worker: Arc::new(AtomicU64::new(0)),
             active_engine_lease: Arc::new(AtomicU64::new(0)),
+            cancel_chunked: Arc::new(AtomicBool::new(false)),
         };
 
         // Start the idle watcher
@@ -1222,16 +1270,27 @@ impl TranscriptionManager {
 
             let seconds_total = audio.len() as f64 / 16_000.0;
             let mut seconds_done = 0.0;
+            self.cancel_chunked.store(false, Ordering::Release);
             self.emit_progress(0, chunks.len(), 0.0, seconds_total);
 
             let mut parts: Vec<String> = Vec::with_capacity(chunks.len());
             for (index, chunk) in chunks.iter().enumerate() {
+                if self.cancel_chunked.load(Ordering::Acquire) {
+                    info!("Chunked transcription cancelled after {} chunks", index);
+                    return Err(anyhow::anyhow!("Transcription cancelled."));
+                }
                 debug!(
                     "Transcribing chunk {}/{} ({:.1}s)",
                     index + 1,
                     chunks.len(),
                     chunk.len() as f64 / 16_000.0
                 );
+                // A dictation may have borrowed the engine since the last chunk.
+                self.wait_for_engine()?;
+                if self.cancel_chunked.load(Ordering::Acquire) {
+                    info!("Chunked transcription cancelled while waiting for the engine");
+                    return Err(anyhow::anyhow!("Transcription cancelled."));
+                }
                 let text = self.transcribe(chunk.to_vec())?;
                 let text = text.trim();
                 if !text.is_empty() {
@@ -2016,6 +2075,21 @@ mod tests {
 
     fn languages(codes: &[&str]) -> Vec<String> {
         codes.iter().map(|code| (*code).to_string()).collect()
+    }
+
+    /// The engine wait exists because a dictation on a streaming model takes the
+    /// engine out of its slot mid-run. Cancelling has to break that wait, or a
+    /// cancel pressed while a dictation is live would hang for the full timeout.
+    #[test]
+    fn the_engine_wait_is_long_enough_to_outlast_a_dictation() {
+        assert!(
+            super::ENGINE_WAIT_TIMEOUT >= std::time::Duration::from_secs(60),
+            "a wait shorter than a spoken sentence would defeat the purpose"
+        );
+        assert!(
+            super::ENGINE_WAIT_POLL < super::ENGINE_WAIT_TIMEOUT,
+            "the poll interval has to fit inside the timeout"
+        );
     }
 
     #[test]

@@ -902,6 +902,16 @@ async transcribeFile(path: string, deliver: boolean) : Promise<Result<string, st
     else return { status: "error", error: e  as any };
 }
 },
+/**
+ * Stop a running file transcription at the next chunk boundary.
+ * 
+ * Only chunked (long) audio can be cancelled — a short file is a single
+ * engine call with nowhere to interrupt it, and finishes before a button
+ * could be pressed anyway.
+ */
+async cancelFileTranscription() : Promise<void> {
+    await TAURI_INVOKE("cancel_file_transcription");
+},
 async getHistoryEntries(cursor: number | null, limit: number | null, source: HistorySource | null) : Promise<Result<PaginatedHistory, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("get_history_entries", { cursor, limit, source }) };
