@@ -542,6 +542,29 @@ fn paste_direct(
     input::paste_text_direct(enigo, text)
 }
 
+/// Type `text` into the focused field without touching the clipboard.
+///
+/// [`paste`] routes through whatever `paste_method` the user configured, which
+/// may be clipboard-based (`CtrlV` and friends) or disabled entirely (`None`).
+/// The insert-last-transcript shortcut has to work regardless of that choice and
+/// must leave the clipboard alone, so it always types.
+pub fn type_text_directly(text: &str, app_handle: &AppHandle) -> Result<(), String> {
+    let enigo_state = app_handle
+        .try_state::<EnigoState>()
+        .ok_or("Enigo state not initialized")?;
+    let mut enigo = enigo_state
+        .0
+        .lock()
+        .map_err(|e| format!("Failed to lock Enigo: {}", e))?;
+
+    paste_direct(
+        &mut enigo,
+        text,
+        #[cfg(target_os = "linux")]
+        get_settings(app_handle).typing_tool,
+    )
+}
+
 fn send_return_key(enigo: &mut Enigo, key_type: AutoSubmitKey) -> Result<(), String> {
     match key_type {
         AutoSubmitKey::Enter => {

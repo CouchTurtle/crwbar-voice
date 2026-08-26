@@ -211,6 +211,14 @@
           "voice_action": {
             "name": "Voice-Action-Tastenkürzel",
             "description": "Sprich eine Anweisung und erzeuge daraus mit optionalem Kontext und dem gewählten KI-Backend einen Text."
+          },
+          "copy_last_transcript": {
+            "name": "Kopieren-Tastenkürzel",
+            "description": "Das Tastenkürzel, um die letzte Transkription in die Zwischenablage zu kopieren."
+          },
+          "insert_last_transcript": {
+            "name": "Einfügen-Tastenkürzel",
+            "description": "Das Tastenkürzel, um die letzte Transkription in das aktive Feld zu tippen, ohne die Zwischenablage zu verändern."
           }
         },
         "errors": {

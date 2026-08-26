@@ -190,6 +190,14 @@
           "voice_action": {
             "name": "Voice Action Shortcut",
             "description": "Speak an instruction and generate text using optional context and your selected AI backend."
+          },
+          "copy_last_transcript": {
+            "name": "Copy Last Transcript",
+            "description": "The keyboard shortcut to copy the most recent transcription to the clipboard."
+          },
+          "insert_last_transcript": {
+            "name": "Insert Last Transcript",
+            "description": "The keyboard shortcut to type the most recent transcription into the focused field, without changing the clipboard."
           }
         },
         "errors": {

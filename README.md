@@ -39,6 +39,8 @@ The app currently includes:
   of exhausting memory;
 - transcription history with microphone/file filters;
 - optional automatic clipboard copy and paste;
+- shortcuts to reach for the last transcript again: one copies it to the
+  clipboard, one types it into the focused field without touching the clipboard;
 - a custom accent color for the interface and the recording bar;
 - audio ducking that lowers other playback while recording, at a speed you pick;
 - optional AI post-processing through a provider configured by the user.

@@ -10,6 +10,7 @@ mod commands;
 mod file_import;
 mod helpers;
 mod input;
+mod last_transcript;
 mod llm_client;
 mod managers;
 mod overlay;

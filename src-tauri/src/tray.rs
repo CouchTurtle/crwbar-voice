@@ -1,16 +1,14 @@
-use crate::managers::history::{HistoryEntry, HistoryManager};
 use crate::managers::model::ModelManager;
 use crate::managers::transcription::TranscriptionManager;
 use crate::settings;
 use crate::tray_i18n::get_tray_translations;
-use log::{debug, error, info, warn};
+use log::{debug, error, info};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use tauri::image::Image;
 use tauri::menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tauri::tray::TrayIcon;
 use tauri::{AppHandle, Manager, Theme};
-use tauri_plugin_clipboard_manager::ClipboardExt;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum TrayIconState {
@@ -289,13 +287,6 @@ pub fn update_tray_menu(app: &AppHandle, locale: Option<&str>) {
     let _ = tray.set_tooltip(Some(version_label));
 }
 
-fn last_transcript_text(entry: &HistoryEntry) -> &str {
-    entry
-        .post_processed_text
-        .as_deref()
-        .unwrap_or(&entry.transcription_text)
-}
-
 pub fn set_tray_visibility(app: &AppHandle, visible: bool) {
     let tray = app.state::<TrayIcon>();
     if let Err(e) = tray.set_visible(visible) {
@@ -306,67 +297,12 @@ pub fn set_tray_visibility(app: &AppHandle, visible: bool) {
 }
 
 pub fn copy_last_transcript(app: &AppHandle) {
-    let history_manager = app.state::<Arc<HistoryManager>>();
-    let entry = match history_manager.get_latest_completed_entry() {
-        Ok(Some(entry)) => entry,
-        Ok(None) => {
-            warn!("No completed transcription history entries available for tray copy.");
-            return;
-        }
-        Err(err) => {
-            error!(
-                "Failed to fetch last completed transcription entry: {}",
-                err
-            );
-            return;
-        }
-    };
-
-    let text = last_transcript_text(&entry);
-    if text.trim().is_empty() {
-        warn!("Last completed transcription is empty; skipping tray copy.");
-        return;
-    }
-
-    if let Err(err) = app.clipboard().write_text(text) {
-        error!("Failed to copy last transcript to clipboard: {}", err);
-        return;
-    }
-
-    info!("Copied last transcript to clipboard via tray.");
+    crate::last_transcript::copy_to_clipboard(app);
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{last_transcript_text, load_tray_icon};
-    use crate::managers::history::{HistoryEntry, HistorySource};
-
-    fn build_entry(transcription: &str, post_processed: Option<&str>) -> HistoryEntry {
-        HistoryEntry {
-            id: 1,
-            file_name: "handy-1.wav".to_string(),
-            timestamp: 0,
-            saved: false,
-            title: "Recording".to_string(),
-            transcription_text: transcription.to_string(),
-            post_processed_text: post_processed.map(|text| text.to_string()),
-            post_process_prompt: None,
-            post_process_requested: false,
-            source: HistorySource::Microphone,
-        }
-    }
-
-    #[test]
-    fn uses_post_processed_text_when_available() {
-        let entry = build_entry("raw", Some("processed"));
-        assert_eq!(last_transcript_text(&entry), "processed");
-    }
-
-    #[test]
-    fn falls_back_to_raw_transcription() {
-        let entry = build_entry("raw", None);
-        assert_eq!(last_transcript_text(&entry), "raw");
-    }
+    use super::load_tray_icon;
 
     #[test]
     fn tray_icon_resolution_failure_is_returned_instead_of_panicking() {

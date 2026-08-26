@@ -946,6 +946,35 @@ pub fn get_default_settings() -> AppSettings {
             current_binding: default_voice_action_shortcut.to_string(),
         },
     );
+    // Reaching back at the last transcript. Option/Alt+C and +V sit next to the
+    // system copy/paste shortcuts they echo, one key away from Cmd/Ctrl.
+    #[cfg(target_os = "macos")]
+    let (default_copy_shortcut, default_insert_shortcut) = ("option+c", "option+v");
+    #[cfg(not(target_os = "macos"))]
+    let (default_copy_shortcut, default_insert_shortcut) = ("alt+c", "alt+v");
+
+    bindings.insert(
+        "copy_last_transcript".to_string(),
+        ShortcutBinding {
+            id: "copy_last_transcript".to_string(),
+            name: "Copy Last Transcript".to_string(),
+            description: "Copies the most recent transcription to the clipboard.".to_string(),
+            default_binding: default_copy_shortcut.to_string(),
+            current_binding: default_copy_shortcut.to_string(),
+        },
+    );
+    bindings.insert(
+        "insert_last_transcript".to_string(),
+        ShortcutBinding {
+            id: "insert_last_transcript".to_string(),
+            name: "Insert Last Transcript".to_string(),
+            description:
+                "Types the most recent transcription into the focused field, leaving the clipboard untouched."
+                    .to_string(),
+            default_binding: default_insert_shortcut.to_string(),
+            current_binding: default_insert_shortcut.to_string(),
+        },
+    );
     bindings.insert(
         "cancel".to_string(),
         ShortcutBinding {
@@ -1278,6 +1307,67 @@ mod tests {
             voice_action.current_binding, transcribe.current_binding,
             "Voice Actions must not shadow normal dictation by default"
         );
+    }
+
+    #[test]
+    fn default_bindings_are_all_unique() {
+        let settings = get_default_settings();
+        let mut seen: HashMap<&str, &str> = HashMap::new();
+
+        for binding in settings.bindings.values() {
+            if let Some(other) = seen.insert(&binding.current_binding, &binding.id) {
+                panic!(
+                    "'{}' and '{}' both default to {}; one would fail to register",
+                    other, binding.id, binding.current_binding
+                );
+            }
+        }
+    }
+
+    /// The last-transcript shortcuts only reach `ACTION_MAP` if they are in the
+    /// defaults: both shortcut backends register from `get_default_settings`,
+    /// and `load_or_create_app_settings` merges new ids into existing stores.
+    #[test]
+    fn default_bindings_include_the_last_transcript_shortcuts() {
+        let settings = get_default_settings();
+
+        for id in ["copy_last_transcript", "insert_last_transcript"] {
+            let binding = settings
+                .bindings
+                .get(id)
+                .unwrap_or_else(|| panic!("{id} binding should exist"));
+            assert_eq!(binding.id, id);
+            assert!(
+                !binding.current_binding.is_empty(),
+                "{id} needs a default key combination"
+            );
+        }
+    }
+
+    /// Guards the chosen defaults against the parser that actually has to accept
+    /// them. A binding that fails here is dropped at registration with nothing
+    /// but a log line, so the shortcut would silently never fire.
+    #[test]
+    fn default_bindings_parse_for_both_shortcut_backends() {
+        use tauri_plugin_global_shortcut::Shortcut;
+
+        for binding in get_default_settings().bindings.values() {
+            crate::shortcut::tauri_impl::validate_shortcut(&binding.current_binding)
+                .unwrap_or_else(|e| panic!("'{}' is invalid: {e}", binding.current_binding));
+
+            binding
+                .current_binding
+                .parse::<Shortcut>()
+                .unwrap_or_else(|e| panic!("'{}' does not parse: {e}", binding.current_binding));
+
+            crate::shortcut::handy_keys::validate_shortcut(&binding.current_binding)
+                .unwrap_or_else(|e| {
+                    panic!(
+                        "'{}' is invalid for handy-keys: {e}",
+                        binding.current_binding
+                    )
+                });
+        }
     }
 
     /// Frozen snapshot of a real v0.9.0-era settings store, as written to

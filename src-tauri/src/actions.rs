@@ -25,7 +25,7 @@ use std::collections::HashMap;
 use std::future::Future;
 use std::path::{Path, PathBuf};
 use std::process::Stdio;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 use tauri::Manager;
 use tauri::{AppHandle, Emitter};
@@ -1365,6 +1365,64 @@ impl ShortcutAction for CancelAction {
     }
 }
 
+/// Copy the last completed transcription to the clipboard.
+struct CopyLastTranscriptAction;
+
+impl ShortcutAction for CopyLastTranscriptAction {
+    fn start(&self, app: &AppHandle, _binding_id: &str, _shortcut_str: &str) {
+        crate::last_transcript::copy_to_clipboard(app);
+    }
+
+    fn stop(&self, _app: &AppHandle, _binding_id: &str, _shortcut_str: &str) {}
+}
+
+/// Type the last completed transcription into the focused field.
+struct InsertLastTranscriptAction {
+    /// Guards against key auto-repeat. Holding the shortcut can deliver several
+    /// press events, and typing the transcript once per repeat would flood the
+    /// field. A timestamp rather than a pressed/released latch on purpose: a
+    /// release event that never arrives would wedge a latch shut forever, while
+    /// a stale timestamp heals itself on the next press.
+    last_fired: Mutex<Option<Instant>>,
+}
+
+/// Auto-repeat arrives far faster than anyone can deliberately press twice.
+const INSERT_REPEAT_GUARD: Duration = Duration::from_millis(400);
+
+impl InsertLastTranscriptAction {
+    fn new() -> Self {
+        Self {
+            last_fired: Mutex::new(None),
+        }
+    }
+
+    /// `true` when this press is a fresh one rather than auto-repeat.
+    fn accept_press(&self, now: Instant) -> bool {
+        let mut last_fired = match self.last_fired.lock() {
+            Ok(guard) => guard,
+            Err(poisoned) => poisoned.into_inner(),
+        };
+
+        if last_fired.is_some_and(|last| now.duration_since(last) < INSERT_REPEAT_GUARD) {
+            return false;
+        }
+
+        *last_fired = Some(now);
+        true
+    }
+}
+
+impl ShortcutAction for InsertLastTranscriptAction {
+    fn start(&self, app: &AppHandle, _binding_id: &str, _shortcut_str: &str) {
+        if !self.accept_press(Instant::now()) {
+            return;
+        }
+        crate::last_transcript::insert_into_focused_field(app);
+    }
+
+    fn stop(&self, _app: &AppHandle, _binding_id: &str, _shortcut_str: &str) {}
+}
+
 // Test Action
 struct TestAction;
 
@@ -1414,6 +1472,14 @@ pub static ACTION_MAP: Lazy<HashMap<String, Arc<dyn ShortcutAction>>> = Lazy::ne
         Arc::new(CancelAction) as Arc<dyn ShortcutAction>,
     );
     map.insert(
+        "copy_last_transcript".to_string(),
+        Arc::new(CopyLastTranscriptAction) as Arc<dyn ShortcutAction>,
+    );
+    map.insert(
+        "insert_last_transcript".to_string(),
+        Arc::new(InsertLastTranscriptAction::new()) as Arc<dyn ShortcutAction>,
+    );
+    map.insert(
         "test".to_string(),
         Arc::new(TestAction) as Arc<dyn ShortcutAction>,
     );
@@ -1424,15 +1490,52 @@ pub static ACTION_MAP: Lazy<HashMap<String, Arc<dyn ShortcutAction>>> = Lazy::ne
 mod tests {
     use super::{
         cli_failure_detail, complete_unless_cancelled, is_blank_transcription,
-        should_use_streaming_overlay, truncate_voice_action_context, VoiceActionRequest,
-        VoiceActionTurn, CLIPBOARD_CONTEXT_ORIGIN, MAX_VOICE_ACTION_CONTEXT_CHARS,
+        should_use_streaming_overlay, truncate_voice_action_context, InsertLastTranscriptAction,
+        VoiceActionRequest, VoiceActionTurn, ACTION_MAP, CLIPBOARD_CONTEXT_ORIGIN,
+        INSERT_REPEAT_GUARD, MAX_VOICE_ACTION_CONTEXT_CHARS,
     };
     use crate::settings::OverlayStyle;
     use std::future;
     use std::sync::atomic::{AtomicBool, Ordering};
     use std::sync::Arc;
     use std::thread;
-    use std::time::Duration;
+    use std::time::{Duration, Instant};
+
+    /// A binding without an `ACTION_MAP` entry is registered and then does
+    /// nothing but log a warning when pressed.
+    #[test]
+    fn last_transcript_shortcuts_have_actions() {
+        for id in ["copy_last_transcript", "insert_last_transcript"] {
+            assert!(ACTION_MAP.contains_key(id), "{id} has no action");
+        }
+    }
+
+    #[test]
+    fn insert_ignores_key_auto_repeat() {
+        let action = InsertLastTranscriptAction::new();
+        let press = Instant::now();
+
+        assert!(
+            action.accept_press(press),
+            "the first press must go through"
+        );
+        assert!(
+            !action.accept_press(press + INSERT_REPEAT_GUARD / 2),
+            "a repeat inside the guard window must be dropped"
+        );
+    }
+
+    #[test]
+    fn insert_accepts_a_deliberate_second_press() {
+        let action = InsertLastTranscriptAction::new();
+        let press = Instant::now();
+
+        assert!(action.accept_press(press));
+        assert!(
+            action.accept_press(press + INSERT_REPEAT_GUARD),
+            "pressing again after the guard window must insert again"
+        );
+    }
 
     #[test]
     fn blank_transcription_is_detected() {

@@ -85,6 +85,7 @@ src/
 | ALAC (Apple Lossless) decoding                              | `symphonia` dependency in `src-tauri/Cargo.toml` — see _Decoding_                                                 |
 | Long audio transcribed in chunks                            | `managers/transcription.rs::split_for_transcription`                                                              |
 | Overlay "copied" confirmation with re-copy                  | overlay `done` state, `commands::copy_last_transcript`                                                            |
+| Shortcuts to copy / insert the last transcript              | `last_transcript.rs`, `actions.rs` (`copy_last_transcript`, `insert_last_transcript`)                             |
 | History distinguishes microphone vs file                    | `managers/history.rs::source_from_file_name`                                                                      |
 | Custom accent color                                         | `settings.accent_color`, `src/lib/utils/theme.ts`, `AccentColorPicker.tsx`                                        |
 | RGB accent cycling ("Emil mode")                            | `settings.rgb_mode`, `theme.ts::startRgbMode`, `RgbModeToggle.tsx`                                                |
@@ -143,6 +144,25 @@ inline `--color-logo-primary` / `--color-background-ui` on the document root so
 it beats the `:root` / `[data-theme]` rules. It must be applied in both entry
 points (`src/main.tsx` and `src/overlay/main.tsx`) or the overlay keeps the
 default orange.
+
+**A new shortcut needs three things, not one.** A `ShortcutBinding` in
+`settings.rs::get_default_settings`, a matching entry in `actions.rs::ACTION_MAP`,
+and an i18n pair under `settings.general.shortcut.bindings.<id>`. Both keyboard
+backends register from the _defaults_, so a binding missing there is never
+registered; a binding missing from `ACTION_MAP` registers fine and then does
+nothing but log a warning when pressed. Existing settings stores pick new
+bindings up automatically — `load_or_create_app_settings` merges in ids they have
+not seen. Defaults must also parse for _both_ backends, which
+`default_bindings_parse_for_both_shortcut_backends` pins, and must not collide
+with another default, since `register_shortcut` refuses duplicates.
+
+**Inserting text is not the same as pasting it.** `clipboard::paste` honours the
+user's `paste_method`, which may route through the clipboard or be `None`. The
+insert-last-transcript shortcut exists precisely so the clipboard stays
+untouched, so it calls `clipboard::type_text_directly` and always types. It also
+debounces on a timestamp rather than a pressed/released latch: key auto-repeat
+would otherwise type the transcript once per repeat, and a latch that never saw
+its release event would wedge the shortcut shut for good.
 
 **Long audio must stay chunked.** Engine memory scales with the length of a
 single `transcribe()` call, not with the model. A 19-minute recording made the

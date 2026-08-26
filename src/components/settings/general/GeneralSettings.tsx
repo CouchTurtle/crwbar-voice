@@ -36,6 +36,10 @@ export const GeneralSettings: React.FC = () => {
           <ShortcutInput shortcutId="cancel" grouped={true} />
         )}
         <AutoCopyClipboard descriptionMode="tooltip" grouped={true} />
+        {/* The on-demand counterpart to the auto-copy toggle above: reach for
+            the last transcript deliberately instead of copying every one. */}
+        <ShortcutInput shortcutId="copy_last_transcript" grouped={true} />
+        <ShortcutInput shortcutId="insert_last_transcript" grouped={true} />
         <DragDropToggle descriptionMode="tooltip" grouped={true} />
       </SettingsGroup>
 
