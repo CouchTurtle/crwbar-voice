@@ -894,7 +894,7 @@ async unloadModelManually() : Promise<Result<null, string>> {
  * Transcribing an hour of meeting audio should not fire text into whatever
  * window happens to have focus; the result belongs in the app.
  */
-async transcribeFile(path: string, deliver: boolean) : Promise<Result<string, string>> {
+async transcribeFile(path: string, deliver: boolean) : Promise<Result<FileTranscription, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("transcribe_file", { path, deliver }) };
 } catch (e) {
@@ -1100,6 +1100,15 @@ export type EngineType =
  * the file, so this one variant covers the whole transcribe-cpp family.
  */
 "TranscribeCpp" | "Parakeet" | "Moonshine" | "MoonshineStreaming" | "SenseVoice" | "GigaAM" | "Canary" | "Cohere"
+/**
+ * The outcome of a file transcription.
+ * 
+ * `complete` is false when the run stopped early — cancelled, or a chunk failed
+ * — and `text` is what had been transcribed up to that point. An hour abandoned
+ * at 80% is 48 minutes of work, so it is handed back rather than discarded; the
+ * flag exists so the caller never presents it as the whole recording.
+ */
+export type FileTranscription = { text: string; complete: boolean }
 export type GpuDeviceOption = { id: number; name: string; total_vram_mb: number }
 export type HistoryEntry = { id: number; file_name: string; timestamp: number; saved: boolean; title: string; transcription_text: string; post_processed_text: string | null; post_process_prompt: string | null; post_process_requested: boolean; source: HistorySource }
 export type HistorySource = "microphone" | "file"

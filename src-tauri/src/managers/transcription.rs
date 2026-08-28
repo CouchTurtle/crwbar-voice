@@ -260,6 +260,10 @@ pub struct TranscriptionManager {
     /// Set to stop a chunked transcription between chunks. Only long audio is
     /// chunked, which is also the only run long enough to be worth cancelling.
     cancel_chunked: Arc<AtomicBool>,
+    /// Text from a chunked run that stopped early. An hour of audio abandoned at
+    /// 80% is 48 minutes of work; the caller gets the chance to keep it rather
+    /// than having the error throw it away.
+    partial_transcript: Arc<Mutex<Option<String>>>,
 }
 
 /// Progress through a chunked transcription, emitted as `transcription-progress`.
@@ -346,6 +350,33 @@ impl TranscriptionManager {
         self.cancel_chunked.store(true, Ordering::Release);
     }
 
+    /// Take the text a chunked run had finished before it stopped, if any.
+    ///
+    /// Consuming it on read keeps a later, unrelated failure from resurrecting
+    /// a stale transcript — the caller gets exactly one chance to keep it.
+    pub fn take_partial_transcript(&self) -> Option<String> {
+        self.partial_transcript
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
+            .take()
+            .filter(|text| !text.trim().is_empty())
+    }
+
+    fn store_partial_transcript(&self, parts: &[String]) {
+        let text = parts.join(" ");
+        let kept = (!text.trim().is_empty()).then_some(text);
+        if let Some(text) = &kept {
+            info!(
+                "Keeping {} characters from the interrupted transcription",
+                text.len()
+            );
+        }
+        *self
+            .partial_transcript
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner()) = kept;
+    }
+
     /// Block until the engine is back in its slot.
     ///
     /// A live dictation on a streaming model *takes the engine out* of the mutex
@@ -411,6 +442,7 @@ impl TranscriptionManager {
             active_stream_worker: Arc::new(AtomicU64::new(0)),
             active_engine_lease: Arc::new(AtomicU64::new(0)),
             cancel_chunked: Arc::new(AtomicBool::new(false)),
+            partial_transcript: Arc::new(Mutex::new(None)),
         };
 
         // Start the idle watcher
@@ -1271,12 +1303,14 @@ impl TranscriptionManager {
             let seconds_total = audio.len() as f64 / 16_000.0;
             let mut seconds_done = 0.0;
             self.cancel_chunked.store(false, Ordering::Release);
+            self.store_partial_transcript(&[]);
             self.emit_progress(0, chunks.len(), 0.0, seconds_total);
 
             let mut parts: Vec<String> = Vec::with_capacity(chunks.len());
             for (index, chunk) in chunks.iter().enumerate() {
                 if self.cancel_chunked.load(Ordering::Acquire) {
                     info!("Chunked transcription cancelled after {} chunks", index);
+                    self.store_partial_transcript(&parts);
                     return Err(anyhow::anyhow!("Transcription cancelled."));
                 }
                 debug!(
@@ -1286,12 +1320,22 @@ impl TranscriptionManager {
                     chunk.len() as f64 / 16_000.0
                 );
                 // A dictation may have borrowed the engine since the last chunk.
-                self.wait_for_engine()?;
+                if let Err(e) = self.wait_for_engine() {
+                    self.store_partial_transcript(&parts);
+                    return Err(e);
+                }
                 if self.cancel_chunked.load(Ordering::Acquire) {
                     info!("Chunked transcription cancelled while waiting for the engine");
+                    self.store_partial_transcript(&parts);
                     return Err(anyhow::anyhow!("Transcription cancelled."));
                 }
-                let text = self.transcribe(chunk.to_vec())?;
+                let text = match self.transcribe(chunk.to_vec()) {
+                    Ok(text) => text,
+                    Err(e) => {
+                        self.store_partial_transcript(&parts);
+                        return Err(e);
+                    }
+                };
                 let text = text.trim();
                 if !text.is_empty() {
                     parts.push(text.to_string());

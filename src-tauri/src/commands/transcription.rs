@@ -66,6 +66,18 @@ fn pick_file_model(override_id: Option<&str>, selected: &str) -> String {
         .to_string()
 }
 
+/// The outcome of a file transcription.
+///
+/// `complete` is false when the run stopped early — cancelled, or a chunk failed
+/// — and `text` is what had been transcribed up to that point. An hour abandoned
+/// at 80% is 48 minutes of work, so it is handed back rather than discarded; the
+/// flag exists so the caller never presents it as the whole recording.
+#[derive(Debug, Clone, Serialize, Type)]
+pub struct FileTranscription {
+    pub text: String,
+    pub complete: bool,
+}
+
 /// Transcribe an audio file.
 ///
 /// Decodes the file to 16 kHz mono, runs the currently selected model, and always
@@ -83,7 +95,7 @@ pub async fn transcribe_file(
     app: AppHandle,
     path: String,
     deliver: bool,
-) -> Result<String, String> {
+) -> Result<FileTranscription, String> {
     // Deliberately ungated: this is reached either from the file picker (an
     // explicit user action) or from a drop, and the drop sites themselves honour
     // the `drag_drop_enabled` setting.
@@ -101,8 +113,9 @@ pub async fn transcribe_file(
     // Decode + model load + transcribe are blocking/CPU-bound; keep them off the
     // async reactor. Serialising the load with transcribe here mirrors the CLI path.
     let app_for_work = app.clone();
-    let work =
-        tauri::async_runtime::spawn_blocking(move || -> Result<(String, Vec<f32>), String> {
+    #[allow(clippy::type_complexity)]
+    let work = tauri::async_runtime::spawn_blocking(
+        move || -> Result<(Vec<f32>, Result<String, String>), String> {
             let samples = crate::file_import::decode_to_16k_mono(&file_path)?;
 
             let tm = app_for_work.state::<Arc<TranscriptionManager>>();
@@ -123,14 +136,18 @@ pub async fn transcribe_file(
                     .map_err(|e| format!("Failed to load model '{}': {}", model_id, e))?;
             }
 
+            // Decoding succeeded, so the samples are worth returning even when
+            // the transcription does not: a partial run still wants its WAV and
+            // its history entry.
             let text = tm
                 .transcribe(samples.clone())
-                .map_err(|e| format!("Transcription failed: {}", e))?;
-            Ok((text, samples))
-        })
-        .await;
+                .map_err(|e| format!("Transcription failed: {}", e));
+            Ok((samples, text))
+        },
+    )
+    .await;
 
-    let (raw_text, samples) = match work {
+    let (samples, text_result) = match work {
         Ok(Ok(v)) => v,
         Ok(Err(e)) => {
             // Log as well as surface it: a toast the user dismisses is otherwise
@@ -152,6 +169,35 @@ pub async fn transcribe_file(
         }
     };
 
+    // A run that stopped early still transcribed everything up to that point.
+    // Take it and carry on down the same path — history entry, WAV, return —
+    // rather than letting the error discard the work.
+    let (raw_text, complete) = match text_result {
+        Ok(text) => (text, true),
+        Err(e) => match app
+            .state::<Arc<TranscriptionManager>>()
+            .take_partial_transcript()
+        {
+            Some(partial) => {
+                log::warn!(
+                    "File transcription stopped early for {} ({}); keeping {} characters",
+                    path,
+                    e,
+                    partial.len()
+                );
+                (partial, false)
+            }
+            None => {
+                log::error!("File transcription failed for {}: {}", path, e);
+                if deliver {
+                    crate::utils::hide_recording_overlay(&app);
+                }
+                let _ = app.emit("transcription-error", e.clone());
+                return Err(e);
+            }
+        },
+    };
+
     // Same post-processing (Chinese variant / optional LLM) as the mic path.
     let processed = crate::actions::process_transcription_output(&app, &raw_text, false).await;
     let final_text = processed.final_text;
@@ -160,7 +206,10 @@ pub async fn transcribe_file(
         if deliver {
             crate::utils::hide_recording_overlay(&app);
         }
-        return Ok(String::new());
+        return Ok(FileTranscription {
+            text: String::new(),
+            complete,
+        });
     }
 
     // Persist a 16 kHz WAV + history entry so the audio player and the overlay's
@@ -186,7 +235,9 @@ pub async fn transcribe_file(
 
     // `paste` owns both text delivery and the existing clipboard-handling
     // preference, so dropped files and microphone recordings stay consistent.
-    if deliver {
+    // A partial run is never delivered: silently pasting a truncated transcript
+    // into someone's document is worse than pasting nothing.
+    if deliver && complete {
         let app_for_paste = app.clone();
         let text_for_paste = final_text.clone();
         app.run_on_main_thread(move || {
@@ -196,9 +247,14 @@ pub async fn transcribe_file(
             crate::utils::show_done_overlay(&app_for_paste);
         })
         .map_err(|e| format!("Failed to finalise on main thread: {}", e))?;
+    } else if deliver {
+        crate::utils::hide_recording_overlay(&app);
     }
 
-    Ok(final_text)
+    Ok(FileTranscription {
+        text: final_text,
+        complete,
+    })
 }
 
 #[cfg(test)]

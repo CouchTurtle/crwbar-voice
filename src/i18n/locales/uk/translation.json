@@ -748,6 +748,10 @@
       "followDictation": "Same as dictation",
       "followDictationHint": "Uses whatever model dictation is set to."
     },
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "cancelling": "Stopping…",
+    "cancellingHint": "Finishing the current piece, then handing back everything transcribed so far.",
+    "partialTitle": "Partial transcript",
+    "partialNote": "This run stopped before the end of the recording. What you see is everything that was transcribed up to that point — the rest of the audio is not in it."
   }
 }

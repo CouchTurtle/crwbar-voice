@@ -119,7 +119,7 @@ const ModelRow: React.FC<ModelRowProps> = ({
 type Phase =
   | { status: "idle" }
   | { status: "running"; fileName: string }
-  | { status: "done"; fileName: string; text: string }
+  | { status: "done"; fileName: string; text: string; complete: boolean }
   | { status: "error"; fileName: string; message: string };
 
 interface Progress {
@@ -170,6 +170,7 @@ export const TranscribeSettings: React.FC = () => {
   const [progress, setProgress] = useState<Progress | null>(null);
   const [dragging, setDragging] = useState(false);
   const [modelListOpen, setModelListOpen] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const [copied, setCopied] = useState(false);
   const copyResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const runningRef = useRef(false);
@@ -198,11 +199,18 @@ export const TranscribeSettings: React.FC = () => {
       const fileName = fileNameOf(path);
       setProgress(null);
       cancelledRef.current = false;
+      setCancelling(false);
       setPhase({ status: "running", fileName });
       try {
         const result = await commands.transcribeFile(path, false);
-        if (cancelledRef.current) return;
         if (result.status === "error") {
+          // Cancelling with nothing transcribed yet is not a failure, it is a
+          // decision. Anything already done comes back as an incomplete result
+          // instead, and lands in the branch below.
+          if (cancelledRef.current) {
+            setPhase({ status: "idle" });
+            return;
+          }
           setPhase({
             status: "error",
             fileName,
@@ -210,9 +218,17 @@ export const TranscribeSettings: React.FC = () => {
           });
           return;
         }
-        setPhase({ status: "done", fileName, text: result.data });
+        setPhase({
+          status: "done",
+          fileName,
+          text: result.data.text,
+          complete: result.data.complete,
+        });
       } catch (error) {
-        if (cancelledRef.current) return;
+        if (cancelledRef.current) {
+          setPhase({ status: "idle" });
+          return;
+        }
         console.error("Failed to transcribe the selected file:", error);
         setPhase({
           status: "error",
@@ -221,6 +237,7 @@ export const TranscribeSettings: React.FC = () => {
         });
       } finally {
         setProgress(null);
+        setCancelling(false);
       }
     },
     [t],
@@ -282,11 +299,12 @@ export const TranscribeSettings: React.FC = () => {
     };
   }, [t, transcribe]);
 
+  // Stopping is a request, not an abandonment: the run finishes its current
+  // chunk and hands back everything transcribed so far.
   const handleCancel = useCallback(() => {
     cancelledRef.current = true;
+    setCancelling(true);
     void commands.cancelFileTranscription();
-    setProgress(null);
-    setPhase({ status: "idle" });
   }, []);
 
   const handlePick = useCallback(async () => {
@@ -372,14 +390,19 @@ export const TranscribeSettings: React.FC = () => {
                     variant="secondary"
                     size="sm"
                     onClick={handleCancel}
+                    disabled={cancelling}
                     className="flex items-center gap-1 shrink-0"
                   >
                     <X className="w-3 h-3" />
-                    {t("transcribe.cancel")}
+                    {cancelling
+                      ? t("transcribe.cancelling")
+                      : t("transcribe.cancel")}
                   </Button>
                 </div>
                 <p className="text-sm text-text/60 mt-1">
-                  {t("transcribe.workingHint")}
+                  {cancelling
+                    ? t("transcribe.cancellingHint")
+                    : t("transcribe.workingHint")}
                 </p>
 
                 {progress && progress.secondsTotal > 0 && (
@@ -510,7 +533,13 @@ export const TranscribeSettings: React.FC = () => {
       )}
 
       {phase.status === "done" && (
-        <SettingsGroup title={t("transcribe.resultTitle")}>
+        <SettingsGroup
+          title={
+            phase.complete
+              ? t("transcribe.resultTitle")
+              : t("transcribe.partialTitle")
+          }
+        >
           <div className="p-4 text-left space-y-3">
             <div className="flex items-center gap-2">
               <FileAudio className="w-4 h-4 shrink-0 text-logo-primary" />
@@ -533,6 +562,13 @@ export const TranscribeSettings: React.FC = () => {
                 </Button>
               )}
             </div>
+
+            {!phase.complete && (
+              <p className="flex items-start gap-2 text-xs text-text/70 rounded-md bg-logo-primary/10 px-3 py-2">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-px text-logo-primary" />
+                {t("transcribe.partialNote")}
+              </p>
+            )}
 
             {phase.text.trim() ? (
               <>

@@ -748,6 +748,10 @@
       "followDictation": "Wie beim Diktieren",
       "followDictationHint": "Nutzt das Modell, das fürs Diktieren eingestellt ist."
     },
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "cancelling": "Wird gestoppt…",
+    "cancellingHint": "Das aktuelle Stück wird noch fertig, danach bekommst du alles bisher Transkribierte.",
+    "partialTitle": "Teiltranskript",
+    "partialNote": "Dieser Lauf wurde vor dem Ende der Aufnahme gestoppt. Du siehst alles, was bis dahin transkribiert wurde — der Rest der Aufnahme fehlt."
   }
 }
