@@ -503,7 +503,9 @@
       "retranscribe": "Повторна транскрипция",
       "retranscribeError": "Повторната транскрипция не бе успешна. Опитайте отново.",
       "transcribing": "Транскрибиране...",
-      "transcriptionFailed": "Транскрипцията не бе успешна. Можете да опитате отново с иконата за повторен опит."
+      "transcriptionFailed": "Транскрипцията не бе успешна. Можете да опитате отново с иконата за повторен опит.",
+      "partial": "Partial",
+      "partialHint": "This run stopped before the end of the audio. The text covers only part of the recording."
     },
     "debug": {
       "title": "Отстраняване",

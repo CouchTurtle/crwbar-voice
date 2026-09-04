@@ -503,7 +503,9 @@
       "retranscribe": "Ri-trascrivere",
       "retranscribeError": "Impossibile ri-trascrivere. Riprova.",
       "transcribing": "Trascrizione in corso...",
-      "transcriptionFailed": "Trascrizione fallita. Puoi ri-trascrivere usando l'icona di ripetizione."
+      "transcriptionFailed": "Trascrizione fallita. Puoi ri-trascrivere usando l'icona di ripetizione.",
+      "partial": "Partial",
+      "partialHint": "This run stopped before the end of the audio. The text covers only part of the recording."
     },
     "debug": {
       "title": "Debug",

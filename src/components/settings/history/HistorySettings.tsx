@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { readFile } from "@tauri-apps/plugin-fs";
 import {
+  AlertCircle,
   Check,
   Copy,
   FileAudio,
@@ -68,6 +69,21 @@ const SourceBadge: React.FC<{ source: HistorySource }> = ({ source }) => {
       {isFile
         ? t("settings.history.sourceFile")
         : t("settings.history.sourceMic")}
+    </span>
+  );
+};
+
+/// A run that stopped before the end of the audio. Without saying so, a
+/// truncated transcript in this list is indistinguishable from a complete one.
+const PartialBadge: React.FC = () => {
+  const { t } = useTranslation();
+  return (
+    <span
+      className="inline-flex items-center gap-1 rounded-full bg-logo-primary/15 px-2 py-0.5 text-[11px] font-medium text-logo-primary"
+      title={t("settings.history.partialHint")}
+    >
+      <AlertCircle width={11} height={11} />
+      {t("settings.history.partial")}
     </span>
   );
 };
@@ -481,6 +497,7 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">{formattedDate}</p>
           <SourceBadge source={entry.source} />
+          {entry.partial && <PartialBadge />}
         </div>
         <div className="flex items-center">
           <IconButton

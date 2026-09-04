@@ -226,6 +226,7 @@ pub async fn transcribe_file(
                 false,
                 processed.post_processed_text.clone(),
                 processed.post_process_prompt.clone(),
+                !complete,
             ) {
                 log::error!("Failed to save imported-file history entry: {}", e);
             }

@@ -503,7 +503,9 @@
       "retranscribe": "Opnieuw transcriberen",
       "retranscribeError": "Opnieuw transcriberen mislukt. Probeer het opnieuw.",
       "transcribing": "Transcriberen...",
-      "transcriptionFailed": "Transcriptie mislukt. Je kunt het opnieuw proberen via het herlaad-pictogram."
+      "transcriptionFailed": "Transcriptie mislukt. Je kunt het opnieuw proberen via het herlaad-pictogram.",
+      "partial": "Partial",
+      "partialHint": "This run stopped before the end of the audio. The text covers only part of the recording."
     },
     "debug": {
       "title": "Probleemoplossing",

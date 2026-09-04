@@ -1,4 +1,5 @@
 use crate::managers::audio::AudioRecordingManager;
+use crate::managers::history::{HistoryManager, HistorySource};
 use crate::managers::transcription::TranscriptionManager;
 use crate::shortcut;
 use crate::TranscriptionCoordinator;
@@ -25,9 +26,16 @@ pub fn cancel_current_operation(app: &AppHandle) {
     let recording_was_active = audio_manager.is_recording();
     audio_manager.cancel_recording();
 
-    // Abandon any live streaming transcription
+    // Abandon any live streaming transcription. A chunked batch run is asked to
+    // stop too — it checks between chunks and hands back what it finished.
     let tm = app.state::<Arc<TranscriptionManager>>();
+    tm.cancel_chunked_transcription();
     tm.cancel_stream();
+
+    // Whatever had already been transcribed goes to History rather than into
+    // the bin. Pressing Escape after speaking for two minutes used to discard
+    // every word of it with nothing to go back to.
+    keep_cancelled_transcript(app, &tm);
 
     // Update tray icon and hide overlay
     change_tray_icon(app, crate::tray::TrayIconState::Idle);
@@ -42,6 +50,39 @@ pub fn cancel_current_operation(app: &AppHandle) {
     }
 
     info!("Operation cancellation completed - returned to idle state");
+}
+
+/// Save text from a cancelled run as a history entry marked partial.
+///
+/// There is no recording to go with it — cancelling discards the audio — so the
+/// entry references a WAV that was never written. History already tolerates
+/// that: the retention setting deletes recordings while keeping their text.
+fn keep_cancelled_transcript(app: &AppHandle, tm: &Arc<TranscriptionManager>) {
+    let Some(text) = tm.take_salvageable_text() else {
+        return;
+    };
+
+    let Some(history) = app.try_state::<Arc<HistoryManager>>() else {
+        log::warn!("Cancelled transcript is unsaved: history manager unavailable");
+        return;
+    };
+
+    let file_name = format!("handy-cancelled-{}.wav", chrono::Utc::now().timestamp());
+    match history.save_entry(
+        file_name,
+        HistorySource::Microphone,
+        text,
+        false,
+        None,
+        None,
+        true,
+    ) {
+        Ok(entry) => info!(
+            "Kept the cancelled transcript as history entry {}",
+            entry.id
+        ),
+        Err(e) => log::error!("Failed to keep the cancelled transcript: {}", e),
+    }
 }
 
 /// Check if using the Wayland display server protocol

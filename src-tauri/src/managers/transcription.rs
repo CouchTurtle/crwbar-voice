@@ -264,6 +264,10 @@ pub struct TranscriptionManager {
     /// 80% is 48 minutes of work; the caller gets the chance to keep it rather
     /// than having the error throw it away.
     partial_transcript: Arc<Mutex<Option<String>>>,
+    /// The committed prefix of the live stream, mirrored here so a cancelled
+    /// dictation can be salvaged. Only the committed part: the tentative suffix
+    /// is by definition text the model may still rewrite.
+    live_stream_text: Arc<Mutex<String>>,
 }
 
 /// Progress through a chunked transcription, emitted as `transcription-progress`.
@@ -443,6 +447,7 @@ impl TranscriptionManager {
             active_engine_lease: Arc::new(AtomicU64::new(0)),
             cancel_chunked: Arc::new(AtomicBool::new(false)),
             partial_transcript: Arc::new(Mutex::new(None)),
+            live_stream_text: Arc::new(Mutex::new(String::new())),
         };
 
         // Start the idle watcher
@@ -1236,11 +1241,23 @@ impl TranscriptionManager {
         // always go through the shared fuzzy post-correction path.
         let filtered = post_process_transcription_text(raw, &settings, false);
 
+        // The text has been handed over; a later cancel must not resurrect it.
+        self.clear_live_stream_text();
+
         self.maybe_unload_immediately("streaming transcription");
         Ok(Some(filtered))
     }
 
     /// Abandon any active stream without producing text (e.g. on cancel).
+    /// Forget the mirrored stream text. Called once a stream has delivered its
+    /// result, so a later cancel cannot resurrect the previous dictation.
+    pub fn clear_live_stream_text(&self) {
+        self.live_stream_text
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
+            .clear();
+    }
+
     pub fn cancel_stream(&self) {
         if let Some(tx) = self.router.take() {
             let _ = tx.send(StreamCmd::Cancel);
@@ -1257,7 +1274,25 @@ impl TranscriptionManager {
         .emit(&self.app_handle);
     }
 
+    /// Whatever a cancelled run left behind — a chunked run's finished chunks,
+    /// or the committed prefix of a live stream. Consumed on read.
+    pub fn take_salvageable_text(&self) -> Option<String> {
+        if let Some(partial) = self.take_partial_transcript() {
+            return Some(partial);
+        }
+        let mut live = self
+            .live_stream_text
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        let text = std::mem::take(&mut *live);
+        (!text.trim().is_empty()).then_some(text)
+    }
+
     fn emit_stream_text(&self, committed: &str, tentative: &str) {
+        *self
+            .live_stream_text
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner()) = committed.to_string();
         let _ = StreamTextEvent {
             committed: committed.to_string(),
             tentative: tentative.to_string(),

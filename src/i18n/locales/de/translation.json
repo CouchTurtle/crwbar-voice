@@ -503,7 +503,9 @@
       "retranscribe": "Erneut transkribieren",
       "retranscribeError": "Erneute Transkription fehlgeschlagen. Bitte versuche es erneut.",
       "transcribing": "Transkribiere...",
-      "transcriptionFailed": "Transkription fehlgeschlagen. Du kannst über das Wiederholen-Symbol erneut transkribieren."
+      "transcriptionFailed": "Transkription fehlgeschlagen. Du kannst über das Wiederholen-Symbol erneut transkribieren.",
+      "partial": "Teilweise",
+      "partialHint": "Dieser Lauf wurde vor dem Ende der Aufnahme gestoppt. Der Text deckt nur einen Teil der Aufnahme ab."
     },
     "debug": {
       "title": "Debug",

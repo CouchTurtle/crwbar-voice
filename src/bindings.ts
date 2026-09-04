@@ -1110,7 +1110,12 @@ export type EngineType =
  */
 export type FileTranscription = { text: string; complete: boolean }
 export type GpuDeviceOption = { id: number; name: string; total_vram_mb: number }
-export type HistoryEntry = { id: number; file_name: string; timestamp: number; saved: boolean; title: string; transcription_text: string; post_processed_text: string | null; post_process_prompt: string | null; post_process_requested: boolean; source: HistorySource }
+export type HistoryEntry = { id: number; file_name: string; timestamp: number; saved: boolean; title: string; transcription_text: string; post_processed_text: string | null; post_process_prompt: string | null; post_process_requested: boolean; source: HistorySource; 
+/**
+ * The run stopped before the end of the audio, so this text covers only
+ * part of the recording.
+ */
+partial: boolean }
 export type HistorySource = "microphone" | "file"
 export type HistorySourceCounts = { total: number; microphone: number; file: number }
 export type HistoryUpdatePayload = { action: "added"; entry: HistoryEntry } | { action: "updated"; entry: HistoryEntry } | { action: "deleted"; id: number } | { action: "toggled"; id: number }

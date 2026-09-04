@@ -503,7 +503,9 @@
       "retranscribe": "Re-transcribir",
       "retranscribeError": "No se pudo re-transcribir. Por favor, inténtalo de nuevo.",
       "transcribing": "Transcribiendo...",
-      "transcriptionFailed": "La transcripción falló. Puedes re-transcribir usando el ícono de reintentar."
+      "transcriptionFailed": "La transcripción falló. Puedes re-transcribir usando el ícono de reintentar.",
+      "partial": "Partial",
+      "partialHint": "This run stopped before the end of the audio. The text covers only part of the recording."
     },
     "debug": {
       "title": "Depuración",

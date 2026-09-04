@@ -39,6 +39,9 @@ static MIGRATIONS: &[M] = &[
          SET source = 'file'
          WHERE file_name LIKE 'handy-import-%';",
     ),
+    // A run that stopped before the end of the audio. Existing rows are complete
+    // by definition — nothing before this column could be cancelled and kept.
+    M::up("ALTER TABLE transcription_history ADD COLUMN partial BOOLEAN NOT NULL DEFAULT 0;"),
 ];
 
 #[derive(Clone, Debug, Serialize, Deserialize, Type)]
@@ -79,6 +82,9 @@ pub struct HistoryEntry {
     pub post_process_prompt: Option<String>,
     pub post_process_requested: bool,
     pub source: HistorySource,
+    /// The run stopped before the end of the audio, so this text covers only
+    /// part of the recording.
+    pub partial: bool,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, Type)]
@@ -248,6 +254,7 @@ impl HistoryManager {
             post_process_prompt: row.get("post_process_prompt")?,
             post_process_requested: row.get("post_process_requested")?,
             source: HistorySource::from_db(&source),
+            partial: row.get("partial")?,
         })
     }
 
@@ -265,6 +272,8 @@ impl HistoryManager {
         post_process_requested: bool,
         post_processed_text: Option<String>,
         post_process_prompt: Option<String>,
+        // True when the run stopped before the end of the audio.
+        partial: bool,
     ) -> Result<HistoryEntry> {
         let timestamp = Utc::now().timestamp();
         let title = self.format_timestamp_title(timestamp);
@@ -280,8 +289,9 @@ impl HistoryManager {
                 post_processed_text,
                 post_process_prompt,
                 post_process_requested,
-                source
-            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
+                source,
+                partial
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
             params![
                 &file_name,
                 timestamp,
@@ -292,6 +302,7 @@ impl HistoryManager {
                 &post_process_prompt,
                 post_process_requested,
                 source.as_str(),
+                partial,
             ],
         )?;
 
@@ -306,6 +317,7 @@ impl HistoryManager {
             post_process_prompt,
             post_process_requested,
             source,
+            partial,
         };
 
         debug!("Saved history entry with id {}", entry.id);
@@ -353,7 +365,7 @@ impl HistoryManager {
 
         let entry = conn
             .query_row(
-                "SELECT id, file_name, timestamp, saved, title, transcription_text, post_processed_text, post_process_prompt, post_process_requested, source
+                "SELECT id, file_name, timestamp, saved, title, transcription_text, post_processed_text, post_process_prompt, post_process_requested, source, partial
                  FROM transcription_history WHERE id = ?1",
                 params![id],
                 Self::map_history_entry,
@@ -503,7 +515,7 @@ impl HistoryManager {
 
         let mut query = String::from(
             "SELECT id, file_name, timestamp, saved, title, transcription_text,
-                    post_processed_text, post_process_prompt, post_process_requested, source
+                    post_processed_text, post_process_prompt, post_process_requested, source, partial
              FROM transcription_history",
         );
         let mut conditions = Vec::new();
@@ -581,7 +593,8 @@ impl HistoryManager {
                 post_processed_text,
                 post_process_prompt,
                 post_process_requested,
-                source
+                source,
+                partial
              FROM transcription_history
              ORDER BY timestamp DESC
              LIMIT 1",
@@ -609,7 +622,8 @@ impl HistoryManager {
                 post_processed_text,
                 post_process_prompt,
                 post_process_requested,
-                source
+                source,
+                partial
              FROM transcription_history
              WHERE transcription_text != ''
              ORDER BY timestamp DESC
@@ -664,7 +678,8 @@ impl HistoryManager {
                 post_processed_text,
                 post_process_prompt,
                 post_process_requested,
-                source
+                source,
+                partial
              FROM transcription_history
              WHERE id = ?1",
         )?;
@@ -734,11 +749,41 @@ mod tests {
                 post_processed_text TEXT,
                 post_process_prompt TEXT,
                 post_process_requested BOOLEAN NOT NULL DEFAULT 0,
-                source TEXT NOT NULL DEFAULT 'microphone'
+                source TEXT NOT NULL DEFAULT 'microphone',
+                partial BOOLEAN NOT NULL DEFAULT 0
             );",
         )
         .expect("create transcription_history table");
         conn
+    }
+
+    /// The migration runs against databases that already hold real transcripts,
+    /// so it must add the column without disturbing them — and everything
+    /// written before it existed is complete by definition.
+    #[test]
+    fn partial_migration_leaves_existing_rows_complete() {
+        let mut conn = Connection::open_in_memory().expect("open in-memory db");
+        Migrations::new(MIGRATIONS.to_vec())
+            .to_latest(&mut conn)
+            .expect("migrations apply cleanly");
+
+        conn.execute(
+            "INSERT INTO transcription_history
+                (file_name, timestamp, saved, title, transcription_text, post_process_requested, source)
+             VALUES ('handy-1.wav', 1, 0, 'Recording', 'hello', 0, 'microphone')",
+            [],
+        )
+        .expect("insert a row the old way, without naming partial");
+
+        let partial: bool = conn
+            .query_row("SELECT partial FROM transcription_history", [], |row| {
+                row.get(0)
+            })
+            .expect("read the new column");
+        assert!(
+            !partial,
+            "rows written before the column existed are complete"
+        );
     }
 
     fn insert_entry(conn: &Connection, timestamp: i64, text: &str, post_processed: Option<&str>) {

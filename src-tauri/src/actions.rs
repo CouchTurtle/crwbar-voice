@@ -1258,6 +1258,7 @@ impl ShortcutAction for TranscribeAction {
                                     ai_processing,
                                     processed.post_processed_text.clone(),
                                     processed.post_process_prompt.clone(),
+                                    false,
                                 ) {
                                     error!("Failed to save history entry: {}", err);
                                 }
@@ -1327,6 +1328,9 @@ impl ShortcutAction for TranscribeAction {
                                     ai_processing,
                                     None,
                                     None,
+                                    // Empty rather than truncated: there is no
+                                    // text here to be partial about.
+                                    false,
                                 ) {
                                     error!("Failed to save failed history entry: {}", save_err);
                                 }

@@ -207,6 +207,19 @@ dictating while a long file was being transcribed. The chunk loop now calls
 into an error path: waiting costs a dictation's worth of seconds, failing costs
 the whole run.
 
+**Cancelled work is kept, and marked.** `history.partial` (added by migration;
+pre-existing rows are complete by definition) is what stops a truncated
+transcript from being indistinguishable from a whole one in the list. Two paths
+feed it: `transcribe_file` passes `!complete`, and `cancel_current_operation`
+calls `keep_cancelled_transcript`, which saves whatever
+`take_salvageable_text` returns — a chunked run's finished chunks, or the
+committed prefix of a live stream mirrored in `live_stream_text`. Only the
+_committed_ prefix: the tentative suffix is by definition text the model may
+still rewrite. `finalize_stream` clears the mirror so a later cancel cannot
+resurrect a delivered dictation, and both salvage reads consume. The entry
+names a WAV that was never written, which History already tolerates — the
+retention setting deletes recordings while keeping their text.
+
 **Cancellation happens between chunks.** `cancel_chunked` is checked before each
 chunk and inside the engine wait, so a cancel lands even while a dictation holds
 the engine. Short audio is one engine call with nowhere to interrupt it, so it
@@ -269,7 +282,7 @@ skips the build. It does **not** touch Rust — run those checks yourself from
 `src-tauri/`:
 
 ```bash
-cargo test         # 155 tests at 0.3.0
+cargo test         # 156 tests at 0.3.0
 cargo check
 cargo fmt -- --check
 ```
