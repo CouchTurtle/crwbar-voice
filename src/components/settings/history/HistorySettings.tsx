@@ -26,6 +26,7 @@ import {
 } from "@/bindings";
 import { useOsType } from "@/hooks/useOsType";
 import { formatDateTime } from "@/utils/dateFormat";
+import { highlightPieces } from "@/lib/utils/highlight";
 import { AudioPlayer, AudioPlayerGroup } from "../../ui/AudioPlayer";
 import { Button } from "../../ui/Button";
 
@@ -404,6 +405,7 @@ export const HistorySettings: React.FC = () => {
                 getAudioUrl={getAudioUrl}
                 deleteAudio={deleteAudioEntry}
                 retryTranscription={retryHistoryEntry}
+                search={search}
               />
             ))}
           </div>
@@ -493,6 +495,8 @@ interface HistoryEntryProps {
   getAudioUrl: (fileName: string) => Promise<string | null>;
   deleteAudio: (id: number) => Promise<void>;
   retryTranscription: (id: number) => Promise<void>;
+  /** Active search, so the words that made this entry match can be marked. */
+  search: string;
 }
 
 const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
@@ -502,6 +506,7 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
   getAudioUrl,
   deleteAudio,
   retryTranscription,
+  search,
 }) => {
   const { t, i18n } = useTranslation();
   const [showCopied, setShowCopied] = useState(false);
@@ -637,7 +642,19 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
         {retrying
           ? t("settings.history.transcribing")
           : hasTranscription
-            ? entry.transcription_text
+            ? highlightPieces(entry.transcription_text, search).map(
+                (piece, index) =>
+                  piece.match ? (
+                    <mark
+                      key={index}
+                      className="rounded-sm bg-logo-primary/30 px-0.5 text-text"
+                    >
+                      {piece.text}
+                    </mark>
+                  ) : (
+                    <React.Fragment key={index}>{piece.text}</React.Fragment>
+                  ),
+              )
             : t("settings.history.transcriptionFailed")}
       </p>
 
