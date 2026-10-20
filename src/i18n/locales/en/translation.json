@@ -491,11 +491,11 @@
       "title": "History",
       "openFolder": "Open Recordings Folder",
       "sourceMic": "Microphone",
-      "sourceFile": "File",
+      "sourceFile": "Upload",
       "filter": {
         "all": "All",
         "microphone": "Microphone",
-        "file": "File"
+        "file": "Upload"
       },
       "emptyFiltered": "No entries in this category.",
       "loading": "Loading history...",
@@ -510,7 +510,13 @@
       "transcribing": "Transcribing...",
       "transcriptionFailed": "Transcription failed. You can re-transcribe using the retry icon.",
       "partial": "Partial",
-      "partialHint": "This run stopped before the end of the audio. The text covers only part of the recording."
+      "partialHint": "This run stopped before the end of the audio. The text covers only part of the recording.",
+      "noAudio": "Audio no longer kept — only the newest recordings keep theirs.",
+      "search": {
+        "placeholder": "Search transcripts",
+        "clear": "Clear search",
+        "noResults": "Nothing matches “{{query}}”."
+      }
     },
     "debug": {
       "title": "Debug",
@@ -553,13 +559,13 @@
         "description": "Sensitivity for custom word corrections"
       },
       "historyLimit": {
-        "title": "History Limit",
-        "description": "Maximum number of history entries to keep",
-        "entries": "entries"
+        "title": "Recordings with audio",
+        "description": "How many of the newest recordings keep their audio. Transcripts are always kept and stay searchable.",
+        "entries": "recordings"
       },
       "recordingRetention": {
         "title": "Auto-Delete Recordings",
-        "description": "Automatically delete old recordings to save space",
+        "description": "Delete the audio of older recordings to save space. Transcripts are always kept.",
         "never": "Never",
         "preserveLimit": "Keep latest {{count}}",
         "days3": "After 3 days",

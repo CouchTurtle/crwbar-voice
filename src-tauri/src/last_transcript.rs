@@ -97,6 +97,7 @@ mod tests {
             post_process_requested: false,
             source: HistorySource::Microphone,
             partial: false,
+            has_audio: true,
         }
     }
 

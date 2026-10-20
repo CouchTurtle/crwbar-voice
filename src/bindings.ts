@@ -912,9 +912,9 @@ async transcribeFile(path: string, deliver: boolean) : Promise<Result<FileTransc
 async cancelFileTranscription() : Promise<void> {
     await TAURI_INVOKE("cancel_file_transcription");
 },
-async getHistoryEntries(cursor: number | null, limit: number | null, source: HistorySource | null) : Promise<Result<PaginatedHistory, string>> {
+async getHistoryEntries(cursor: number | null, limit: number | null, source: HistorySource | null, search: string | null) : Promise<Result<PaginatedHistory, string>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("get_history_entries", { cursor, limit, source }) };
+    return { status: "ok", data: await TAURI_INVOKE("get_history_entries", { cursor, limit, source, search }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -1115,7 +1115,13 @@ export type HistoryEntry = { id: number; file_name: string; timestamp: number; s
  * The run stopped before the end of the audio, so this text covers only
  * part of the recording.
  */
-partial: boolean }
+partial: boolean; 
+/**
+ * Whether the recording is still on disk. Derived on every read, never
+ * stored: text is kept for good, audio only for the newest recordings, so
+ * an entry outliving its WAV is the normal case, not a broken one.
+ */
+has_audio: boolean }
 export type HistorySource = "microphone" | "file"
 export type HistorySourceCounts = { total: number; microphone: number; file: number }
 export type HistoryUpdatePayload = { action: "added"; entry: HistoryEntry } | { action: "updated"; entry: HistoryEntry } | { action: "deleted"; id: number } | { action: "toggled"; id: number }

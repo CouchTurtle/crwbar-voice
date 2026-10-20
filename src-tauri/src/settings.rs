@@ -572,7 +572,7 @@ fn default_model() -> String {
     "".to_string()
 }
 
-const CURRENT_SETTINGS_SCHEMA_VERSION: u32 = 1;
+const CURRENT_SETTINGS_SCHEMA_VERSION: u32 = 2;
 
 fn default_settings_schema_version() -> u32 {
     CURRENT_SETTINGS_SCHEMA_VERSION
@@ -657,9 +657,13 @@ fn default_auto_submit() -> bool {
     false
 }
 
+/// How many recordings keep their audio. Text is never pruned.
 fn default_history_limit() -> usize {
-    5
+    10
 }
+
+/// The default before audio and text retention were separated.
+const LEGACY_DEFAULT_HISTORY_LIMIT: usize = 5;
 
 fn default_recording_retention_period() -> RecordingRetentionPeriod {
     RecordingRetentionPeriod::PreserveLimit
@@ -1225,6 +1229,18 @@ fn apply_settings_migrations(
         settings.settings_schema_version = CURRENT_SETTINGS_SCHEMA_VERSION;
         updated = true;
     }
+    if stored_schema_version < 2 {
+        // `history_limit` used to cap the whole history; it now only caps how
+        // many recordings keep their audio, and text is never deleted. A store
+        // still on the old default moves to the new one. Any other number was
+        // chosen on purpose and is kept — under the new rule it already keeps
+        // strictly more than before.
+        if settings.history_limit == LEGACY_DEFAULT_HISTORY_LIMIT {
+            settings.history_limit = default_history_limit();
+        }
+        settings.settings_schema_version = CURRENT_SETTINGS_SCHEMA_VERSION;
+        updated = true;
+    }
 
     // One-time overlay migration (only while the new key is absent): the retired
     // overlay_position `none` meant "hide the overlay" → OverlayStyle::None; any
@@ -1491,8 +1507,15 @@ mod tests {
         assert_eq!(settings.log_level, LogLevel::Debug);
         assert_eq!(settings.sound_theme, SoundTheme::Pop);
 
-        // A current-format store must not be rewritten on every read.
-        assert!(!apply_settings_migrations(&mut settings, &stored));
+        // A v1 store is one schema version behind and migrates exactly once:
+        // `history_limit` still on the old default of 5 moves to the new one.
+        assert!(apply_settings_migrations(&mut settings, &stored));
+        assert_eq!(settings.history_limit, default_history_limit());
+
+        // Once migrated it is current-format, and must not be rewritten on
+        // every read.
+        let migrated = serde_json::to_value(&settings).expect("serialize");
+        assert!(!apply_settings_migrations(&mut settings, &migrated));
     }
 
     #[test]

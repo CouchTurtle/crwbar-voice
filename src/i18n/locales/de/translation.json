@@ -491,11 +491,11 @@
       "title": "Verlauf",
       "openFolder": "Aufnahmeordner öffnen",
       "sourceMic": "Mikrofon",
-      "sourceFile": "Datei",
+      "sourceFile": "Upload",
       "filter": {
         "all": "Alle",
         "microphone": "Mikrofon",
-        "file": "Datei"
+        "file": "Upload"
       },
       "emptyFiltered": "Keine Einträge in dieser Kategorie.",
       "loading": "Verlauf wird geladen...",
@@ -510,7 +510,13 @@
       "transcribing": "Transkribiere...",
       "transcriptionFailed": "Transkription fehlgeschlagen. Du kannst über das Wiederholen-Symbol erneut transkribieren.",
       "partial": "Teilweise",
-      "partialHint": "Dieser Lauf wurde vor dem Ende der Aufnahme gestoppt. Der Text deckt nur einen Teil der Aufnahme ab."
+      "partialHint": "Dieser Lauf wurde vor dem Ende der Aufnahme gestoppt. Der Text deckt nur einen Teil der Aufnahme ab.",
+      "noAudio": "Audio nicht mehr gespeichert — nur die neuesten Aufnahmen behalten es.",
+      "search": {
+        "placeholder": "Transkripte durchsuchen",
+        "clear": "Suche leeren",
+        "noResults": "Nichts passt zu „{{query}}“."
+      }
     },
     "debug": {
       "title": "Debug",
@@ -546,13 +552,13 @@
         "description": "Empfindlichkeit für benutzerdefinierte Wortkorrekturen"
       },
       "historyLimit": {
-        "title": "Verlaufslimit",
-        "description": "Maximale Anzahl der Verlaufseinträge",
-        "entries": "Einträge"
+        "title": "Aufnahmen mit Audio",
+        "description": "So viele der neuesten Aufnahmen behalten ihr Audio. Transkripte bleiben immer erhalten und durchsuchbar.",
+        "entries": "Aufnahmen"
       },
       "recordingRetention": {
         "title": "Aufnahmen automatisch löschen",
-        "description": "Alte Aufnahmen automatisch löschen, um Speicherplatz zu sparen",
+        "description": "Audio älterer Aufnahmen löschen, um Speicherplatz zu sparen. Transkripte bleiben immer erhalten.",
         "never": "Nie",
         "preserveLimit": "Neueste {{count}} behalten",
         "days3": "Nach 3 Tagen",

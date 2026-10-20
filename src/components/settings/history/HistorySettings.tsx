@@ -5,6 +5,8 @@ import {
   AlertCircle,
   Check,
   Copy,
+  Search,
+  X,
   FileAudio,
   FolderOpen,
   Mic,
@@ -49,6 +51,21 @@ const IconButton: React.FC<{
 );
 
 const PAGE_SIZE = 30;
+/** Long enough not to query on every keystroke, short enough to feel live. */
+const SEARCH_DEBOUNCE_MS = 250;
+
+/**
+ * Client-side mirror of the backend's `matches_search`, used only to decide
+ * whether a freshly added entry belongs in the current results.
+ */
+const matchesSearch = (entry: HistoryEntry, query: string): boolean => {
+  const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+  if (terms.length === 0) return true;
+  const haystack = [entry.transcription_text, entry.post_processed_text ?? ""]
+    .join("\n")
+    .toLowerCase();
+  return terms.every((term) => haystack.includes(term));
+};
 
 type SourceFilter = "all" | HistorySource;
 
@@ -116,6 +133,8 @@ export const HistorySettings: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [filter, setFilter] = useState<SourceFilter>("all");
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
   const [sourceCounts, setSourceCounts] = useState<HistorySourceCounts | null>(
     null,
   );
@@ -128,6 +147,14 @@ export const HistorySettings: React.FC = () => {
   useEffect(() => {
     entriesRef.current = entries;
   }, [entries]);
+
+  useEffect(() => {
+    const timer = setTimeout(
+      () => setSearch(searchInput.trim()),
+      SEARCH_DEBOUNCE_MS,
+    );
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   const loadPage = useCallback(
     async (cursor?: number) => {
@@ -145,6 +172,7 @@ export const HistorySettings: React.FC = () => {
           cursor ?? null,
           PAGE_SIZE,
           filter === "all" ? null : filter,
+          search || null,
         );
         if (generation !== loadGenerationRef.current) return;
         if (result.status === "ok") {
@@ -164,7 +192,7 @@ export const HistorySettings: React.FC = () => {
         }
       }
     },
-    [filter],
+    [filter, search],
   );
 
   const loadSourceCounts = useCallback(async () => {
@@ -234,7 +262,10 @@ export const HistorySettings: React.FC = () => {
               }
             : current,
         );
-        if (filter === "all" || payload.entry.source === filter) {
+        if (
+          (filter === "all" || payload.entry.source === filter) &&
+          matchesSearch(payload.entry, search)
+        ) {
           setEntries((prev) => [payload.entry, ...prev]);
         }
       } else if (payload.action === "updated") {
@@ -249,7 +280,7 @@ export const HistorySettings: React.FC = () => {
     return () => {
       unlisten.then((fn) => fn());
     };
-  }, [filter]);
+  }, [filter, search]);
 
   const toggleSaved = async (id: number) => {
     // Optimistic update
@@ -345,7 +376,7 @@ export const HistorySettings: React.FC = () => {
         {t("settings.history.loading")}
       </div>
     );
-  } else if (entries.length === 0 && filter === "all") {
+  } else if (entries.length === 0 && filter === "all" && !search) {
     content = (
       <div className="px-4 py-3 text-center text-text/60">
         {t("settings.history.empty")}
@@ -354,7 +385,9 @@ export const HistorySettings: React.FC = () => {
   } else if (entries.length === 0) {
     content = (
       <div className="px-4 py-3 text-center text-text/60">
-        {t("settings.history.emptyFiltered")}
+        {search
+          ? t("settings.history.search.noResults", { query: search })
+          : t("settings.history.emptyFiltered")}
       </div>
     );
   } else {
@@ -394,6 +427,29 @@ export const HistorySettings: React.FC = () => {
             onClick={openRecordingsFolder}
             label={t("settings.history.openFolder")}
           />
+        </div>
+        <div className="px-4">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text/40 pointer-events-none" />
+            <input
+              type="search"
+              value={searchInput}
+              onChange={(event) => setSearchInput(event.target.value)}
+              placeholder={t("settings.history.search.placeholder")}
+              aria-label={t("settings.history.search.placeholder")}
+              className="w-full rounded-lg border border-mid-gray/20 bg-background py-1.5 pl-8 pr-8 text-sm text-text placeholder:text-text/40 focus:border-logo-primary focus:outline-none [&::-webkit-search-cancel-button]:hidden"
+            />
+            {searchInput && (
+              <button
+                type="button"
+                onClick={() => setSearchInput("")}
+                aria-label={t("settings.history.search.clear")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-text/40 hover:text-text"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
         </div>
         {!loading && sourceCounts && (
           <div className="px-4 flex items-center gap-1">
@@ -529,8 +585,12 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
           </IconButton>
           <IconButton
             onClick={handleRetranscribe}
-            disabled={retrying}
-            title={t("settings.history.retranscribe")}
+            disabled={retrying || !entry.has_audio}
+            title={
+              entry.has_audio
+                ? t("settings.history.retranscribe")
+                : t("settings.history.noAudio")
+            }
           >
             <RotateCcw
               width={16}
@@ -581,7 +641,11 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
             : t("settings.history.transcriptionFailed")}
       </p>
 
-      <AudioPlayer onLoadRequest={handleLoadAudio} className="w-full" />
+      {entry.has_audio ? (
+        <AudioPlayer onLoadRequest={handleLoadAudio} className="w-full" />
+      ) : (
+        <p className="text-xs text-text/40">{t("settings.history.noAudio")}</p>
+      )}
     </div>
   );
 };

@@ -85,6 +85,10 @@ pub struct HistoryEntry {
     /// The run stopped before the end of the audio, so this text covers only
     /// part of the recording.
     pub partial: bool,
+    /// Whether the recording is still on disk. Derived on every read, never
+    /// stored: text is kept for good, audio only for the newest recordings, so
+    /// an entry outliving its WAV is the normal case, not a broken one.
+    pub has_audio: bool,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, Type)]
@@ -241,11 +245,24 @@ impl HistoryManager {
         Ok(Connection::open(&self.db_path)?)
     }
 
-    fn map_history_entry(row: &rusqlite::Row<'_>) -> rusqlite::Result<HistoryEntry> {
+    fn has_recording(&self, file_name: &str) -> bool {
+        self.recordings_dir.join(file_name).is_file()
+    }
+
+    fn map_history_entry(&self, row: &rusqlite::Row<'_>) -> rusqlite::Result<HistoryEntry> {
+        Self::map_row(row, &self.recordings_dir)
+    }
+
+    fn map_row(
+        row: &rusqlite::Row<'_>,
+        recordings_dir: &std::path::Path,
+    ) -> rusqlite::Result<HistoryEntry> {
         let source: String = row.get("source")?;
+        let file_name: String = row.get("file_name")?;
         Ok(HistoryEntry {
             id: row.get("id")?,
-            file_name: row.get("file_name")?,
+            has_audio: recordings_dir.join(&file_name).is_file(),
+            file_name,
             timestamp: row.get("timestamp")?,
             saved: row.get("saved")?,
             title: row.get("title")?,
@@ -318,6 +335,11 @@ impl HistoryManager {
             post_process_requested,
             source,
             partial,
+            has_audio: false,
+        };
+        let entry = HistoryEntry {
+            has_audio: self.has_recording(&entry.file_name),
+            ..entry
         };
 
         debug!("Saved history entry with id {}", entry.id);
@@ -368,7 +390,7 @@ impl HistoryManager {
                 "SELECT id, file_name, timestamp, saved, title, transcription_text, post_processed_text, post_process_prompt, post_process_requested, source, partial
                  FROM transcription_history WHERE id = ?1",
                 params![id],
-                Self::map_history_entry,
+                |row| self.map_history_entry(row),
             )?;
 
         debug!("Updated transcription for history entry {}", id);
@@ -404,63 +426,43 @@ impl HistoryManager {
         }
     }
 
-    fn delete_entries_and_files(&self, entries: &[(i64, String)]) -> Result<usize> {
-        if entries.is_empty() {
-            return Ok(0);
-        }
-
-        let conn = self.get_connection()?;
-        let mut deleted_count = 0;
-
-        for (id, file_name) in entries {
-            // Delete database entry
-            conn.execute(
-                "DELETE FROM transcription_history WHERE id = ?1",
-                params![id],
-            )?;
-
-            // Delete WAV file
-            let file_path = self.recordings_dir.join(file_name);
-            if file_path.exists() {
-                if let Err(e) = fs::remove_file(&file_path) {
-                    error!("Failed to delete WAV file {}: {}", file_name, e);
-                } else {
-                    debug!("Deleted old WAV file: {}", file_name);
-                    deleted_count += 1;
-                }
-            }
-        }
-
-        Ok(deleted_count)
+    /// Delete recordings, keeping their history entries.
+    ///
+    /// Text is small and is what people come back for; audio is what fills the
+    /// disk. So retention only ever removes WAV files — the transcript stays
+    /// searchable for good and simply loses its play button.
+    fn delete_recordings(&self, file_names: &[String]) -> usize {
+        delete_recordings(&self.recordings_dir, file_names)
     }
 
+    /// Keep audio for the newest `limit` recordings, counting only entries that
+    /// still have one — a cancelled dictation never had a WAV and must not take
+    /// a recording's place. Starred entries keep their audio regardless.
     fn cleanup_by_count(&self, limit: usize) -> Result<()> {
         let conn = self.get_connection()?;
-
-        // Get all entries that are not saved, ordered by timestamp desc
-        let mut stmt = conn.prepare(
-            "SELECT id, file_name FROM transcription_history WHERE saved = 0 ORDER BY timestamp DESC"
-        )?;
-
-        let rows = stmt.query_map([], |row| {
-            Ok((row.get::<_, i64>("id")?, row.get::<_, String>("file_name")?))
-        })?;
-
-        let mut entries: Vec<(i64, String)> = Vec::new();
-        for row in rows {
-            entries.push(row?);
+        let deleted = Self::prune_audio_by_count(&conn, &self.recordings_dir, limit)?;
+        if deleted > 0 {
+            debug!("Removed audio from {} older history entries", deleted);
         }
-
-        if entries.len() > limit {
-            let entries_to_delete = &entries[limit..];
-            let deleted_count = self.delete_entries_and_files(entries_to_delete)?;
-
-            if deleted_count > 0 {
-                debug!("Cleaned up {} old history entries by count", deleted_count);
-            }
-        }
-
         Ok(())
+    }
+
+    fn prune_audio_by_count(
+        conn: &Connection,
+        recordings_dir: &std::path::Path,
+        limit: usize,
+    ) -> Result<usize> {
+        let mut stmt = conn.prepare(
+            "SELECT file_name FROM transcription_history WHERE saved = 0 ORDER BY timestamp DESC",
+        )?;
+        let file_names = stmt
+            .query_map([], |row| row.get::<_, String>("file_name"))?
+            .collect::<rusqlite::Result<Vec<_>>>()?;
+
+        let beyond_limit = recordings_beyond_limit(&file_names, limit, |name| {
+            recordings_dir.join(name).is_file()
+        });
+        Ok(delete_recordings(recordings_dir, &beyond_limit))
     }
 
     fn cleanup_by_time(
@@ -478,21 +480,17 @@ impl HistoryManager {
             _ => unreachable!("Should not reach here"),
         };
 
-        // Get all unsaved entries older than the cutoff timestamp
+        // Recordings of unsaved entries older than the cutoff. The entries stay.
         let mut stmt = conn.prepare(
-            "SELECT id, file_name FROM transcription_history WHERE saved = 0 AND timestamp < ?1",
+            "SELECT file_name FROM transcription_history WHERE saved = 0 AND timestamp < ?1",
         )?;
+        let file_names = stmt
+            .query_map(params![cutoff_timestamp], |row| {
+                row.get::<_, String>("file_name")
+            })?
+            .collect::<rusqlite::Result<Vec<_>>>()?;
 
-        let rows = stmt.query_map(params![cutoff_timestamp], |row| {
-            Ok((row.get::<_, i64>("id")?, row.get::<_, String>("file_name")?))
-        })?;
-
-        let mut entries_to_delete: Vec<(i64, String)> = Vec::new();
-        for row in rows {
-            entries_to_delete.push(row?);
-        }
-
-        let deleted_count = self.delete_entries_and_files(&entries_to_delete)?;
+        let deleted_count = self.delete_recordings(&file_names);
 
         if deleted_count > 0 {
             debug!(
@@ -509,8 +507,27 @@ impl HistoryManager {
         cursor: Option<i64>,
         limit: Option<usize>,
         source: Option<HistorySource>,
+        search: Option<String>,
     ) -> Result<PaginatedHistory> {
         let conn = self.get_connection()?;
+        Self::query_history_page(
+            &conn,
+            &self.recordings_dir,
+            cursor,
+            limit,
+            source,
+            &search_terms(search.as_deref()),
+        )
+    }
+
+    fn query_history_page(
+        conn: &Connection,
+        recordings_dir: &std::path::Path,
+        cursor: Option<i64>,
+        limit: Option<usize>,
+        source: Option<HistorySource>,
+        terms: &[String],
+    ) -> Result<PaginatedHistory> {
         let limit = limit.map(|l| l.min(100));
 
         let mut query = String::from(
@@ -534,15 +551,30 @@ impl HistoryManager {
             query.push_str(&conditions.join(" AND "));
         }
         query.push_str(" ORDER BY id DESC");
-        if let Some(lim) = limit {
+        // A search filters in Rust (below), so SQL cannot cut the page short.
+        if let (Some(lim), true) = (limit, terms.is_empty()) {
             values.push(((lim + 1) as i64).into());
             query.push_str(&format!(" LIMIT ?{}", values.len()));
         }
 
+        // Matching happens here rather than in SQL because SQLite's LIKE folds
+        // case for ASCII only — "Änderung" would never find "änderung". Rows
+        // arrive lazily in page order, so the scan stops once a page is full.
         let mut stmt = conn.prepare(&query)?;
-        let mut entries = stmt
-            .query_map(rusqlite::params_from_iter(values), Self::map_history_entry)?
-            .collect::<std::result::Result<Vec<_>, _>>()?;
+        let wanted = limit.map(|lim| lim + 1);
+        let mut entries = Vec::new();
+        for row in stmt.query_map(rusqlite::params_from_iter(values), |row| {
+            Self::map_row(row, recordings_dir)
+        })? {
+            let entry = row?;
+            if !matches_search(&entry, terms) {
+                continue;
+            }
+            entries.push(entry);
+            if wanted.is_some_and(|w| entries.len() >= w) {
+                break;
+            }
+        }
 
         let has_more = limit.is_some_and(|lim| entries.len() > lim);
         if has_more {
@@ -581,7 +613,10 @@ impl HistoryManager {
     }
 
     #[cfg(test)]
-    fn get_latest_entry_with_conn(conn: &Connection) -> Result<Option<HistoryEntry>> {
+    fn get_latest_entry_with_conn(
+        conn: &Connection,
+        recordings_dir: &std::path::Path,
+    ) -> Result<Option<HistoryEntry>> {
         let mut stmt = conn.prepare(
             "SELECT
                 id,
@@ -600,17 +635,22 @@ impl HistoryManager {
              LIMIT 1",
         )?;
 
-        let entry = stmt.query_row([], Self::map_history_entry).optional()?;
+        let entry = stmt
+            .query_row([], |row| Self::map_row(row, recordings_dir))
+            .optional()?;
         Ok(entry)
     }
 
     /// Get the latest entry with non-empty transcription text.
     pub fn get_latest_completed_entry(&self) -> Result<Option<HistoryEntry>> {
         let conn = self.get_connection()?;
-        Self::get_latest_completed_entry_with_conn(&conn)
+        Self::get_latest_completed_entry_with_conn(&conn, &self.recordings_dir)
     }
 
-    fn get_latest_completed_entry_with_conn(conn: &Connection) -> Result<Option<HistoryEntry>> {
+    fn get_latest_completed_entry_with_conn(
+        conn: &Connection,
+        recordings_dir: &std::path::Path,
+    ) -> Result<Option<HistoryEntry>> {
         let mut stmt = conn.prepare(
             "SELECT
                 id,
@@ -630,7 +670,9 @@ impl HistoryManager {
              LIMIT 1",
         )?;
 
-        let entry = stmt.query_row([], Self::map_history_entry).optional()?;
+        let entry = stmt
+            .query_row([], |row| Self::map_row(row, recordings_dir))
+            .optional()?;
         Ok(entry)
     }
 
@@ -684,7 +726,9 @@ impl HistoryManager {
              WHERE id = ?1",
         )?;
 
-        let entry = stmt.query_row([id], Self::map_history_entry).optional()?;
+        let entry = stmt
+            .query_row([id], |row| self.map_history_entry(row))
+            .optional()?;
 
         Ok(entry)
     }
@@ -731,6 +775,68 @@ impl HistoryManager {
     }
 }
 
+/// Delete recordings, keeping their history entries.
+///
+/// Text is small and is what people come back for; audio is what fills the
+/// disk. So retention only ever removes WAV files — the transcript stays
+/// searchable for good and simply loses its play button.
+fn delete_recordings(recordings_dir: &std::path::Path, file_names: &[String]) -> usize {
+    let mut deleted = 0;
+    for file_name in file_names {
+        let file_path = recordings_dir.join(file_name);
+        if !file_path.is_file() {
+            continue;
+        }
+        match fs::remove_file(&file_path) {
+            Ok(()) => {
+                debug!("Deleted old recording: {}", file_name);
+                deleted += 1;
+            }
+            Err(e) => error!("Failed to delete recording {}: {}", file_name, e),
+        }
+    }
+    deleted
+}
+
+/// Lowercased search words; empty when there is nothing to search for.
+fn search_terms(search: Option<&str>) -> Vec<String> {
+    search
+        .unwrap_or_default()
+        .split_whitespace()
+        .map(str::to_lowercase)
+        .collect()
+}
+
+/// Every word has to appear somewhere in the entry's text — raw or
+/// post-processed — in any order and regardless of case.
+fn matches_search(entry: &HistoryEntry, terms: &[String]) -> bool {
+    if terms.is_empty() {
+        return true;
+    }
+    let mut haystack = entry.transcription_text.to_lowercase();
+    if let Some(processed) = &entry.post_processed_text {
+        haystack.push('\n');
+        haystack.push_str(&processed.to_lowercase());
+    }
+    terms.iter().all(|term| haystack.contains(term.as_str()))
+}
+
+/// The recordings to drop so that only the newest `limit` that still exist are
+/// kept. `file_names` is newest first; entries without audio are skipped
+/// rather than counted.
+fn recordings_beyond_limit(
+    file_names: &[String],
+    limit: usize,
+    has_recording: impl Fn(&str) -> bool,
+) -> Vec<String> {
+    file_names
+        .iter()
+        .filter(|name| has_recording(name))
+        .skip(limit)
+        .cloned()
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -755,6 +861,164 @@ mod tests {
         )
         .expect("create transcription_history table");
         conn
+    }
+
+    /// A database built by the real migrations, with rows inserted the way the
+    /// app writes them. `rows` is (file_name, saved, text, source), oldest first.
+    fn migrated_db(rows: &[(&str, bool, &str, &str)]) -> Connection {
+        let mut conn = Connection::open_in_memory().expect("open in-memory db");
+        Migrations::new(MIGRATIONS.to_vec())
+            .to_latest(&mut conn)
+            .expect("migrations apply cleanly");
+        for (i, (file_name, saved, text, source)) in rows.iter().enumerate() {
+            conn.execute(
+                "INSERT INTO transcription_history
+                    (file_name, timestamp, saved, title, transcription_text, post_process_requested, source)
+                 VALUES (?1, ?2, ?3, 'Recording', ?4, 0, ?5)",
+                params![file_name, i as i64, saved, text, source],
+            )
+            .expect("insert row");
+        }
+        conn
+    }
+
+    fn ids(page: &PaginatedHistory) -> Vec<i64> {
+        page.entries.iter().map(|e| e.id).collect()
+    }
+
+    /// The real page query: search, cursor and source filter together, and the
+    /// play button only where a recording is actually on disk.
+    #[test]
+    fn history_page_combines_search_cursor_and_source() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        std::fs::write(dir.path().join("1.wav"), b"RIFF").expect("write wav");
+        let conn = migrated_db(&[
+            ("1.wav", false, "Die Änderung am Budget", "microphone"),
+            ("2.wav", false, "Notizen vom Meeting", "file"),
+            ("3.wav", false, "Budget für Freitag", "microphone"),
+            ("4.wav", false, "Etwas anderes", "microphone"),
+            ("5.wav", false, "Änderungen im Plan", "file"),
+        ]);
+        let page = |cursor, limit, source, query: &str| {
+            HistoryManager::query_history_page(
+                &conn,
+                dir.path(),
+                cursor,
+                limit,
+                source,
+                &super::search_terms(Some(query)),
+            )
+            .expect("query page")
+        };
+
+        let first = page(None, Some(2), None, "");
+        assert_eq!(ids(&first), vec![5, 4]);
+        assert!(first.has_more);
+
+        assert_eq!(ids(&page(None, Some(10), None, "ÄNDERUNG")), vec![5, 1]);
+
+        let budget = page(None, Some(1), None, "budget");
+        assert_eq!(ids(&budget), vec![3]);
+        assert!(budget.has_more, "a second match is still to come");
+        let rest = page(Some(3), Some(1), None, "budget");
+        assert_eq!(ids(&rest), vec![1]);
+        assert!(!rest.has_more);
+
+        assert_eq!(
+            ids(&page(None, Some(10), Some(HistorySource::File), "änderung")),
+            vec![5]
+        );
+
+        let all = page(None, Some(10), None, "");
+        let with_audio: Vec<i64> = all
+            .entries
+            .iter()
+            .filter(|e| e.has_audio)
+            .map(|e| e.id)
+            .collect();
+        assert_eq!(
+            with_audio,
+            vec![1],
+            "only the entry whose WAV exists can play"
+        );
+    }
+
+    /// The promise behind the new retention: audio goes, text never does, and
+    /// starred entries keep both. An entry that never had a WAV — a cancelled
+    /// dictation — must not take a recording's slot.
+    #[test]
+    fn pruning_removes_old_audio_but_keeps_every_transcript() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        for name in ["old.wav", "starred.wav", "mid.wav", "new.wav"] {
+            std::fs::write(dir.path().join(name), b"RIFF").expect("write wav");
+        }
+        let conn = migrated_db(&[
+            ("old.wav", false, "oldest", "microphone"),
+            ("starred.wav", true, "starred", "microphone"),
+            ("mid.wav", false, "middle", "microphone"),
+            (
+                "cancelled.wav",
+                false,
+                "cancelled, never recorded",
+                "microphone",
+            ),
+            ("new.wav", false, "newest", "microphone"),
+        ]);
+
+        let deleted = HistoryManager::prune_audio_by_count(&conn, dir.path(), 2).expect("prune");
+        assert_eq!(deleted, 1);
+
+        assert!(
+            !dir.path().join("old.wav").exists(),
+            "beyond the limit: audio goes"
+        );
+        assert!(dir.path().join("mid.wav").exists());
+        assert!(dir.path().join("new.wav").exists());
+        assert!(
+            dir.path().join("starred.wav").exists(),
+            "starred keeps its audio"
+        );
+
+        let rows: i64 = conn
+            .query_row("SELECT COUNT(*) FROM transcription_history", [], |r| {
+                r.get(0)
+            })
+            .expect("count rows");
+        assert_eq!(rows, 5, "every transcript survives pruning");
+    }
+
+    /// German transcripts are the case that SQL's LIKE gets wrong: it folds
+    /// case for ASCII only. Words match in any order, in either text.
+    #[test]
+    fn search_folds_umlauts_and_needs_every_word() {
+        let entry = |raw: &str, processed: Option<&str>| HistoryEntry {
+            id: 1,
+            file_name: "handy-1.wav".to_string(),
+            timestamp: 0,
+            saved: false,
+            title: String::new(),
+            transcription_text: raw.to_string(),
+            post_processed_text: processed.map(str::to_string),
+            post_process_prompt: None,
+            post_process_requested: false,
+            source: HistorySource::Microphone,
+            partial: false,
+            has_audio: false,
+        };
+        let terms = |q: &str| super::search_terms(Some(q));
+
+        let raw = entry("Die Änderung am Budget kommt Freitag", None);
+        assert!(super::matches_search(&raw, &terms("änderung")));
+        assert!(super::matches_search(&raw, &terms("freitag BUDGET")));
+        assert!(!super::matches_search(&raw, &terms("budget montag")));
+
+        let processed = entry("roh", Some("Überarbeiteter Text"));
+        assert!(super::matches_search(&processed, &terms("überarbeiteter")));
+
+        assert!(
+            super::matches_search(&raw, &terms("   ")),
+            "blank search shows everything"
+        );
     }
 
     /// The migration runs against databases that already hold real transcripts,
@@ -859,7 +1123,9 @@ mod tests {
     #[test]
     fn get_latest_entry_returns_none_when_empty() {
         let conn = setup_conn();
-        let entry = HistoryManager::get_latest_entry_with_conn(&conn).expect("fetch latest entry");
+        let entry =
+            HistoryManager::get_latest_entry_with_conn(&conn, std::path::Path::new("/nonexistent"))
+                .expect("fetch latest entry");
         assert!(entry.is_none());
     }
 
@@ -869,9 +1135,10 @@ mod tests {
         insert_entry(&conn, 100, "first", None);
         insert_entry(&conn, 200, "second", Some("processed"));
 
-        let entry = HistoryManager::get_latest_entry_with_conn(&conn)
-            .expect("fetch latest entry")
-            .expect("entry exists");
+        let entry =
+            HistoryManager::get_latest_entry_with_conn(&conn, std::path::Path::new("/nonexistent"))
+                .expect("fetch latest entry")
+                .expect("entry exists");
 
         assert_eq!(entry.timestamp, 200);
         assert_eq!(entry.transcription_text, "second");
@@ -884,9 +1151,12 @@ mod tests {
         insert_entry(&conn, 100, "completed", None);
         insert_entry(&conn, 200, "", None);
 
-        let entry = HistoryManager::get_latest_completed_entry_with_conn(&conn)
-            .expect("fetch latest completed entry")
-            .expect("completed entry exists");
+        let entry = HistoryManager::get_latest_completed_entry_with_conn(
+            &conn,
+            std::path::Path::new("/nonexistent"),
+        )
+        .expect("fetch latest completed entry")
+        .expect("completed entry exists");
 
         assert_eq!(entry.timestamp, 100);
         assert_eq!(entry.transcription_text, "completed");

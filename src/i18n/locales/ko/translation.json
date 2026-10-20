@@ -510,7 +510,13 @@
       "transcribing": "전사 중...",
       "transcriptionFailed": "전사에 실패했습니다. 재시도 아이콘을 사용하여 다시 전사할 수 있습니다.",
       "partial": "Partial",
-      "partialHint": "This run stopped before the end of the audio. The text covers only part of the recording."
+      "partialHint": "This run stopped before the end of the audio. The text covers only part of the recording.",
+      "noAudio": "Audio no longer kept — only the newest recordings keep theirs.",
+      "search": {
+        "placeholder": "Search transcripts",
+        "clear": "Clear search",
+        "noResults": "Nothing matches “{{query}}”."
+      }
     },
     "debug": {
       "title": "디버그",

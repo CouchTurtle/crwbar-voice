@@ -510,7 +510,13 @@
       "transcribing": "文字起こし中…",
       "transcriptionFailed": "文字起こしに失敗しました。リトライアイコンを使用して再文字起こしできます。",
       "partial": "Partial",
-      "partialHint": "This run stopped before the end of the audio. The text covers only part of the recording."
+      "partialHint": "This run stopped before the end of the audio. The text covers only part of the recording.",
+      "noAudio": "Audio no longer kept — only the newest recordings keep theirs.",
+      "search": {
+        "placeholder": "Search transcripts",
+        "clear": "Clear search",
+        "noResults": "Nothing matches “{{query}}”."
+      }
     },
     "debug": {
       "title": "デバッグ",

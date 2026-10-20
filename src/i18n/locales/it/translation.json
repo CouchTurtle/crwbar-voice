@@ -510,7 +510,13 @@
       "transcribing": "Trascrizione in corso...",
       "transcriptionFailed": "Trascrizione fallita. Puoi ri-trascrivere usando l'icona di ripetizione.",
       "partial": "Partial",
-      "partialHint": "This run stopped before the end of the audio. The text covers only part of the recording."
+      "partialHint": "This run stopped before the end of the audio. The text covers only part of the recording.",
+      "noAudio": "Audio no longer kept — only the newest recordings keep theirs.",
+      "search": {
+        "placeholder": "Search transcripts",
+        "clear": "Clear search",
+        "noResults": "Nothing matches “{{query}}”."
+      }
     },
     "debug": {
       "title": "Debug",
