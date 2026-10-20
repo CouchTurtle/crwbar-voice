@@ -245,10 +245,6 @@ impl HistoryManager {
         Ok(Connection::open(&self.db_path)?)
     }
 
-    fn has_recording(&self, file_name: &str) -> bool {
-        self.recordings_dir.join(file_name).is_file()
-    }
-
     fn map_history_entry(&self, row: &rusqlite::Row<'_>) -> rusqlite::Result<HistoryEntry> {
         Self::map_row(row, &self.recordings_dir)
     }
@@ -261,7 +257,7 @@ impl HistoryManager {
         let file_name: String = row.get("file_name")?;
         Ok(HistoryEntry {
             id: row.get("id")?,
-            has_audio: recordings_dir.join(&file_name).is_file(),
+            has_audio: recording_exists(recordings_dir, &file_name),
             file_name,
             timestamp: row.get("timestamp")?,
             saved: row.get("saved")?,
@@ -323,6 +319,7 @@ impl HistoryManager {
             ],
         )?;
 
+        let has_audio = recording_exists(&self.recordings_dir, &file_name);
         let entry = HistoryEntry {
             id: conn.last_insert_rowid(),
             file_name,
@@ -335,11 +332,7 @@ impl HistoryManager {
             post_process_requested,
             source,
             partial,
-            has_audio: false,
-        };
-        let entry = HistoryEntry {
-            has_audio: self.has_recording(&entry.file_name),
-            ..entry
+            has_audio,
         };
 
         debug!("Saved history entry with id {}", entry.id);
@@ -426,15 +419,6 @@ impl HistoryManager {
         }
     }
 
-    /// Delete recordings, keeping their history entries.
-    ///
-    /// Text is small and is what people come back for; audio is what fills the
-    /// disk. So retention only ever removes WAV files — the transcript stays
-    /// searchable for good and simply loses its play button.
-    fn delete_recordings(&self, file_names: &[String]) -> usize {
-        delete_recordings(&self.recordings_dir, file_names)
-    }
-
     /// Keep audio for the newest `limit` recordings, counting only entries that
     /// still have one — a cancelled dictation never had a WAV and must not take
     /// a recording's place. Starred entries keep their audio regardless.
@@ -460,7 +444,7 @@ impl HistoryManager {
             .collect::<rusqlite::Result<Vec<_>>>()?;
 
         let beyond_limit = recordings_beyond_limit(&file_names, limit, |name| {
-            recordings_dir.join(name).is_file()
+            recording_exists(recordings_dir, name)
         });
         Ok(delete_recordings(recordings_dir, &beyond_limit))
     }
@@ -490,7 +474,7 @@ impl HistoryManager {
             })?
             .collect::<rusqlite::Result<Vec<_>>>()?;
 
-        let deleted_count = self.delete_recordings(&file_names);
+        let deleted_count = delete_recordings(&self.recordings_dir, &file_names);
 
         if deleted_count > 0 {
             debug!(
@@ -775,6 +759,10 @@ impl HistoryManager {
     }
 }
 
+fn recording_exists(recordings_dir: &std::path::Path, file_name: &str) -> bool {
+    recordings_dir.join(file_name).is_file()
+}
+
 /// Delete recordings, keeping their history entries.
 ///
 /// Text is small and is what people come back for; audio is what fills the
@@ -783,10 +771,10 @@ impl HistoryManager {
 fn delete_recordings(recordings_dir: &std::path::Path, file_names: &[String]) -> usize {
     let mut deleted = 0;
     for file_name in file_names {
-        let file_path = recordings_dir.join(file_name);
-        if !file_path.is_file() {
+        if !recording_exists(recordings_dir, file_name) {
             continue;
         }
+        let file_path = recordings_dir.join(file_name);
         match fs::remove_file(&file_path) {
             Ok(()) => {
                 debug!("Deleted old recording: {}", file_name);

@@ -80,15 +80,18 @@ src/
 | Feature                                                     | Where                                                                                                             |
 | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | Drop an audio file on the overlay or the main window        | `file_import.rs`, `commands/transcription.rs::transcribe_file`, `src/overlay/RecordingOverlay.tsx`, `src/App.tsx` |
-| Pick an audio file from _General_                           | `TranscribeFileButton.tsx`                                                                                        |
+| Pick or drop a file in the _Transcribe_ tab                 | `transcribe/TranscribeSettings.tsx`                                                                               |
 | Opus (WhatsApp voice notes) decoding                        | `file_import.rs` — `audiopus` + `ogg`; rodio/Symphonia has no Opus codec                                          |
 | ALAC (Apple Lossless) decoding                              | `symphonia` dependency in `src-tauri/Cargo.toml` — see _Decoding_                                                 |
+| CAF (Core Audio Format) decoding, every codec               | `file_import.rs::decode_via_afconvert` — see _Decoding_                                                           |
 | Long audio transcribed in chunks                            | `managers/transcription.rs::split_for_transcription`                                                              |
 | Overlay "copied" confirmation with re-copy                  | overlay `done` state, `commands::copy_last_transcript`                                                            |
 | Shortcuts to copy / insert the last transcript              | `last_transcript.rs`, `actions.rs` (`copy_last_transcript`, `insert_last_transcript`)                             |
 | Shortcuts can be switched off                               | empty `current_binding`, `shortcut::is_disabled`                                                                  |
 | File transcription that stays in the app                    | `TranscribeSettings.tsx`, `transcribe_file(.., deliver: false)`                                                   |
 | History distinguishes microphone vs file                    | `managers/history.rs::source_from_file_name`                                                                      |
+| History keeps all text, audio for the newest N, searchable  | `managers/history.rs` — see _History retention_                                                                   |
+| Keep recording after release (post-roll)                    | `settings.extra_recording_buffer_ms`, `RecordingBuffer.tsx` in _General_                                          |
 | Custom accent color                                         | `settings.accent_color`, `src/lib/utils/theme.ts`, `AccentColorPicker.tsx`                                        |
 | RGB accent cycling ("Emil mode")                            | `settings.rgb_mode`, `theme.ts::startRgbMode`, `RgbModeToggle.tsx`                                                |
 | Voice actions (API / Codex CLI / Claude CLI)                | `actions.rs`, `post-processing/VoiceActionSettings.tsx`                                                           |
@@ -217,8 +220,10 @@ committed prefix of a live stream mirrored in `live_stream_text`. Only the
 _committed_ prefix: the tentative suffix is by definition text the model may
 still rewrite. `finalize_stream` clears the mirror so a later cancel cannot
 resurrect a delivered dictation, and both salvage reads consume. The entry
-names a WAV that was never written, which History already tolerates — the
-retention setting deletes recordings while keeping their text.
+names a WAV that was never written. That is an ordinary state since 0.4.0 —
+see _History retention_ — and the UI reads `has_audio` to show a note instead
+of a player. (Before 0.4.0 retention deleted the whole row, text included;
+an earlier version of this paragraph claimed otherwise, and was wrong.)
 
 **Cancellation happens between chunks.** `cancel_chunked` is checked before each
 chunk and inside the engine wait, so a cancel lands even while a dictation holds
@@ -235,6 +240,32 @@ _after_ decode and model load; the frontend divides audio-seconds done by
 wall-clock elapsed to get a rate this machine actually achieved. Only chunked
 (long) audio reports progress, which is the only case where a countdown earns
 its place.
+
+**History retention removes audio, never text.** `cleanup_by_count` and
+`cleanup_by_time` only delete WAV files (`delete_recordings`); every row stays.
+`history_limit` therefore means "how many recordings keep their audio", default
+10, and counts only entries whose WAV still exists (`recordings_beyond_limit`)
+— a cancelled dictation never had one and must not take a recording's slot.
+Starred entries keep their audio. The meaning changed in settings schema v2: a
+store still on the old default of 5 moves to 10, any other number is kept.
+`has_audio` is derived on every read (`recording_exists`), never stored.
+
+**History search filters in Rust, not SQL.** SQLite's `LIKE` folds case for
+ASCII only, so "änderung" would never match "Änderung" — the common case in
+German transcripts. `query_history_page` drops the SQL `LIMIT` when searching,
+reads rows lazily in id order and stops once a page is full, so the `id <
+cursor` pagination keeps working. Every search word must appear, in any order,
+in raw or post-processed text (`matches_search`; the frontend mirrors it only
+to decide whether a live-added entry belongs in the current results).
+
+**The end of a recording used to be thrown away twice.** The cpal block that
+first saw the stop flag was dropped although it was captured before the stop
+(up to one callback period, worst on Bluetooth), and `FrameResampler::finish`
+left the newest ~10 ms in the resampler's delay line. Both are fixed
+(`handle_input_block`, the delay-line flush in `finish`; ported from upstream
+#1958) and the resampler test is checked to fail without the flush. These are
+milliseconds; a word cut off because the shortcut was released mid-word is what
+`extra_recording_buffer_ms` is for.
 
 **Long audio must stay chunked.** Engine memory scales with the length of a
 single `transcribe()` call, not with the model. A 19-minute recording made the
@@ -271,6 +302,14 @@ Cargo unifies features across the shared dependency, so enabling them there is
 what makes rodio's own probe accept Apple Lossless. Dropping the dependency as
 "unused" silently removes the codec.
 
+**CAF** is enabled in Symphonia (`caf` feature), which covers PCM, ALAC and
+G.711. AAC, Opus and IMA ADPCM in CAF still fail there — the reader maps them,
+but there is no Opus decoder, IMA ADPCM is not compiled in, and AAC does not
+initialise from CAF's codec setup. On macOS a `.caf` that Symphonia rejects goes
+through `/usr/bin/afconvert` to 16 kHz mono via a temporary WAV
+(`decode_via_afconvert`). The regression test builds AAC-in-CAF from a sine wave,
+so it only passes while the fallback works.
+
 Decode failures are logged with `log::error!` as well as surfaced in the UI;
 before that they existed only as a toast and left nothing behind to read.
 
@@ -282,10 +321,16 @@ skips the build. It does **not** touch Rust — run those checks yourself from
 `src-tauri/`:
 
 ```bash
-cargo test         # 156 tests at 0.3.0
+cargo test         # 162 tests at 0.4.0
 cargo check
 cargo fmt -- --check
 ```
+
+If linking fails with `library 'clang_rt.osx' not found` after a Command Line
+Tools update, the cause is `ort-sys`: its build script resolves the clang
+runtime directory once and cargo caches the result, so it still points at the
+old clang version. `cargo clean -p ort-sys` and `cargo clean -p ort-sys
+--release` make it look again; nothing else needs rebuilding.
 
 `cargo fmt` in particular is easy to forget precisely because `verify.sh` does
 not run it, and the formatting then drifts unnoticed across several commits.

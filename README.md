@@ -24,7 +24,7 @@ and tray assets, and is not affiliated with or endorsed by the Handy project.
 
 ## Current status
 
-The fork runs its own release line, currently `0.2.1`, and is intended for
+The fork runs its own release line, currently `0.4.0`, and is intended for
 direct GitHub distribution, not an app store. Automatic updates are
 intentionally disabled until this repository has its own signed release channel.
 
@@ -32,15 +32,19 @@ The app currently includes:
 
 - global push-to-talk or toggle-to-talk transcription;
 - local Whisper-, Parakeet-, and other compatible speech models;
-- audio file transcription, by drag-and-drop or from a file picker, covering
-  WAV, MP3, M4A (AAC and Apple Lossless), FLAC, OGG/OGA and OPUS — WhatsApp
-  voice notes and iPhone voice memos included;
+- audio file transcription in its own tab, by drag-and-drop or from a file
+  picker, covering WAV, MP3, M4A (AAC and Apple Lossless), FLAC, OGG/OGA, OPUS
+  and CAF — WhatsApp voice notes and iPhone voice memos included;
 - long recordings transcribed in pieces, so a talk-length file finishes instead
   of exhausting memory;
-- transcription history with microphone/file filters;
+- a searchable transcription history that keeps every transcript, with
+  microphone/upload filters; audio is kept for the newest recordings;
+- optional extra recording time after the shortcut is released, so a word you
+  are still finishing is not cut off;
 - optional automatic clipboard copy and paste;
 - shortcuts to reach for the last transcript again: one copies it to the
-  clipboard, one types it into the focused field without touching the clipboard;
+  clipboard, one inserts it into the focused field and restores the clipboard
+  afterwards;
 - a custom accent color for the interface and the recording bar;
 - audio ducking that lowers other playback while recording, at a speed you pick;
 - optional AI post-processing through a provider configured by the user.
