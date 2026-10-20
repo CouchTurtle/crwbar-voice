@@ -218,6 +218,11 @@
       "pushToTalk": {
         "label": "按住說話",
         "description": "按住錄製，放開停止"
+      },
+      "recordingBuffer": {
+        "title": "額外錄音緩衝",
+        "description": "放開按鍵後繼續錄音的額外時間（毫秒），以捕捉尾音。0 = 無額外緩衝。",
+        "off": "Off"
       }
     },
     "models": {
@@ -592,10 +597,6 @@
       "pasteDelayAfter": {
         "title": "貼上延遲（後）",
         "description": "發送貼上按鍵後、還原先前剪貼簿前的延遲（毫秒）。如果貼上的是舊的剪貼簿內容而非轉錄文字，請增加此值。"
-      },
-      "recordingBuffer": {
-        "title": "額外錄音緩衝",
-        "description": "放開按鍵後繼續錄音的額外時間（毫秒），以捕捉尾音。0 = 無額外緩衝。"
       },
       "whatsNewPreview": {
         "title": "預覽新功能",

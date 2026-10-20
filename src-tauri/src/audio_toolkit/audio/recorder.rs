@@ -357,39 +357,14 @@ impl AudioRecorder {
         let mut eos_sent = false;
 
         let stream_cb = move |data: &[T], _: &cpal::InputCallbackInfo| {
-            if stop_flag.load(Ordering::Relaxed) {
-                if !eos_sent {
-                    let _ = sample_tx.send(AudioChunk::EndOfStream);
-                    eos_sent = true;
-                }
-                return;
-            }
-            eos_sent = false;
-
-            output_buffer.clear();
-
-            if channels == 1 {
-                output_buffer.extend(data.iter().map(|&sample| sample.to_sample::<f32>()));
-            } else {
-                let frame_count = data.len() / channels;
-                output_buffer.reserve(frame_count);
-
-                for frame in data.chunks_exact(channels) {
-                    let mono_sample = frame
-                        .iter()
-                        .map(|&sample| sample.to_sample::<f32>())
-                        .sum::<f32>()
-                        / channels as f32;
-                    output_buffer.push(mono_sample);
-                }
-            }
-
-            if sample_tx
-                .send(AudioChunk::Samples(output_buffer.clone()))
-                .is_err()
-            {
-                log::error!("Failed to send samples");
-            }
+            handle_input_block(
+                data,
+                channels,
+                &stop_flag,
+                &mut eos_sent,
+                &mut output_buffer,
+                &sample_tx,
+            );
         };
 
         device.build_input_stream(
@@ -456,6 +431,64 @@ impl AudioRecorder {
     }
 }
 
+/// Body of the cpal input callback, extracted so it can be tested without a
+/// device. Converts the block to mono and forwards it.
+///
+/// The block that first observes the stop flag was captured *before* the stop,
+/// so it is forwarded, followed by the end-of-stream sentinel. Dropping it — as
+/// this used to — lost up to one callback period of the last word, worst on
+/// Bluetooth microphones with their long periods. Later blocks are dropped
+/// until the flag clears. Ported from upstream Handy (#1958).
+fn handle_input_block<T>(
+    data: &[T],
+    channels: usize,
+    stop_flag: &AtomicBool,
+    eos_sent: &mut bool,
+    output_buffer: &mut Vec<f32>,
+    sample_tx: &mpsc::Sender<AudioChunk>,
+) where
+    T: Sample,
+    f32: cpal::FromSample<T>,
+{
+    let stopping = stop_flag.load(Ordering::Relaxed);
+    if stopping && *eos_sent {
+        return;
+    }
+
+    output_buffer.clear();
+
+    if channels == 1 {
+        output_buffer.extend(data.iter().map(|&sample| sample.to_sample::<f32>()));
+    } else {
+        output_buffer.reserve(data.len() / channels);
+        for frame in data.chunks_exact(channels) {
+            let mono_sample = frame
+                .iter()
+                .map(|&sample| sample.to_sample::<f32>())
+                .sum::<f32>()
+                / channels as f32;
+            output_buffer.push(mono_sample);
+        }
+    }
+
+    // During shutdown the consumer exits before the stream is dropped, so a
+    // failed send is only worth reporting while capture is supposed to be live.
+    if sample_tx
+        .send(AudioChunk::Samples(output_buffer.clone()))
+        .is_err()
+        && !stopping
+    {
+        log::error!("Failed to send samples");
+    }
+
+    if stopping {
+        let _ = sample_tx.send(AudioChunk::EndOfStream);
+        *eos_sent = true;
+    } else {
+        *eos_sent = false;
+    }
+}
+
 pub fn is_microphone_access_denied(error_message: &str) -> bool {
     let normalized = error_message.to_lowercase();
     normalized.contains("access is denied")
@@ -472,7 +505,48 @@ pub fn is_no_input_device_error(error_message: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::{is_microphone_access_denied, is_no_input_device_error};
+    use super::{
+        handle_input_block, is_microphone_access_denied, is_no_input_device_error, AudioChunk,
+    };
+    use std::sync::{
+        atomic::{AtomicBool, Ordering},
+        mpsc,
+    };
+
+    /// The last block before a stop holds the end of the last word. It has to
+    /// reach the consumer ahead of the end-of-stream marker, not be swallowed.
+    #[test]
+    fn boundary_block_is_forwarded_before_end_of_stream() {
+        let (tx, rx) = mpsc::channel();
+        let stop_flag = AtomicBool::new(false);
+        let mut eos_sent = false;
+        let mut scratch = Vec::new();
+        let mut push = |flag: &AtomicBool, eos: &mut bool, block: &[f32]| {
+            handle_input_block::<f32>(block, 1, flag, eos, &mut scratch, &tx)
+        };
+
+        push(&stop_flag, &mut eos_sent, &[0.1]);
+        assert!(matches!(rx.try_recv(), Ok(AudioChunk::Samples(_))));
+        assert!(rx.try_recv().is_err(), "no marker while recording");
+
+        stop_flag.store(true, Ordering::Relaxed);
+        push(&stop_flag, &mut eos_sent, &[0.5, 0.5]);
+        match rx.try_recv() {
+            Ok(AudioChunk::Samples(samples)) => assert_eq!(samples, vec![0.5, 0.5]),
+            _ => panic!("the block that saw the stop must be forwarded, not dropped"),
+        }
+        assert!(matches!(rx.try_recv(), Ok(AudioChunk::EndOfStream)));
+
+        push(&stop_flag, &mut eos_sent, &[0.9]);
+        assert!(
+            rx.try_recv().is_err(),
+            "blocks after the marker are dropped"
+        );
+
+        stop_flag.store(false, Ordering::Relaxed);
+        push(&stop_flag, &mut eos_sent, &[0.2]);
+        assert!(matches!(rx.try_recv(), Ok(AudioChunk::Samples(_))));
+    }
 
     #[test]
     fn detects_access_is_denied() {

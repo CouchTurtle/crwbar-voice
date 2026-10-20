@@ -218,6 +218,11 @@
       "pushToTalk": {
         "label": "Tryck för att tala",
         "description": "Håll ned för att spela in, släpp för att stoppa"
+      },
+      "recordingBuffer": {
+        "title": "Extra inspelningsbuffert",
+        "description": "Extra tid (i millisekunder) för att fortsätta spela in efter att du släppt tangenten, för att fånga upp avslutande ljud. 0 = ingen extra buffert.",
+        "off": "Off"
       }
     },
     "models": {
@@ -592,10 +597,6 @@
       "pasteDelayAfter": {
         "title": "Fördröjning vid klistra in (efter)",
         "description": "Fördröjning (i millisekunder) efter tangenttryckningen för att klistra in, innan ditt tidigare urklipp återställs. Öka om det gamla urklippsinnehållet klistras in i stället för transkriptionen."
-      },
-      "recordingBuffer": {
-        "title": "Extra inspelningsbuffert",
-        "description": "Extra tid (i millisekunder) för att fortsätta spela in efter att du släppt tangenten, för att fånga upp avslutande ljud. 0 = ingen extra buffert."
       },
       "whatsNewPreview": {
         "title": "Förhandsvisa nyheter",

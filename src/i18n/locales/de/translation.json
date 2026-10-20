@@ -236,6 +236,11 @@
       "pushToTalk": {
         "label": "Push-to-Talk",
         "description": "Gedrückt halten zum Aufnehmen, loslassen zum Stoppen"
+      },
+      "recordingBuffer": {
+        "title": "Nach dem Loslassen weiter aufnehmen",
+        "description": "Nimmt nach dem Loslassen des Tastenkürzels so lange weiter auf, damit ein Wort, das du gerade noch beendest, nicht abgeschnitten wird. Die Transkription startet entsprechend später.",
+        "off": "Aus"
       }
     },
     "sound": {
@@ -592,10 +597,6 @@
       "pasteDelayAfter": {
         "title": "Einfügeverzögerung (nachher)",
         "description": "Verzögerung (in Millisekunden) nach dem Einfüge-Tastendruck, bevor deine vorherige Zwischenablage wiederhergestellt wird. Erhöhe den Wert, wenn der alte Inhalt der Zwischenablage statt der Transkription eingefügt wird."
-      },
-      "recordingBuffer": {
-        "title": "Zusätzlicher Aufnahmepuffer",
-        "description": "Zusätzliche Zeit (in Millisekunden), um nach dem Loslassen der Taste weiter aufzunehmen, um nachlaufendes Audio zu erfassen. 0 = kein zusätzlicher Puffer."
       },
       "whatsNewPreview": {
         "title": "Vorschau der Neuerungen",

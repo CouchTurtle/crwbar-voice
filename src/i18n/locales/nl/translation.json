@@ -218,6 +218,11 @@
       "pushToTalk": {
         "label": "Push-to-talk",
         "description": "Ingedrukt houden om op te nemen, loslaten om te stoppen"
+      },
+      "recordingBuffer": {
+        "title": "Extra opnamebuffer",
+        "description": "Extra tijd (in milliseconden) om te blijven opnemen nadat je de toets loslaat, om naloopaudio op te vangen. 0 = geen extra buffer.",
+        "off": "Off"
       }
     },
     "models": {
@@ -599,10 +604,6 @@
       "pasteDelayAfter": {
         "title": "Plakvertraging (na)",
         "description": "Vertraging (in milliseconden) na de plak-toetsaanslag, voordat je vorige klembord wordt hersteld. Verhoog dit als de oude klembordinhoud wordt geplakt in plaats van de transcriptie."
-      },
-      "recordingBuffer": {
-        "title": "Extra opnamebuffer",
-        "description": "Extra tijd (in milliseconden) om te blijven opnemen nadat je de toets loslaat, om naloopaudio op te vangen. 0 = geen extra buffer."
       }
     },
     "appearance": {

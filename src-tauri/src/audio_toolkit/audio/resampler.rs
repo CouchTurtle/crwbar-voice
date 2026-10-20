@@ -10,6 +10,12 @@ pub struct FrameResampler {
     in_buf: Vec<f32>,
     frame_samples: usize,
     pending: Vec<f32>,
+    in_hz: usize,
+    out_hz: usize,
+    /// Samples into and out of the inner resampler. `finish()` uses the pair to
+    /// work out how much real audio its delay line is still holding.
+    in_count: usize,
+    out_count: usize,
 }
 
 impl FrameResampler {
@@ -31,6 +37,10 @@ impl FrameResampler {
             in_buf: Vec::with_capacity(chunk_in),
             frame_samples,
             pending: Vec::with_capacity(frame_samples),
+            in_hz,
+            out_hz,
+            in_count: 0,
+            out_count: 0,
         }
     }
 
@@ -39,6 +49,7 @@ impl FrameResampler {
             self.emit_frames(src, &mut emit);
             return;
         }
+        self.in_count += src.len();
 
         while !src.is_empty() {
             let space = self.chunk_in - self.in_buf.len();
@@ -56,6 +67,7 @@ impl FrameResampler {
                 {
                     // let duration = start.elapsed();
                     // log::debug!("Resampler took: {:?}", duration);
+                    self.out_count += out[0].len();
                     self.emit_frames(&out[0], &mut emit);
                 }
                 self.in_buf.clear();
@@ -64,18 +76,42 @@ impl FrameResampler {
     }
 
     pub fn finish(&mut self, mut emit: impl FnMut(&[f32])) {
-        // Process any remaining input samples
-        if let Some(ref mut resampler) = self.resampler {
+        if let Some(resampler) = self.resampler.as_mut() {
+            // Process any remaining input samples (padded internally).
             if !self.in_buf.is_empty() {
-                // Pad with zeros to reach chunk size
-                self.in_buf.resize(self.chunk_in, 0.0);
-                if let Ok(out) = resampler.process(&[&self.in_buf[..]], None) {
-                    self.emit_frames(&out[0], &mut emit);
+                if let Ok(out) = resampler.process_partial(Some(&[&self.in_buf[..]]), None) {
+                    self.out_count += out[0].len();
+                    let out = out[0].clone();
+                    self.emit_frames(&out, &mut emit);
                 }
                 // Drop the consumed input: a full in_buf would satisfy the
                 // next push()'s chunk check immediately, re-processing this
                 // padded tail into the following recording.
                 self.in_buf.clear();
+            }
+        }
+
+        // Output lags input by `output_delay()` samples, so the real audio has
+        // only all emerged once in*ratio + delay samples are out. Without this
+        // the last ~10-30 ms — the end of the final word — never left the
+        // resampler. Feed empty chunks until then and trim the synthetic rest.
+        // Ported from upstream Handy (#1958).
+        if self.resampler.is_some() && self.in_count > 0 {
+            let delay = self.resampler.as_ref().unwrap().output_delay();
+            let expected = self.in_count * self.out_hz / self.in_hz + delay;
+            let mut rounds = 0;
+            while self.out_count < expected && rounds < 8 {
+                rounds += 1;
+                let result = self
+                    .resampler
+                    .as_mut()
+                    .unwrap()
+                    .process_partial::<&[f32]>(None, None);
+                let Ok(out) = result else { break };
+                let take = (expected - self.out_count).min(out[0].len());
+                self.out_count += take;
+                let out = out[0][..take].to_vec();
+                self.emit_frames(&out, &mut emit);
             }
         }
 
@@ -94,6 +130,8 @@ impl FrameResampler {
     pub fn reset(&mut self) {
         self.in_buf.clear();
         self.pending.clear();
+        self.in_count = 0;
+        self.out_count = 0;
         if let Some(ref mut resampler) = self.resampler {
             resampler.reset();
         }
@@ -132,6 +170,35 @@ mod tests {
         let mut out = Vec::new();
         resampler.push(input, |frame| out.extend_from_slice(frame));
         out
+    }
+
+    /// A recording that ends mid-word: one second of silence, then a tone right
+    /// up to the last input sample. After `finish()` the tone has to reach the
+    /// end of the output too — otherwise the resampler's delay line swallowed
+    /// the end of the word.
+    #[test]
+    fn finish_flushes_audio_still_in_the_delay_line() {
+        let in_hz = 48_000;
+        let out_hz = 16_000;
+        let mut input = vec![0.0f32; in_hz];
+        input.extend(sine_wave(in_hz, 440.0, 0.1));
+        let input_secs = input.len() as f64 / in_hz as f64;
+
+        let mut r = FrameResampler::new(in_hz, out_hz, Duration::from_millis(30));
+        let mut out = Vec::new();
+        r.push(&input, |frame| out.extend_from_slice(frame));
+        r.finish(|frame| out.extend_from_slice(frame));
+
+        let last_loud = out
+            .iter()
+            .rposition(|s| s.abs() > 0.1)
+            .expect("the tone must come out at all");
+        let tone_ends_at = last_loud as f64 / out_hz as f64;
+        let missing_ms = (input_secs - tone_ends_at) * 1000.0;
+        assert!(
+            missing_ms < 3.0,
+            "the last {missing_ms:.1} ms of the recording never left the resampler"
+        );
     }
 
     #[test]

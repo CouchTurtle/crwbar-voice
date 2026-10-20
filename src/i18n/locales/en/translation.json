@@ -218,6 +218,11 @@
       "pushToTalk": {
         "label": "Push To Talk",
         "description": "Hold to record, release to stop"
+      },
+      "recordingBuffer": {
+        "title": "Keep recording after release",
+        "description": "Keeps recording this long after you release the shortcut, so a word you are still finishing is not cut off. Transcription starts that much later.",
+        "off": "Off"
       }
     },
     "models": {
@@ -599,10 +604,6 @@
       "pasteDelayAfter": {
         "title": "Paste Delay (After)",
         "description": "Delay (in milliseconds) after the paste keystroke, before restoring your previous clipboard. Increase if your old clipboard content is being pasted instead of the transcription."
-      },
-      "recordingBuffer": {
-        "title": "Extra Recording Buffer",
-        "description": "Extra time (in milliseconds) to keep recording after you release the key, to capture trailing audio. 0 = no extra buffer."
       }
     },
     "appearance": {

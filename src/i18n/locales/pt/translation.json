@@ -218,6 +218,11 @@
       "pushToTalk": {
         "label": "Pressionar para Falar",
         "description": "Segure para gravar, solte para parar"
+      },
+      "recordingBuffer": {
+        "title": "Buffer de gravação extra",
+        "description": "Tempo extra (em milissegundos) para continuar gravando após soltar a tecla, para capturar áudio restante. 0 = sem buffer extra.",
+        "off": "Off"
       }
     },
     "models": {
@@ -592,10 +597,6 @@
       "pasteDelayAfter": {
         "title": "Atraso de colagem (depois)",
         "description": "Atraso (em milissegundos) após a tecla de colar, antes de restaurar a área de transferência anterior. Aumente se o conteúdo antigo da área de transferência estiver sendo colado em vez da transcrição."
-      },
-      "recordingBuffer": {
-        "title": "Buffer de gravação extra",
-        "description": "Tempo extra (em milissegundos) para continuar gravando após soltar a tecla, para capturar áudio restante. 0 = sem buffer extra."
       },
       "whatsNewPreview": {
         "title": "Pré-visualizar novidades",
