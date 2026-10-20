@@ -728,7 +728,7 @@
     "title": "Transcribe a file",
     "heading": "Transcribe an audio file",
     "body": "Pick a recording and it is transcribed here, in the app. Nothing is typed into other windows and nothing appears on the recording bar — useful for meetings and long voice notes.",
-    "formats": "WAV, MP3, M4A, AAC, FLAC, OGG and OPUS — WhatsApp voice notes and Apple Voice Memos included.",
+    "formats": "WAV, MP3, M4A, AAC, FLAC, OGG, OPUS and CAF — WhatsApp voice notes and Apple Voice Memos included.",
     "filter": "Audio",
     "pick": "Choose audio file…",
     "pickAnother": "Transcribe another file",

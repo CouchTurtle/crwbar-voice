@@ -8,6 +8,11 @@
 //! mode and which the `symphonia` dependency in Cargo.toml enables. Ogg **Opus**
 //! (WhatsApp voice notes) has no Symphonia codec, so it is demuxed with `ogg`
 //! and decoded with libopus via `audiopus`.
+//!
+//! **CAF** is read by Symphonia when it carries PCM, ALAC or G.711, but the same
+//! container also holds AAC, Opus and IMA ADPCM, which Symphonia cannot decode
+//! from it. CAF is Apple's own format, so on macOS the system's `afconvert` —
+//! which reads every codec macOS can write — takes over when Symphonia gives up.
 
 use std::path::Path;
 use std::time::Duration;
@@ -41,15 +46,53 @@ pub fn decode_to_16k_mono(path: &Path) -> Result<Vec<f32>, String> {
 
     match decode_via_rodio(path) {
         Ok(samples) => Ok(samples),
-        Err(rodio_err) => {
-            if matches!(ext_lower(path).as_deref(), Some("ogg" | "oga")) {
-                decode_opus_ogg_to_16k_mono(path)
-                    .map_err(|opus_err| format!("{rodio_err} (also tried Opus: {opus_err})"))
-            } else {
-                Err(rodio_err)
-            }
+        Err(rodio_err) => match ext_lower(path).as_deref() {
+            Some("ogg" | "oga") => decode_opus_ogg_to_16k_mono(path)
+                .map_err(|opus_err| format!("{rodio_err} (also tried Opus: {opus_err})")),
+            #[cfg(target_os = "macos")]
+            Some("caf" | "caff") => decode_via_afconvert(path)
+                .map_err(|af_err| format!("{rodio_err} (also tried afconvert: {af_err})")),
+            _ => Err(rodio_err),
+        },
+    }
+}
+
+/// Decode with macOS's own `afconvert`, straight to 16 kHz mono PCM.
+///
+/// The conversion goes through a temporary WAV, removed again when `TempWav`
+/// drops — on success and on every error path alike.
+#[cfg(target_os = "macos")]
+fn decode_via_afconvert(path: &Path) -> Result<Vec<f32>, String> {
+    struct TempWav(std::path::PathBuf);
+    impl Drop for TempWav {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_file(&self.0);
         }
     }
+
+    let nanos = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_nanos())
+        .unwrap_or(0);
+    let wav = TempWav(std::env::temp_dir().join(format!(
+        "crwbar-afconvert-{}-{nanos}.wav",
+        std::process::id()
+    )));
+
+    let output = std::process::Command::new("/usr/bin/afconvert")
+        .args(["-f", "WAVE", "-d", "LEI16@16000", "-c", "1"])
+        .arg(path)
+        .arg(&wav.0)
+        .output()
+        .map_err(|e| format!("cannot run afconvert: {e}"))?;
+    if !output.status.success() {
+        return Err(format!(
+            "afconvert failed: {}",
+            String::from_utf8_lossy(&output.stderr).trim()
+        ));
+    }
+
+    decode_via_rodio(&wav.0)
 }
 
 /// Resample a mono buffer to 16 kHz using the same resampler the recorder uses.
@@ -175,6 +218,52 @@ mod tests {
             "a non-streamable mp4 keeps its index at the end; decoding it \
              requires a source with a known length"
         );
+    }
+
+    /// AAC in CAF is one of the codecs Symphonia cannot decode from that
+    /// container, so this only passes when the afconvert fallback works. The
+    /// fixture is built with afconvert itself from a sine wave, so the expected
+    /// length is known and nothing here depends on a speech model.
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn caf_with_a_codec_symphonia_cannot_read_still_decodes() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let wav = dir.path().join("tone.wav");
+        let caf = dir.path().join("tone.caf");
+
+        let spec = hound::WavSpec {
+            channels: 1,
+            sample_rate: 16_000,
+            bits_per_sample: 16,
+            sample_format: hound::SampleFormat::Int,
+        };
+        let mut writer = hound::WavWriter::create(&wav, spec).expect("create wav");
+        for n in 0..16_000 {
+            let t = n as f32 / 16_000.0;
+            let sample = (t * 440.0 * std::f32::consts::TAU).sin() * 0.5;
+            writer
+                .write_sample((sample * i16::MAX as f32) as i16)
+                .expect("write");
+        }
+        writer.finalize().expect("finalize wav");
+
+        let status = std::process::Command::new("/usr/bin/afconvert")
+            .args(["-f", "caff", "-d", "aac "])
+            .arg(&wav)
+            .arg(&caf)
+            .status()
+            .expect("run afconvert");
+        assert!(status.success(), "afconvert could not build the fixture");
+
+        let samples = decode_to_16k_mono(&caf).expect("CAF/AAC must decode");
+        // AAC adds encoder priming, so allow a little slack around one second.
+        assert!(
+            (15_000..=17_500).contains(&samples.len()),
+            "expected about one second of audio, got {} samples",
+            samples.len()
+        );
+        let energy = samples.iter().map(|s| s * s).sum::<f32>() / samples.len() as f32;
+        assert!(energy > 0.01, "decoded audio is silent (energy {energy})");
     }
 
     #[test]

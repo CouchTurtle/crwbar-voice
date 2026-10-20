@@ -36,6 +36,8 @@ const AUDIO_EXTENSIONS = [
   "ogg",
   "oga",
   "opus",
+  "caf",
+  "caff",
 ];
 
 /** Sentinel for "no override"; `null` is what actually reaches the backend. */
