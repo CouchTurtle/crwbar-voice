@@ -511,7 +511,11 @@
       "transcriptionFailed": "Transkription fehlgeschlagen. Du kannst über das Wiederholen-Symbol erneut transkribieren.",
       "partial": "Teilweise",
       "partialHint": "Dieser Lauf wurde vor dem Ende der Aufnahme gestoppt. Der Text deckt nur einen Teil der Aufnahme ab.",
-      "noAudio": "Audio nicht mehr gespeichert — nur die neuesten Aufnahmen behalten es.",
+      "noAudio": {
+        "title": "Audio nicht verfügbar",
+        "stopped": "Vorzeitig gestoppt — nur der Text bis dahin wurde behalten.",
+        "removed": "Zum Platzsparen entfernt — ältere Aufnahmen behalten nur ihren Text."
+      },
       "search": {
         "placeholder": "Transkripte durchsuchen",
         "clear": "Suche leeren",

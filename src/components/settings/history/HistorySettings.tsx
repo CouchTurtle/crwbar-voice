@@ -6,6 +6,7 @@ import {
   Check,
   Copy,
   Search,
+  VolumeX,
   X,
   FileAudio,
   FolderOpen,
@@ -594,7 +595,7 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
             title={
               entry.has_audio
                 ? t("settings.history.retranscribe")
-                : t("settings.history.noAudio")
+                : t("settings.history.noAudio.title")
             }
           >
             <RotateCcw
@@ -661,7 +662,22 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
       {entry.has_audio ? (
         <AudioPlayer onLoadRequest={handleLoadAudio} className="w-full" />
       ) : (
-        <p className="text-xs text-text/40">{t("settings.history.noAudio")}</p>
+        // Same row shape as the player, so entries with and without audio line
+        // up. Both reasons are worded to hold for every case they cover: a
+        // partial entry either never had a recording (cancelled dictation) or
+        // lost it later, and "older recordings" fits count- and time-based
+        // retention alike.
+        <div className="flex items-center gap-3 text-xs">
+          <VolumeX width={20} height={20} className="shrink-0 text-text/30" />
+          <span className="text-text/60">
+            {t("settings.history.noAudio.title")}
+          </span>
+          <span className="text-text/40">
+            {entry.partial
+              ? t("settings.history.noAudio.stopped")
+              : t("settings.history.noAudio.removed")}
+          </span>
+        </div>
       )}
     </div>
   );

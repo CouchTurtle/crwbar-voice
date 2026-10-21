@@ -511,7 +511,11 @@
       "transcriptionFailed": "ट्रान्सक्रिप्सन गर्न सकिएन। रिट्राई आइकन प्रयोग गरेर फेरि ट्रान्सक्राइब गर्न सक्नुहुन्छ।",
       "partial": "Partial",
       "partialHint": "This run stopped before the end of the audio. The text covers only part of the recording.",
-      "noAudio": "Audio no longer kept — only the newest recordings keep theirs.",
+      "noAudio": {
+        "title": "Audio not available",
+        "stopped": "Stopped early — only the text up to that point was kept.",
+        "removed": "Removed to save space — older recordings keep only their text."
+      },
       "search": {
         "placeholder": "Search transcripts",
         "clear": "Clear search",
