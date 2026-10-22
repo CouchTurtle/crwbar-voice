@@ -117,6 +117,32 @@ fn set_mute(mute: bool) {
 mod tests {
     use super::{ducked_volume, interpolated_volume};
 
+    /// A crash mid-duck leaves the output at the ducked level; restore it. If
+    /// the level moved since — the user turned it up by hand, say — the marker
+    /// is stale and acting on it would undo their choice.
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn a_stranded_duck_is_only_undone_while_the_volume_is_still_ducked() {
+        let marker = super::DuckingMarker {
+            volume: 60,
+            muted: false,
+            ducked: 12,
+        };
+        assert!(super::stranded_duck_needs_restore(12, marker));
+        assert!(
+            super::stranded_duck_needs_restore(13, marker),
+            "AppleScript rounding"
+        );
+        assert!(
+            !super::stranded_duck_needs_restore(45, marker),
+            "changed by hand"
+        );
+        assert!(
+            !super::stranded_duck_needs_restore(0, marker),
+            "muted by hand"
+        );
+    }
+
     #[test]
     fn ducking_uses_twenty_percent_without_silencing_nonzero_audio() {
         assert_eq!(ducked_volume(100), 20);
@@ -141,6 +167,89 @@ mod tests {
 struct SystemAudioSnapshot {
     volume: u8,
     muted: bool,
+}
+
+/// On-disk copy of a duck in progress. The snapshot above lives only in memory,
+/// so a crash or a force-quit mid-recording used to leave the Mac at a fifth of
+/// its volume with nothing left that knew the original. Normal quits never get
+/// that far: `RunEvent::Exit` restores synchronously and removes the file.
+#[cfg(target_os = "macos")]
+#[derive(serde::Serialize, serde::Deserialize, Debug, Clone, Copy, PartialEq)]
+struct DuckingMarker {
+    volume: u8,
+    muted: bool,
+    /// The level the duck set. Restoring is only safe while the output is
+    /// still there — anything else means someone changed it since.
+    ducked: u8,
+}
+
+#[cfg(target_os = "macos")]
+fn ducking_marker_path(app: &AppHandle) -> Option<std::path::PathBuf> {
+    crate::portable::app_data_dir(app)
+        .ok()
+        .map(|dir| dir.join("audio-ducking.json"))
+}
+
+#[cfg(target_os = "macos")]
+fn write_ducking_marker(app: &AppHandle, marker: DuckingMarker) {
+    let Some(path) = ducking_marker_path(app) else {
+        return;
+    };
+    match serde_json::to_vec(&marker) {
+        Ok(bytes) => {
+            if let Err(e) = std::fs::write(&path, bytes) {
+                warn!("Could not record the ducking state: {}", e);
+            }
+        }
+        Err(e) => warn!("Could not encode the ducking state: {}", e),
+    }
+}
+
+#[cfg(target_os = "macos")]
+fn clear_ducking_marker(app: &AppHandle) {
+    if let Some(path) = ducking_marker_path(app) {
+        let _ = std::fs::remove_file(path);
+    }
+}
+
+/// Whether a stranded duck should be undone: only while the output still sits
+/// at the level the duck set (one step of slack for rounding in AppleScript).
+#[cfg(target_os = "macos")]
+fn stranded_duck_needs_restore(current_volume: u8, marker: DuckingMarker) -> bool {
+    current_volume.abs_diff(marker.ducked) <= 1
+}
+
+/// Undo a duck the previous run never got to restore. Called once at startup.
+#[cfg(target_os = "macos")]
+pub fn recover_stranded_ducking(app: &AppHandle) {
+    let Some(path) = ducking_marker_path(app) else {
+        return;
+    };
+    let Ok(bytes) = std::fs::read(&path) else {
+        return; // the normal case: nothing was left behind
+    };
+    let _ = std::fs::remove_file(&path);
+
+    let Ok(marker) = serde_json::from_slice::<DuckingMarker>(&bytes) else {
+        warn!("Ignoring an unreadable ducking marker");
+        return;
+    };
+    let Some(current) = read_system_audio() else {
+        return;
+    };
+    if stranded_duck_needs_restore(current.volume, marker) {
+        let _ = set_system_volume(marker.volume);
+        let _ = set_system_muted(marker.muted);
+        info!(
+            "Restored system volume to {}% after an interrupted recording",
+            marker.volume
+        );
+    } else {
+        info!(
+            "Previous run left audio ducked, but the volume ({}%) was changed since; leaving it",
+            current.volume
+        );
+    }
 }
 
 fn ducked_volume(original: u8) -> u8 {
@@ -536,6 +645,14 @@ impl AudioRecordingManager {
             };
 
             let target = ducked_volume(original.volume);
+            write_ducking_marker(
+                &self.app_handle,
+                DuckingMarker {
+                    volume: original.volume,
+                    muted: original.muted,
+                    ducked: target,
+                },
+            );
             let (duck_fade, _) = ducking_fade_durations(&self.app_handle);
             let generation_counter = Arc::clone(&self.audio_ducking_generation);
             let command_lock = Arc::clone(&self.system_audio_command_lock);
@@ -592,6 +709,7 @@ impl AudioRecordingManager {
             let generation_counter = Arc::clone(&self.audio_ducking_generation);
             let snapshot = Arc::clone(&self.audio_ducking_snapshot);
             let command_lock = Arc::clone(&self.system_audio_command_lock);
+            let app = self.app_handle.clone();
 
             std::thread::spawn(move || {
                 if !fade_system_volume(
@@ -619,6 +737,7 @@ impl AudioRecordingManager {
                 let _ = set_system_volume(original.volume);
                 let _ = set_system_muted(original.muted);
                 *snapshot = None;
+                clear_ducking_marker(&app);
                 debug!("System audio restored to {}%", original.volume);
             });
         }
@@ -648,6 +767,7 @@ impl AudioRecordingManager {
                 let _command = self.system_audio_command_lock.lock().unwrap();
                 let _ = set_system_volume(original.volume);
                 let _ = set_system_muted(original.muted);
+                clear_ducking_marker(&self.app_handle);
                 debug!(
                     "System audio immediately restored to {}% for shutdown",
                     original.volume

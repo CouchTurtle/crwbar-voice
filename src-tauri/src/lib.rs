@@ -178,6 +178,9 @@ fn initialize_core_logic(app_handle: &AppHandle) {
         TranscriptionManager::new(app_handle, model_manager.clone())
             .expect("Failed to initialize transcription manager"),
     );
+    // Before anything can duck again: undo a duck a crashed run left behind.
+    #[cfg(target_os = "macos")]
+    managers::audio::recover_stranded_ducking(app_handle);
     let recording_manager = Arc::new(
         AudioRecordingManager::new(app_handle, transcription_manager.stream_router())
             .expect("Failed to initialize recording manager"),
