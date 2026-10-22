@@ -229,8 +229,6 @@
       }
     },
     "models": {
-      "title": "Модели за транскрипция",
-      "description": "Изберете модел за транскрипция или изтеглете допълнителни. Различните модели предлагат различна точност и скорост.",
       "yourModels": "Изтеглени модели",
       "availableModels": "Налични за изтегляне",
       "deleteConfirm": "Сигурни ли сте, че искате да изтриете {{modelName}}? Ще трябва да го изтеглите отново, за да го използвате.",
@@ -244,6 +242,11 @@
       "rescan": {
         "label": "Сканиране отново",
         "tooltip": "Сканиране отново за модели, добавени в папката с модели или кеша на Hugging Face извън crwbar voice"
+      },
+      "download": "Изтегляне",
+      "role": {
+        "dictation": "Диктовка",
+        "files": "Файлове"
       }
     },
     "sound": {
@@ -514,8 +517,7 @@
         "placeholder": "Search transcripts",
         "clear": "Clear search",
         "noResults": "Nothing matches “{{query}}”."
-      },
-      "more": "Още"
+      }
     },
     "debug": {
       "title": "Отстраняване",
@@ -665,7 +667,8 @@
     "open": "Отваряне",
     "copy": "Копиране",
     "clear": "Изчистване",
-    "noOptionsFound": "Няма намерени опции"
+    "noOptionsFound": "Няма намерени опции",
+    "more": "Още"
   },
   "accessibility": {
     "permissionsDescription": "crwbar voice се нуждае от разрешения за достъпност, за да въвежда транскрибирания текст.",

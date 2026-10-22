@@ -158,8 +158,6 @@
       "title": "Ustawienia {{model}}"
     },
     "models": {
-      "title": "Modele transkrypcji",
-      "description": "Wybierz model transkrypcji lub pobierz dodatkowe modele. Różne modele oferują różne poziomy dokładności i szybkości.",
       "deleteConfirm": "Czy na pewno chcesz usunąć {{modelName}}? Będziesz musiał pobrać go ponownie, aby go użyć.",
       "deleteActiveConfirm": "{{modelName}} jest Twoim aktywnym modelem. Usunięcie go zatrzyma transkrypcje, dopóki nie wybierzesz nowego modelu. Czy na pewno chcesz kontynuować?",
       "deleteTitle": "Usuń model",
@@ -173,6 +171,11 @@
       "rescan": {
         "label": "Skanuj ponownie",
         "tooltip": "Skanuj ponownie w poszukiwaniu modeli dodanych do folderu modeli lub pamięci podręcznej Hugging Face poza crwbar voice"
+      },
+      "download": "Pobierz",
+      "role": {
+        "dictation": "Dyktowanie",
+        "files": "Pliki"
       }
     },
     "general": {
@@ -514,8 +517,7 @@
         "placeholder": "Search transcripts",
         "clear": "Clear search",
         "noResults": "Nothing matches “{{query}}”."
-      },
-      "more": "Więcej"
+      }
     },
     "debug": {
       "title": "Debugowanie",
@@ -665,7 +667,8 @@
     "open": "Otwórz",
     "copy": "Kopiuj",
     "clear": "Wyczyść",
-    "noOptionsFound": "Nie znaleziono opcji"
+    "noOptionsFound": "Nie znaleziono opcji",
+    "more": "Więcej"
   },
   "accessibility": {
     "permissionsDescription": "crwbar voice potrzebuje uprawnień dostępności, aby wpisywać transkrybowany tekst.",

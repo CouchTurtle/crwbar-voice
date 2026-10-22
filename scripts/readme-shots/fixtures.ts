@@ -81,6 +81,35 @@ export const models: ModelInfo[] = [
     false,
     ["en", "de"],
   ),
+  // Not downloaded: the catalog's offer, sizes as in catalog.json.
+  {
+    ...model(
+      "handy-computer/whisper-large-v3-turbo-gguf",
+      "Whisper Large v3 Turbo",
+      "100-language speech-to-text with translation",
+      0.87,
+      0.35,
+      false,
+      ["en", "de", "fr", "es", "it"],
+    ),
+    is_downloaded: false,
+    size_mb: 886,
+    supports_translation: true,
+  },
+  {
+    ...model(
+      "handy-computer/canary-180m-flash-gguf",
+      "Canary 180M Flash",
+      "Tiny and instant, runs well on any hardware",
+      0.88,
+      0.98,
+      false,
+      ["en", "de", "fr", "es"],
+    ),
+    is_downloaded: false,
+    size_mb: 218,
+    is_recommended: false,
+  },
 ];
 
 const now = Math.floor(Date.UTC(2026, 9, 21, 15, 40) / 1000);

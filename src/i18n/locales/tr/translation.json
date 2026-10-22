@@ -158,8 +158,6 @@
       "title": "{{model}} Ayarları"
     },
     "models": {
-      "title": "Transkripsiyon Modelleri",
-      "description": "Bir transkripsiyon modeli seçin veya ek modeller indirin. Farklı modeller değişen doğruluk ve hız seviyeleri sunar.",
       "deleteConfirm": "{{modelName}} modelini silmek istediğinizden emin misiniz? Kullanmak için tekrar indirmeniz gerekecek.",
       "deleteActiveConfirm": "{{modelName}} aktif modelinizdir. Silmek, yeni bir model seçene kadar transkripsiyonları durduracaktır. Emin misiniz?",
       "deleteTitle": "Modeli Sil",
@@ -173,6 +171,11 @@
       "rescan": {
         "label": "Yeniden tara",
         "tooltip": "crwbar voice dışında modeller klasörüne veya Hugging Face önbelleğine eklenen modelleri yeniden tara"
+      },
+      "download": "İndir",
+      "role": {
+        "dictation": "Dikte",
+        "files": "Dosyalar"
       }
     },
     "general": {
@@ -514,8 +517,7 @@
         "placeholder": "Search transcripts",
         "clear": "Clear search",
         "noResults": "Nothing matches “{{query}}”."
-      },
-      "more": "Daha fazla"
+      }
     },
     "debug": {
       "title": "Hata Ayıklama",
@@ -665,7 +667,8 @@
     "open": "Aç",
     "copy": "Kopyala",
     "clear": "Temizle",
-    "noOptionsFound": "Seçenek bulunamadı"
+    "noOptionsFound": "Seçenek bulunamadı",
+    "more": "Daha fazla"
   },
   "accessibility": {
     "permissionsDescription": "crwbar voice, transkribe edilen metni yazabilmek için erişilebilirlik izinlerine ihtiyaç duyar.",

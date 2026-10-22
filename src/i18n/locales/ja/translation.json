@@ -158,8 +158,6 @@
       "title": "{{model}} の設定"
     },
     "models": {
-      "title": "文字起こしのモデル",
-      "description": "文字起こしのモデルを選択するか、追加のモデルをダウンロードします。異なるモデルは精度と速度のレベルが異なります。",
       "deleteConfirm": "{{modelName}}を削除してもよろしいですか? 再度使用するにはダウンロードが必要です。",
       "deleteActiveConfirm": "{{modelName}}は現在使用中のモデルです。削除すると、新しいモデルを選択するまで文字起こしが停止します。本当に削除しますか?",
       "deleteTitle": "モデルを削除",
@@ -173,6 +171,11 @@
       "rescan": {
         "label": "再スキャン",
         "tooltip": "crwbar voice を使わずに models フォルダーまたは Hugging Face キャッシュに追加されたモデルを再スキャンします"
+      },
+      "download": "ダウンロード",
+      "role": {
+        "dictation": "音声入力",
+        "files": "ファイル"
       }
     },
     "general": {
@@ -514,8 +517,7 @@
         "placeholder": "Search transcripts",
         "clear": "Clear search",
         "noResults": "Nothing matches “{{query}}”."
-      },
-      "more": "その他"
+      }
     },
     "debug": {
       "title": "デバッグ",
@@ -665,7 +667,8 @@
     "open": "開く",
     "copy": "コピー",
     "clear": "クリア",
-    "noOptionsFound": "オプションが見つかりません"
+    "noOptionsFound": "オプションが見つかりません",
+    "more": "その他"
   },
   "accessibility": {
     "permissionsDescription": "crwbar voice が文字起こしテキストを入力するには、アクセシビリティ権限が必要です。",

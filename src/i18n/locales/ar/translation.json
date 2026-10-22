@@ -493,8 +493,7 @@
         "placeholder": "Search transcripts",
         "clear": "Clear search",
         "noResults": "Nothing matches “{{query}}”."
-      },
-      "more": "المزيد"
+      }
     },
     "debug": {
       "title": "تصحيح الأخطاء",
@@ -627,8 +626,6 @@
       "title": "إعدادات النموذج"
     },
     "models": {
-      "title": "نماذج النسخ",
-      "description": "اختر نموذج نسخ أو قم بتنزيل نماذج إضافية. تقدم النماذج المختلفة مستويات متفاوتة من الدقة والسرعة.",
       "yourModels": "النماذج المحمّلة",
       "availableModels": "متاح للتنزيل",
       "deleteConfirm": "هل أنت متأكد أنك تريد حذف {{modelName}}؟ ستحتاج إلى تنزيله مرة أخرى لاستخدامه.",
@@ -642,6 +639,11 @@
       "rescan": {
         "label": "إعادة الفحص",
         "tooltip": "إعادة الفحص بحثًا عن النماذج المضافة إلى مجلد النماذج أو ذاكرة Hugging Face التخزينية المؤقتة خارج crwbar voice"
+      },
+      "download": "تنزيل",
+      "role": {
+        "dictation": "الإملاء",
+        "files": "الملفات"
       }
     }
   },
@@ -665,7 +667,8 @@
     "open": "فتح",
     "copy": "نسخ",
     "clear": "مسح",
-    "noOptionsFound": "لم يتم العثور على خيارات"
+    "noOptionsFound": "لم يتم العثور على خيارات",
+    "more": "المزيد"
   },
   "accessibility": {
     "permissionsDescription": ".يحتاج crwbar voice إلى أذونات إمكانية الوصول لكتابة النص المفرغ",

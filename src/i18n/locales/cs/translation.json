@@ -158,8 +158,6 @@
       "title": "Nastavení {{model}}"
     },
     "models": {
-      "title": "Modely přepisu",
-      "description": "Vyberte model přepisu nebo stáhněte další modely. Různé modely nabízejí různé úrovně přesnosti a rychlosti.",
       "deleteConfirm": "Opravdu chcete smazat {{modelName}}? Pro opětovné použití jej budete muset znovu stáhnout.",
       "deleteActiveConfirm": "{{modelName}} je váš aktivní model. Jeho smazáním se zastaví přepisy, dokud nevyberete nový model. Opravdu chcete pokračovat?",
       "deleteTitle": "Smazat model",
@@ -173,6 +171,11 @@
       "rescan": {
         "label": "Znovu prohledat",
         "tooltip": "Znovu prohledat modely přidané do složky modelů nebo mezipaměti Hugging Face mimo crwbar voice"
+      },
+      "download": "Stáhnout",
+      "role": {
+        "dictation": "Diktování",
+        "files": "Soubory"
       }
     },
     "general": {
@@ -514,8 +517,7 @@
         "placeholder": "Search transcripts",
         "clear": "Clear search",
         "noResults": "Nothing matches “{{query}}”."
-      },
-      "more": "Další"
+      }
     },
     "debug": {
       "title": "Ladění",
@@ -665,7 +667,8 @@
     "open": "Otevřít",
     "copy": "Kopírovat",
     "clear": "Vymazat",
-    "noOptionsFound": "Nenalezeny žádné možnosti"
+    "noOptionsFound": "Nenalezeny žádné možnosti",
+    "more": "Další"
   },
   "accessibility": {
     "permissionsDescription": "crwbar voice potřebuje oprávnění usnadnění přístupu, aby mohlo psát přepsaný text.",

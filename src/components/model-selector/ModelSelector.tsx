@@ -6,7 +6,6 @@ import { getTranslatedModelName } from "../../lib/utils/modelTranslation";
 import { useModelStore } from "../../stores/modelStore";
 import ModelStatusButton from "./ModelStatusButton";
 import ModelDropdown from "./ModelDropdown";
-import DownloadProgressDisplay from "./DownloadProgressDisplay";
 
 import { ModelStateEvent } from "@/lib/types/events";
 
@@ -30,7 +29,6 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ onError }) => {
     models,
     currentModel,
     downloadProgress,
-    downloadStats,
     verifyingModels,
     extractingModels,
     selectModel,
@@ -242,32 +240,24 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ onError }) => {
     return modelStatus;
   };
 
+  // The chip says "Downloading 42%" itself; the bar lives on the Models page.
   return (
-    <div className="flex items-center gap-3">
-      {/* Model Status and Switcher */}
-      <div className="relative" ref={dropdownRef}>
-        <ModelStatusButton
-          status={getDisplayStatus()}
-          displayText={getModelDisplayText()}
-          isDropdownOpen={showModelDropdown}
-          onClick={() => setShowModelDropdown(!showModelDropdown)}
-        />
-
-        {/* Model Dropdown */}
-        {showModelDropdown && (
-          <ModelDropdown
-            models={models}
-            currentModelId={displayModelId}
-            onModelSelect={handleModelSelect}
-          />
-        )}
-      </div>
-
-      {/* Download Progress Bar for Models */}
-      <DownloadProgressDisplay
-        downloadProgress={downloadProgress}
-        downloadStats={downloadStats}
+    <div className="relative" ref={dropdownRef}>
+      <ModelStatusButton
+        status={getDisplayStatus()}
+        displayText={getModelDisplayText()}
+        isDropdownOpen={showModelDropdown}
+        onClick={() => setShowModelDropdown(!showModelDropdown)}
       />
+
+      {/* Model Dropdown */}
+      {showModelDropdown && (
+        <ModelDropdown
+          models={models}
+          currentModelId={displayModelId}
+          onModelSelect={handleModelSelect}
+        />
+      )}
     </div>
   );
 };

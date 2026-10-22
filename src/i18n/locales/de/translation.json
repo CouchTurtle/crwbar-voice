@@ -142,7 +142,7 @@
     "downloadSpeed": "{{speed}} MB/s",
     "capabilities": {
       "languageSelection": "Unterstützt mehrere Eingabesprachen",
-      "languageCount": "{{total}} languages",
+      "languageCount": "{{total}} Sprachen",
       "translation": "Kann ins Englische übersetzen",
       "translate": "Ins Englische übersetzen",
       "singleLanguage": "Unterstützt nur diese Sprache",
@@ -158,8 +158,6 @@
       "title": "{{model}}-Einstellungen"
     },
     "models": {
-      "title": "Transkriptionsmodelle",
-      "description": "Wähle ein Transkriptionsmodell aus oder lade zusätzliche Modelle herunter. Verschiedene Modelle bieten unterschiedliche Genauigkeits- und Geschwindigkeitsstufen.",
       "deleteConfirm": "Bist du sicher, dass du {{modelName}} löschen möchtest? Du musst es erneut herunterladen, um es zu verwenden.",
       "deleteActiveConfirm": "{{modelName}} ist dein aktives Modell. Das Löschen stoppt Transkriptionen, bis du ein neues Modell auswählst. Bist du sicher?",
       "deleteTitle": "Modell löschen",
@@ -173,6 +171,11 @@
       "rescan": {
         "label": "Neu scannen",
         "tooltip": "Erneut nach Modellen scannen, die außerhalb von crwbar voice zum Modellordner oder Hugging-Face-Cache hinzugefügt wurden"
+      },
+      "download": "Herunterladen",
+      "role": {
+        "dictation": "Diktat",
+        "files": "Dateien"
       }
     },
     "general": {
@@ -514,8 +517,7 @@
         "placeholder": "Transkripte durchsuchen",
         "clear": "Suche leeren",
         "noResults": "Nichts passt zu „{{query}}“."
-      },
-      "more": "Mehr"
+      }
     },
     "debug": {
       "title": "Debug",
@@ -665,7 +667,8 @@
     "open": "Öffnen",
     "copy": "Kopieren",
     "clear": "Leeren",
-    "noOptionsFound": "Keine Optionen gefunden"
+    "noOptionsFound": "Keine Optionen gefunden",
+    "more": "Mehr"
   },
   "accessibility": {
     "permissionsDescription": "crwbar voice benötigt Bedienungshilfen-Berechtigungen, um transkribierten Text einzugeben.",

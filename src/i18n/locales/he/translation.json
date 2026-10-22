@@ -229,8 +229,6 @@
       }
     },
     "models": {
-      "title": "מודלי תמלול",
-      "description": "בחר מודל תמלול או הורד מודלים נוספים. מודלים שונים מציעים רמות שונות של דיוק ומהירות.",
       "yourModels": "מודלים שהורדו",
       "availableModels": "זמינים להורדה",
       "deleteConfirm": "האם למחוק את {{modelName}}? יהיה צורך להוריד אותו שוב כדי להשתמש בו.",
@@ -244,6 +242,11 @@
       "rescan": {
         "label": "סריקה מחדש",
         "tooltip": "סריקה מחדש לאיתור מודלים שנוספו לתיקיית המודלים או למטמון של Hugging Face מחוץ ל-crwbar voice"
+      },
+      "download": "הורדה",
+      "role": {
+        "dictation": "הכתבה",
+        "files": "קבצים"
       }
     },
     "sound": {
@@ -514,8 +517,7 @@
         "placeholder": "Search transcripts",
         "clear": "Clear search",
         "noResults": "Nothing matches “{{query}}”."
-      },
-      "more": "עוד"
+      }
     },
     "debug": {
       "title": "ניפוי שגיאות",
@@ -665,7 +667,8 @@
     "open": "פתח",
     "copy": "העתק",
     "clear": "נקה",
-    "noOptionsFound": "לא נמצאו אפשרויות"
+    "noOptionsFound": "לא נמצאו אפשרויות",
+    "more": "עוד"
   },
   "accessibility": {
     "permissionsDescription": "crwbar voice צריך הרשאות נגישות כדי להקליד את הטקסט המתומלל.",

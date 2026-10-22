@@ -229,8 +229,6 @@
       }
     },
     "models": {
-      "title": "Modelos de Transcrição",
-      "description": "Selecione um modelo de transcrição ou baixe modelos adicionais. Diferentes modelos oferecem diferentes níveis de precisão e velocidade.",
       "deleteConfirm": "Tem certeza de que deseja excluir {{modelName}}? Você precisará baixá-lo novamente para usá-lo.",
       "deleteActiveConfirm": "{{modelName}} é o seu modelo ativo. Excluí-lo interromperá as transcrições até que você selecione um novo modelo. Tem certeza?",
       "deleteTitle": "Excluir Modelo",
@@ -244,6 +242,11 @@
       "rescan": {
         "label": "Reescanear",
         "tooltip": "Reescaneia em busca de modelos adicionados à pasta de modelos ou ao cache do Hugging Face fora do crwbar voice"
+      },
+      "download": "Baixar",
+      "role": {
+        "dictation": "Ditado",
+        "files": "Arquivos"
       }
     },
     "sound": {
@@ -514,8 +517,7 @@
         "placeholder": "Search transcripts",
         "clear": "Clear search",
         "noResults": "Nothing matches “{{query}}”."
-      },
-      "more": "Mais"
+      }
     },
     "debug": {
       "title": "Depuração",
@@ -665,7 +667,8 @@
     "open": "Abrir",
     "copy": "Copiar",
     "clear": "Limpar",
-    "noOptionsFound": "Nenhuma opção encontrada"
+    "noOptionsFound": "Nenhuma opção encontrada",
+    "more": "Mais"
   },
   "accessibility": {
     "permissionsDescription": "O crwbar voice precisa de permissões de acessibilidade para digitar o texto transcrito.",

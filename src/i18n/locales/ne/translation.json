@@ -229,8 +229,6 @@
       }
     },
     "models": {
-      "title": "ट्रान्सक्रिप्सन मोडेलहरू",
-      "description": "ट्रान्सक्रिप्सन मोडेल चयन गर्नुहोस् वा थप मोडेलहरू डाउनलोड गर्नुहोस्। फरक मोडेलहरूले फरक स्तरको शुद्धता र गति दिन्छन्।",
       "searchPlaceholder": "नामद्वारा मोडेल खोज्नुहोस्…",
       "yourModels": "डाउनलोड गरिएका मोडेलहरू",
       "availableModels": "डाउनलोड गर्न उपलब्ध",
@@ -244,7 +242,12 @@
         "label": "फेरि स्क्यान गर्नुहोस्",
         "tooltip": "crwbar voice बाहिरबाट मोडेल फोल्डर वा Hugging Face क्यासमा थपिएका मोडेलहरू फेरि स्क्यान गर्नुहोस्"
       },
-      "noModelsMatch": "यो फिल्टरसँग कुनै मोडेल मिल्दैन।"
+      "noModelsMatch": "यो फिल्टरसँग कुनै मोडेल मिल्दैन।",
+      "download": "डाउनलोड",
+      "role": {
+        "dictation": "श्रुतिलेखन",
+        "files": "फाइलहरू"
+      }
     },
     "sound": {
       "title": "साउन्ड",
@@ -514,8 +517,7 @@
         "placeholder": "Search transcripts",
         "clear": "Clear search",
         "noResults": "Nothing matches “{{query}}”."
-      },
-      "more": "थप"
+      }
     },
     "debug": {
       "title": "डिबग",
@@ -668,7 +670,8 @@
     "open": "खोल्नुहोस्",
     "copy": "कपी गर्नुहोस्",
     "clear": "खाली गर्नुहोस्",
-    "noOptionsFound": "कुनै विकल्प भेटिएन"
+    "noOptionsFound": "कुनै विकल्प भेटिएन",
+    "more": "थप"
   },
   "accessibility": {
     "permissionsDescription": "ट्रान्सक्राइब गरिएको टेक्स्ट टाइप गर्न crwbar voice लाई एक्सेसिबिलिटी अनुमति चाहिन्छ।",

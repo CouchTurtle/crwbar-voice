@@ -229,8 +229,6 @@
       }
     },
     "models": {
-      "title": "Transcriptiemodellen",
-      "description": "Selecteer een transcriptiemodel of download extra modellen. Verschillende modellen bieden variërende niveaus van nauwkeurigheid en snelheid.",
       "searchPlaceholder": "Modellen zoeken op naam...",
       "yourModels": "Gedownloade modellen",
       "availableModels": "Beschikbaar voor download",
@@ -244,7 +242,12 @@
         "label": "Opnieuw scannen",
         "tooltip": "Scannen naar modellen die buiten crwbar voice om zijn toegevoegd aan de modellenmap of Hugging Face-cache"
       },
-      "noModelsMatch": "Geen modellen voldoen aan dit filter."
+      "noModelsMatch": "Geen modellen voldoen aan dit filter.",
+      "download": "Downloaden",
+      "role": {
+        "dictation": "Dicteren",
+        "files": "Bestanden"
+      }
     },
     "sound": {
       "title": "Geluid",
@@ -514,8 +517,7 @@
         "placeholder": "Search transcripts",
         "clear": "Clear search",
         "noResults": "Nothing matches “{{query}}”."
-      },
-      "more": "Meer"
+      }
     },
     "debug": {
       "title": "Probleemoplossing",
@@ -668,7 +670,8 @@
     "open": "Openen",
     "copy": "Kopiëren",
     "clear": "Wissen",
-    "noOptionsFound": "Geen opties gevonden"
+    "noOptionsFound": "Geen opties gevonden",
+    "more": "Meer"
   },
   "accessibility": {
     "permissionsDescription": "crwbar voice heeft toegankelijkheidsmachtigingen nodig om getranscribeerde tekst te kunnen typen.",

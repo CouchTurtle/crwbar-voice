@@ -229,8 +229,6 @@
       }
     },
     "models": {
-      "title": "Transcription Models",
-      "description": "Select a transcription model or download additional models. Different models offer varying levels of accuracy and speed.",
       "searchPlaceholder": "Search models by name…",
       "yourModels": "Downloaded Models",
       "availableModels": "Available to Download",
@@ -244,7 +242,12 @@
         "label": "Rescan",
         "tooltip": "Rescan for models added to the models folder or Hugging Face cache outside crwbar voice"
       },
-      "noModelsMatch": "No models match this filter."
+      "noModelsMatch": "No models match this filter.",
+      "download": "Download",
+      "role": {
+        "dictation": "Dictation",
+        "files": "Files"
+      }
     },
     "sound": {
       "title": "Sound",
@@ -514,8 +517,7 @@
         "placeholder": "Search transcripts",
         "clear": "Clear search",
         "noResults": "Nothing matches “{{query}}”."
-      },
-      "more": "More"
+      }
     },
     "debug": {
       "title": "Debug",
@@ -668,7 +670,8 @@
     "open": "Open",
     "copy": "Copy",
     "clear": "Clear",
-    "noOptionsFound": "No options found"
+    "noOptionsFound": "No options found",
+    "more": "More"
   },
   "accessibility": {
     "permissionsDescription": "crwbar voice needs accessibility permissions to type transcribed text.",

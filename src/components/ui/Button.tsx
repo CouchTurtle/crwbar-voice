@@ -25,7 +25,7 @@ export const Button: React.FC<ButtonProps> = ({
     primary:
       "text-white bg-background-ui border-background-ui hover:bg-background-ui/85",
     "primary-soft":
-      "text-logo-primary bg-logo-primary/15 border-transparent hover:bg-logo-primary/25",
+      "text-accent-text bg-logo-primary/15 border-transparent hover:bg-logo-primary/25",
     secondary: "bg-field border-line hover:border-text/25",
     danger: "text-white bg-red-600 border-red-600 hover:bg-red-700",
     "danger-ghost":

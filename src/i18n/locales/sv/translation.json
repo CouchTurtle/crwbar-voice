@@ -229,8 +229,6 @@
       }
     },
     "models": {
-      "title": "Transkriptionsmodeller",
-      "description": "Välj en transkriptionsmodell eller ladda ner ytterligare modeller. Olika modeller erbjuder varierande nivåer av noggrannhet och hastighet.",
       "yourModels": "Nedladdade modeller",
       "availableModels": "Tillgängliga att ladda ner",
       "deleteConfirm": "Är du säker på att du vill ta bort {{modelName}}? Du måste ladda ner den igen för att använda den.",
@@ -244,6 +242,11 @@
       "rescan": {
         "label": "Skanna om",
         "tooltip": "Skanna om efter modeller som lagts till i modellmappen eller Hugging Face-cachen utanför crwbar voice"
+      },
+      "download": "Ladda ner",
+      "role": {
+        "dictation": "Diktering",
+        "files": "Filer"
       }
     },
     "sound": {
@@ -514,8 +517,7 @@
         "placeholder": "Search transcripts",
         "clear": "Clear search",
         "noResults": "Nothing matches “{{query}}”."
-      },
-      "more": "Mer"
+      }
     },
     "debug": {
       "title": "Felsökning",
@@ -665,7 +667,8 @@
     "open": "Öppna",
     "copy": "Kopiera",
     "clear": "Rensa",
-    "noOptionsFound": "Inga alternativ hittades"
+    "noOptionsFound": "Inga alternativ hittades",
+    "more": "Mer"
   },
   "accessibility": {
     "permissionsDescription": "crwbar voice behöver behörighet för hjälpmedel för att kunna skriva transkriberad text.",

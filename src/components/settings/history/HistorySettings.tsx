@@ -10,7 +10,6 @@ import {
   FileAudio,
   FolderOpen,
   Mic,
-  MoreHorizontal,
   Star,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -25,97 +24,9 @@ import {
 } from "@/bindings";
 import { useOsType } from "@/hooks/useOsType";
 import { highlightPieces } from "@/lib/utils/highlight";
+import { ActionMenu } from "../../ui/ActionMenu";
 import { AudioPlayer, AudioPlayerGroup } from "../../ui/AudioPlayer";
-
-const IconButton: React.FC<{
-  onClick: () => void;
-  title: string;
-  disabled?: boolean;
-  active?: boolean;
-  expanded?: boolean;
-  children: React.ReactNode;
-}> = ({ onClick, title, disabled, active, expanded, children }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    disabled={disabled}
-    aria-label={title}
-    aria-expanded={expanded}
-    className={`w-7 h-7 rounded-[8px] flex items-center justify-center transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-logo-primary/40 disabled:cursor-not-allowed disabled:text-text/20 ${
-      active
-        ? "text-logo-primary hover:bg-logo-primary/10"
-        : "text-text/45 hover:text-text hover:bg-text/8"
-    }`}
-    title={title}
-  >
-    {children}
-  </button>
-);
-
-interface MenuItem {
-  label: string;
-  onSelect: () => void;
-  disabled?: boolean;
-  danger?: boolean;
-}
-
-/// Re-transcribe and delete, kept out of the way of copy and star: the two
-/// actions you rarely want are the two you least want by accident.
-const EntryMenu: React.FC<{ label: string; items: MenuItem[] }> = ({
-  label,
-  items,
-}) => {
-  const [open, setOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const closeOutside = (event: MouseEvent) => {
-      if (!menuRef.current?.contains(event.target as Node)) setOpen(false);
-    };
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("mousedown", closeOutside);
-    document.addEventListener("keydown", closeOnEscape);
-    return () => {
-      document.removeEventListener("mousedown", closeOutside);
-      document.removeEventListener("keydown", closeOnEscape);
-    };
-  }, [open]);
-
-  return (
-    <div className="relative" ref={menuRef}>
-      <IconButton onClick={() => setOpen(!open)} title={label} expanded={open}>
-        <MoreHorizontal width={16} height={16} />
-      </IconButton>
-      {open && (
-        <div
-          role="menu"
-          className="absolute end-0 top-full mt-1 w-52 p-1 bg-surface border border-line rounded-field shadow-lg z-20"
-        >
-          {items.map((item) => (
-            <button
-              key={item.label}
-              type="button"
-              role="menuitem"
-              disabled={item.disabled}
-              onClick={() => {
-                setOpen(false);
-                item.onSelect();
-              }}
-              className={`w-full px-2.5 py-1.5 text-control text-start rounded-[6px] hover:bg-text/8 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
-                item.danger ? "text-red-500" : ""
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
+import { IconButton } from "../../ui/IconButton";
 
 /** Local calendar day, the key entries are grouped by. */
 const dayKey = (date: Date) =>
@@ -660,8 +571,8 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
               fill={entry.saved ? "currentColor" : "none"}
             />
           </IconButton>
-          <EntryMenu
-            label={t("settings.history.more")}
+          <ActionMenu
+            label={t("common.more")}
             items={[
               {
                 label: entry.has_audio
