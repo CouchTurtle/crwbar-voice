@@ -16,6 +16,7 @@ pub(crate) mod tauri_impl;
 use log::{error, info, warn};
 use serde::Serialize;
 use specta::Type;
+use std::sync::atomic::{AtomicBool, Ordering};
 use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_autostart::ManagerExt;
 
@@ -56,25 +57,73 @@ pub fn init_shortcuts(app: &AppHandle) {
     }
 }
 
+/// Whether the recording lifecycle currently wants the cancel shortcut. Written
+/// synchronously by start and stop, so it always holds the latest request.
+static CANCEL_REQUESTED: AtomicBool = AtomicBool::new(false);
+
+/// Whether the cancel shortcut is actually registered. The lock also
+/// serialises reconcile passes.
+#[cfg(not(target_os = "linux"))]
+static CANCEL_REGISTERED: std::sync::Mutex<bool> = std::sync::Mutex::new(false);
+
 /// Register the cancel shortcut (called when recording starts)
 pub fn register_cancel_shortcut(app: &AppHandle) {
-    let settings = get_settings(app);
-    match settings.keyboard_implementation {
-        KeyboardImplementation::Tauri => tauri_impl::register_cancel_shortcut(app),
-        KeyboardImplementation::HandyKeys => handy_keys::register_cancel_shortcut(app),
-    }
+    CANCEL_REQUESTED.store(true, Ordering::SeqCst);
+    schedule_cancel_reconcile(app);
 }
 
 /// Unregister the cancel shortcut (called when recording stops)
 pub fn unregister_cancel_shortcut(app: &AppHandle) {
-    let settings = get_settings(app);
-    match settings.keyboard_implementation {
-        KeyboardImplementation::Tauri => tauri_impl::unregister_cancel_shortcut(app),
-        KeyboardImplementation::HandyKeys => handy_keys::unregister_cancel_shortcut(app),
+    CANCEL_REQUESTED.store(false, Ordering::SeqCst);
+    schedule_cancel_reconcile(app);
+}
+
+/// Apply the requested cancel state off the calling thread.
+///
+/// Start and stop used to spawn one task each — register, unregister — and
+/// spawned tasks run in any order. After a very short recording the unregister
+/// could run first, leaving Escape captured system-wide until the app quit.
+/// Each pass now applies the latest *request* rather than the action that
+/// scheduled it, so the order no longer matters. Ported from upstream (#2190).
+fn schedule_cancel_reconcile(app: &AppHandle) {
+    let app = app.clone();
+    tauri::async_runtime::spawn(async move {
+        reconcile_cancel_shortcut(&app);
+    });
+}
+
+fn reconcile_cancel_shortcut(app: &AppHandle) {
+    // Disabled on Linux due to instability with dynamic shortcut registration.
+    #[cfg(target_os = "linux")]
+    {
+        let _ = app;
+    }
+
+    #[cfg(not(target_os = "linux"))]
+    {
+        let mut registered = CANCEL_REGISTERED
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        let requested = CANCEL_REQUESTED.load(Ordering::SeqCst);
+        if requested == *registered {
+            return;
+        }
+        let Some(cancel_binding) = get_settings(app).bindings.get("cancel").cloned() else {
+            return;
+        };
+
+        let result = if requested {
+            register_shortcut(app, cancel_binding)
+        } else {
+            unregister_shortcut(app, cancel_binding)
+        };
+        match result {
+            Ok(()) => *registered = requested,
+            Err(e) => error!("Failed to update the cancel shortcut: {}", e),
+        }
     }
 }
 
-/// Register a shortcut using the appropriate implementation
 /// A cleared binding means the user switched the shortcut off. It is stored as
 /// an empty string rather than removed, so the id keeps its name, description
 /// and default and can be restored with the reset button.
@@ -82,6 +131,7 @@ pub(crate) fn is_disabled(raw: &str) -> bool {
     raw.trim().is_empty()
 }
 
+/// Register a shortcut using the appropriate implementation
 pub fn register_shortcut(app: &AppHandle, binding: ShortcutBinding) -> Result<(), String> {
     let settings = get_settings(app);
     match settings.keyboard_implementation {
