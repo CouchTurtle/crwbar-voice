@@ -1,11 +1,10 @@
-//! Liquid Glass (macOS 26) under a webview.
+//! Liquid Glass (macOS 26) under a webview — today the recording overlay's card.
 //!
 //! A webview cannot sample what lies behind its window, so CSS can never draw
 //! real glass. Instead a native `NSGlassEffectView` sits under the webview, and
-//! the page reports where it wants the glass — the overlay card every frame it
-//! changes, the main window's sidebar whenever it resizes. Where the glass
-//! shows, the page draws nothing. Earlier macOS has no such class, and the
-//! pages keep drawing their own opaque surfaces.
+//! the page reports where it wants the glass every frame its card changes.
+//! Earlier macOS has no such class, and the page keeps drawing its own opaque
+//! card.
 
 use tauri::WebviewWindow;
 
@@ -34,23 +33,21 @@ pub fn supported() -> bool {
     false
 }
 
-/// Puts a glass view under the window's webview, hidden until the page places
-/// it. `stretch` keeps it the window's height during a live resize, before the
-/// page has re-measured.
-pub fn install(window: &WebviewWindow, stretch: bool) {
+/// Puts a glass view under the window's webview, hidden until the page places it.
+pub fn install(window: &WebviewWindow) {
     #[cfg(target_os = "macos")]
     {
         // Directly when already on the main thread (app setup), so it is in
         // place before the page loads and reports.
         if objc2::MainThreadMarker::new().is_some() {
-            mac::install(window, stretch);
+            mac::install(window);
         } else {
             let target = window.clone();
-            let _ = window.run_on_main_thread(move || mac::install(&target, stretch));
+            let _ = window.run_on_main_thread(move || mac::install(&target));
         }
     }
     #[cfg(not(target_os = "macos"))]
-    let _ = (window, stretch);
+    let _ = window;
 }
 
 /// Moves the window's glass to where its page asked for it.
@@ -70,8 +67,7 @@ mod mac {
     use objc2::rc::Retained;
     use objc2::MainThreadMarker;
     use objc2_app_kit::{
-        NSAutoresizingMaskOptions, NSGlassEffectView, NSGlassEffectViewStyle, NSView, NSWindow,
-        NSWindowOrderingMode,
+        NSGlassEffectView, NSGlassEffectViewStyle, NSView, NSWindow, NSWindowOrderingMode,
     };
     use objc2_foundation::{NSPoint, NSRect, NSSize};
     use std::cell::RefCell;
@@ -88,7 +84,7 @@ mod mac {
         static VIEWS: RefCell<HashMap<String, Installed>> = RefCell::new(HashMap::new());
     }
 
-    pub fn install(window: &tauri::WebviewWindow, stretch: bool) {
+    pub fn install(window: &tauri::WebviewWindow) {
         let Some(mtm) = MainThreadMarker::new() else {
             return;
         };
@@ -106,9 +102,6 @@ mod mac {
         let view = NSGlassEffectView::new(mtm);
         view.setStyle(NSGlassEffectViewStyle::Regular);
         view.setAlphaValue(0.0);
-        if stretch {
-            view.setAutoresizingMask(NSAutoresizingMaskOptions::ViewHeightSizable);
-        }
         // Below every sibling, i.e. under the webview.
         content.addSubview_positioned_relativeTo(&view, NSWindowOrderingMode::Below, None);
         VIEWS.with(|views| {

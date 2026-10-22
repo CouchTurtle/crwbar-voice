@@ -50,13 +50,27 @@ const OVERLAY_HEIGHT: f64 = 46.0;
 const OVERLAY_STREAM_WIDTH: f64 = 400.0;
 const OVERLAY_STREAM_HEIGHT: f64 = 120.0;
 
+/// Room around the card for the shadow that sets Liquid Glass apart from the
+/// desktop (macOS 26). The window grows by it on every side and the screen
+/// offsets shrink by it, so the card stays put; the page pads its stage by the
+/// same amount (`.ov-stage.glass` in RecordingOverlay.css).
+fn shadow_room() -> f64 {
+    if crate::glass::supported() {
+        12.0
+    } else {
+        0.0
+    }
+}
+
 /// Overlay window size (logical) for a given UI state.
 fn overlay_dimensions(state: &str) -> (f64, f64) {
-    if state == "streaming" {
+    let (width, height) = if state == "streaming" {
         (OVERLAY_STREAM_WIDTH, OVERLAY_STREAM_HEIGHT)
     } else {
         (OVERLAY_WIDTH, OVERLAY_HEIGHT)
-    }
+    };
+    let room = 2.0 * shadow_room();
+    (width + room, height + room)
 }
 
 static LAST_MIC_LEVEL_EMIT: AtomicU64 = AtomicU64::new(0);
@@ -258,7 +272,7 @@ fn calculate_overlay_position(
 
     let x = monitor_x + (monitor_width - width) / 2.0;
     let y = match settings.overlay_position {
-        OverlayPosition::Top => monitor_y + OVERLAY_TOP_OFFSET,
+        OverlayPosition::Top => monitor_y + OVERLAY_TOP_OFFSET - shadow_room(),
         OverlayPosition::Bottom => {
             // work_area.position shares monitor.position's global coordinate
             // space, so no monitor offset is added.
@@ -270,7 +284,7 @@ fn calculate_overlay_position(
             #[cfg(not(target_os = "macos"))]
             let bottom = monitor_y + monitor.size().height as f64 / scale;
 
-            bottom - height - OVERLAY_BOTTOM_OFFSET
+            bottom - height - (OVERLAY_BOTTOM_OFFSET - shadow_room())
         }
     };
 
@@ -350,7 +364,8 @@ pub fn create_recording_overlay(app_handle: &AppHandle) {
 /// Creates the recording overlay panel and keeps it hidden by default (macOS)
 #[cfg(target_os = "macos")]
 pub fn create_recording_overlay(app_handle: &AppHandle) {
-    if let Some((x, y)) = calculate_overlay_position(app_handle, OVERLAY_WIDTH, OVERLAY_HEIGHT) {
+    let (width, height) = overlay_dimensions("recording");
+    if let Some((x, y)) = calculate_overlay_position(app_handle, width, height) {
         // PanelBuilder creates a Tauri window then converts it to NSPanel.
         // The window remains registered, so get_webview_window() still works.
         match PanelBuilder::<_, RecordingOverlayPanel>::new(app_handle, "recording_overlay")
@@ -358,10 +373,7 @@ pub fn create_recording_overlay(app_handle: &AppHandle) {
             .title("Recording")
             .position(tauri::Position::Logical(tauri::LogicalPosition { x, y }))
             .level(PanelLevel::Status)
-            .size(tauri::Size::Logical(tauri::LogicalSize {
-                width: OVERLAY_WIDTH,
-                height: OVERLAY_HEIGHT,
-            }))
+            .size(tauri::Size::Logical(tauri::LogicalSize { width, height }))
             .has_shadow(false)
             .transparent(true)
             .no_activate(true)
@@ -385,7 +397,7 @@ pub fn create_recording_overlay(app_handle: &AppHandle) {
             Ok(panel) => {
                 panel.hide();
                 if let Some(window) = app_handle.get_webview_window("recording_overlay") {
-                    crate::glass::install(&window, false);
+                    crate::glass::install(&window);
                 }
             }
             Err(e) => {
@@ -509,7 +521,7 @@ pub fn update_overlay_position(app_handle: &AppHandle) {
         // Use the window's current size so centering stays correct whether the
         // overlay is in compact or streaming layout.
         let (width, height) = current_overlay_logical_size(&overlay_window)
-            .unwrap_or((OVERLAY_WIDTH, OVERLAY_HEIGHT));
+            .unwrap_or_else(|| overlay_dimensions("recording"));
         if let Some((x, y)) = calculate_overlay_position(app_handle, width, height) {
             let _ = overlay_window
                 .set_position(tauri::Position::Logical(tauri::LogicalPosition { x, y }));

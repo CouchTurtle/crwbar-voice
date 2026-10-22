@@ -306,10 +306,7 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
 
   // Show permissions request screen
   return (
-    <div
-      data-tauri-drag-region
-      className="h-screen w-screen flex flex-col p-6 gap-6 items-center justify-center"
-    >
+    <div className="h-screen w-screen flex flex-col p-6 gap-6 items-center justify-center">
       <div className="flex flex-col items-center gap-2">
         <CrwbarVoiceLogo width={230} className="text-2xl" />
       </div>

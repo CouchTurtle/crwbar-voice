@@ -161,11 +161,19 @@
 }
 
 /* Liquid Glass (macOS 26): a native glass view under the page follows the card
-   (src-tauri/src/glass.rs) and is its surface and edge, so the page draws
-   neither. The drop-target border stays: a highlight, not the card's edge. */
+   (src-tauri/src/glass.rs). Bare glass all but vanishes on a light desktop, so
+   the page tints it with the app surface and gives it the shadow and hairline
+   that set it apart. The window leaves 12px around the card for that shadow
+   (overlay.rs::shadow_room). The drop-target border stays a highlight. */
+.ov-stage.glass {
+  padding: 12px;
+}
 .ov-stage.glass .scard {
-  background: transparent;
+  background: color-mix(in srgb, var(--color-background) 70%, transparent);
   border-color: transparent;
+  box-shadow:
+    0 4px 14px rgb(0 0 0 / 0.18),
+    0 0 0 0.5px color-mix(in srgb, var(--color-text) 18%, transparent);
 }
 .ov-stage.glass .scard.dragging {
   border-color: var(--s-accent);

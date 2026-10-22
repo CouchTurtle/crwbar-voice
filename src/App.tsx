@@ -332,23 +332,27 @@ function App() {
     content = (
       <div
         dir={direction}
-        className="h-screen flex overflow-hidden select-none cursor-default"
+        className="h-screen flex flex-col select-none cursor-default"
       >
         <WhatsNewGate />
-        <Sidebar
-          activeSection={currentSection}
-          onSectionChange={setCurrentSection}
-        />
-        <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Main content area that takes remaining space */}
+        <div className="flex-1 flex overflow-hidden">
+          <Sidebar
+            activeSection={currentSection}
+            onSectionChange={setCurrentSection}
+          />
           {/* Scrollable content area */}
-          <div className="flex-1 overflow-y-auto">
-            <div className="flex flex-col items-center p-4 gap-4">
-              <AccessibilityPermissions />
-              {renderSettingsContent(currentSection)}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 overflow-y-auto">
+              <div className="flex flex-col items-center p-4 gap-4">
+                <AccessibilityPermissions />
+                {renderSettingsContent(currentSection)}
+              </div>
             </div>
           </div>
-          <Footer />
         </div>
+        {/* Fixed footer at bottom */}
+        <Footer />
       </div>
     );
   }

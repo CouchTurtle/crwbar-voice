@@ -840,24 +840,11 @@ pub fn run(cli_args: CliArgs) {
                     .maximizable(false)
                     .visible(false);
 
-            // macOS 26: the sidebar floats as Liquid Glass with the window
-            // controls inside it, so the title bar gives way to the page.
-            #[cfg(target_os = "macos")]
-            if glass::supported() {
-                win_builder = win_builder
-                    .title_bar_style(tauri::TitleBarStyle::Overlay)
-                    .hidden_title(true)
-                    .traffic_light_position(tauri::LogicalPosition::new(22.0, 26.0))
-                    .transparent(true)
-                    .initialization_script(glass::INIT_SCRIPT);
-            }
-
             if let Some(data_dir) = portable::data_dir() {
                 win_builder = win_builder.data_directory(data_dir.join("webview"));
             }
 
-            let main_window = win_builder.build()?;
-            glass::install(&main_window, true);
+            win_builder.build()?;
 
             let mut settings = get_settings(app.handle());
 

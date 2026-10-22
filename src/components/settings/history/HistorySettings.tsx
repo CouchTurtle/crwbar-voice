@@ -422,7 +422,7 @@ export const HistorySettings: React.FC = () => {
       <div className="space-y-2">
         <div className="px-4 flex items-center justify-between">
           <div>
-            <h2 className="text-[13px] font-semibold text-mid-gray">
+            <h2 className="text-xs font-medium text-mid-gray uppercase tracking-wide">
               {t("settings.history.title")}
             </h2>
           </div>
@@ -481,7 +481,7 @@ export const HistorySettings: React.FC = () => {
             })}
           </div>
         )}
-        <div className="bg-background border border-mid-gray/20 rounded-xl overflow-visible">
+        <div className="bg-background border border-mid-gray/20 rounded-lg overflow-visible">
           {content}
         </div>
       </div>

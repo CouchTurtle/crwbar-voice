@@ -43,17 +43,6 @@
   background-color: var(--color-background);
 }
 
-/* Liquid Glass (macOS 26, src-tauri/src/glass.rs): the page turns transparent
-   and the sidebar pane is a hole in it, through which the native glass shows.
-   The pane's shadow paints the window background everywhere else. */
-:root[data-glass],
-:root[data-glass] body {
-  background-color: transparent;
-}
-:root[data-glass] .glass-pane {
-  box-shadow: 0 0 0 100vmax var(--color-background);
-}
-
 .container {
   margin: 0;
   padding-top: 10vh;
