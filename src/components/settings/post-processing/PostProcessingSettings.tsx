@@ -428,37 +428,48 @@ PostProcessingSettingsPrompts.displayName = "PostProcessingSettingsPrompts";
 
 export const PostProcessingSettings: React.FC = () => {
   const { t } = useTranslation();
+  const { getSetting } = useSettings();
+  // While off, neither AI shortcut is registered, so the rest would be settings
+  // for something that cannot run.
+  const enabled = getSetting("post_process_enabled") ?? false;
 
   return (
     <div className="max-w-3xl w-full mx-auto space-y-6">
       <SettingsGroup title={t("settings.postProcessing.enable.title")}>
-        <PostProcessingToggle descriptionMode="tooltip" grouped={true} />
-      </SettingsGroup>
-
-      <SettingsGroup title={t("settings.postProcessing.voiceAction.title")}>
-        <ShortcutInput
-          shortcutId="voice_action"
-          descriptionMode="tooltip"
-          grouped={true}
-        />
-        <VoiceActionSettings />
-      </SettingsGroup>
-
-      <SettingsGroup title={t("settings.postProcessing.hotkey.title")}>
-        <ShortcutInput
-          shortcutId="transcribe_with_post_process"
-          descriptionMode="tooltip"
+        <PostProcessingToggle
+          descriptionMode={enabled ? "tooltip" : "inline"}
           grouped={true}
         />
       </SettingsGroup>
 
-      <SettingsGroup title={t("settings.postProcessing.api.title")}>
-        <PostProcessingSettingsApi />
-      </SettingsGroup>
+      {enabled && (
+        <>
+          <SettingsGroup title={t("settings.postProcessing.voiceAction.title")}>
+            <ShortcutInput
+              shortcutId="voice_action"
+              descriptionMode="tooltip"
+              grouped={true}
+            />
+            <VoiceActionSettings />
+          </SettingsGroup>
 
-      <SettingsGroup title={t("settings.postProcessing.prompts.title")}>
-        <PostProcessingSettingsPrompts />
-      </SettingsGroup>
+          <SettingsGroup title={t("settings.postProcessing.hotkey.title")}>
+            <ShortcutInput
+              shortcutId="transcribe_with_post_process"
+              descriptionMode="tooltip"
+              grouped={true}
+            />
+          </SettingsGroup>
+
+          <SettingsGroup title={t("settings.postProcessing.api.title")}>
+            <PostProcessingSettingsApi />
+          </SettingsGroup>
+
+          <SettingsGroup title={t("settings.postProcessing.prompts.title")}>
+            <PostProcessingSettingsPrompts />
+          </SettingsGroup>
+        </>
+      )}
     </div>
   );
 };

@@ -18,7 +18,7 @@ and the text is pasted into the app you were typing in.
 - **⌥ C** copies the last transcript, **⌥ V** inserts it again. Both can be
   reassigned or switched off.
 - **Esc** cancels. What was said up to then is kept in History.
-- **Keep recording after release** _(General)_ adds up to two seconds, so the
+- **Keep Recording After Release** _(General)_ adds up to two seconds, so the
   last word isn't cut off.
 
 ## Files and History

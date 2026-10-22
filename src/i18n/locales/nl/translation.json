@@ -356,14 +356,6 @@
           "auto": "Automatisch (Aanbevolen)"
         }
       },
-      "clipboardHandling": {
-        "title": "Klembordbeheer",
-        "description": "'Klembord niet aanpassen' behoudt je huidige klembordinhoud na een transcriptie. 'Kopiëren naar klembord' laat de getranscribeerde tekst achter op je klembord.",
-        "options": {
-          "dontModify": "Klembord niet aanpassen",
-          "copyToClipboard": "Kopiëren naar klembord"
-        }
-      },
       "autoSubmit": {
         "title": "Automatisch verzenden",
         "description": "Verzend automatisch de geselecteerde toetsencombinatie na het invoegen van de tekst. Cmd+Enter geldt voor macOS, Windows/Linux gebruiken Super+Enter.",

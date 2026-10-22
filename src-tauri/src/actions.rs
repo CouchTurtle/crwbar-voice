@@ -819,7 +819,10 @@ pub(crate) async fn process_transcription_output(
         final_text = converted_text;
     }
 
-    if post_process {
+    // The feature switch wins over the caller: re-transcribing a history entry
+    // that was post-processed back then must not reach the AI service once the
+    // user has turned AI features off.
+    if post_process && settings.post_process_enabled {
         if let Some(processed_text) = post_process_transcription(&settings, &final_text).await {
             post_processed_text = Some(processed_text.clone());
             final_text = processed_text;

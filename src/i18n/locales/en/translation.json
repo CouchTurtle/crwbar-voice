@@ -11,7 +11,7 @@
     "general": "General",
     "models": "Models",
     "advanced": "Advanced",
-    "postProcessing": "AI & Voice Actions",
+    "postProcessing": "AI",
     "history": "History",
     "debug": "Debug",
     "about": "About",
@@ -160,11 +160,11 @@
     "general": {
       "title": "General",
       "dragDrop": {
-        "label": "Transcribe dropped files",
+        "label": "Transcribe Dropped Files",
         "description": "Lets you drag an audio file onto the recording bar to transcribe it instead of the microphone."
       },
       "autoCopy": {
-        "label": "Copy to clipboard automatically",
+        "label": "Copy to Clipboard Automatically",
         "description": "Copies every finished transcription to the clipboard automatically."
       },
       "shortcut": {
@@ -220,7 +220,7 @@
         "description": "Hold to record, release to stop"
       },
       "recordingBuffer": {
-        "title": "Keep recording after release",
+        "title": "Keep Recording After Release",
         "description": "Keeps recording this long after you release the shortcut, so a word you are still finishing is not cut off. Transcription starts that much later.",
         "off": "Off"
       }
@@ -266,7 +266,7 @@
         "description": "Adjust the volume of audio feedback sounds"
       },
       "duckingSpeed": {
-        "title": "Ducking speed",
+        "title": "Ducking Speed",
         "description": "How quickly other audio fades down when recording starts and back up when it ends.",
         "options": {
           "instant": "Instant",
@@ -354,14 +354,6 @@
         "description": "Choose which Linux typing tool to use for Direct paste method. Auto will automatically detect and use the best available tool for your system.",
         "options": {
           "auto": "Auto (Recommended)"
-        }
-      },
-      "clipboardHandling": {
-        "title": "Clipboard Handling",
-        "description": "Don't Modify Clipboard preserves your current clipboard contents after transcription. Copy to Clipboard leaves the transcription result in your clipboard after pasting.",
-        "options": {
-          "dontModify": "Don't Modify Clipboard",
-          "copyToClipboard": "Copy to Clipboard"
         }
       },
       "autoSubmit": {
@@ -559,7 +551,7 @@
         "description": "Sensitivity for custom word corrections"
       },
       "historyLimit": {
-        "title": "Recordings with audio",
+        "title": "Recordings With Audio",
         "description": "How many of the newest recordings keep their audio. Transcripts are always kept and stay searchable.",
         "entries": "recordings"
       },
@@ -583,7 +575,7 @@
       },
       "postProcessingToggle": {
         "label": "AI Features",
-        "description": "Enable AI post-processing and Voice Actions"
+        "description": "Post-processing and Voice Actions. Nothing is sent to an AI service while this is off."
       },
       "muteWhileRecording": {
         "label": "Lower Audio While Recording",
@@ -610,7 +602,7 @@
     "appearance": {
       "title": "Appearance",
       "accent": {
-        "title": "Accent color",
+        "title": "Accent Color",
         "description": "Pick a custom accent color for buttons, the recording bar, and highlights. Reset returns to the default orange.",
         "reset": "Reset"
       },

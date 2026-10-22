@@ -11,7 +11,7 @@
     "general": "Allgemein",
     "models": "Modelle",
     "advanced": "Erweitert",
-    "postProcessing": "KI & Voice Actions",
+    "postProcessing": "KI",
     "history": "Verlauf",
     "debug": "Debug",
     "about": "Info",
@@ -356,14 +356,6 @@
           "auto": "Auto (Empfohlen)"
         }
       },
-      "clipboardHandling": {
-        "title": "Zwischenablage-Verhalten",
-        "description": "Zwischenablage nicht ändern bewahrt den aktuellen Inhalt nach der Transkription. In Zwischenablage kopieren hinterlässt das Transkriptionsergebnis in der Zwischenablage.",
-        "options": {
-          "dontModify": "Zwischenablage nicht ändern",
-          "copyToClipboard": "In Zwischenablage kopieren"
-        }
-      },
       "autoSubmit": {
         "title": "Automatisch absenden",
         "description": "Sendet nach dem Einfügen von Text automatisch die ausgewählte Tastenkombination. Cmd+Enter gilt für macOS, während Windows/Linux Super+Enter verwenden.",
@@ -576,7 +568,7 @@
       },
       "postProcessingToggle": {
         "label": "KI-Funktionen",
-        "description": "KI-Nachbearbeitung und Voice Actions aktivieren"
+        "description": "Nachbearbeitung und Voice Actions. Solange das aus ist, geht nichts an einen KI-Dienst."
       },
       "muteWhileRecording": {
         "label": "Audio während der Aufnahme absenken",

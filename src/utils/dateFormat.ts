@@ -17,9 +17,9 @@ export const formatDateTime = (timestamp: string, locale: string): string => {
 
     return new Intl.DateTimeFormat(locale, {
       year: "numeric",
-      month: "long",
+      month: "short",
       day: "numeric",
-      hour: "2-digit",
+      hour: "numeric",
       minute: "2-digit",
     }).format(date);
   } catch (error) {

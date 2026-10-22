@@ -555,13 +555,15 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
 
   return (
     <div className="px-4 py-2 pb-5 flex flex-col gap-3">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-medium">{formattedDate}</p>
+      <div className="flex justify-between items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 min-w-0">
+          <p className="text-sm font-medium whitespace-nowrap">
+            {formattedDate}
+          </p>
           <SourceBadge source={entry.source} />
           {entry.partial && <PartialBadge />}
         </div>
-        <div className="flex items-center">
+        <div className="flex items-center shrink-0">
           <IconButton
             onClick={handleCopyText}
             disabled={!hasTranscription || retrying}
@@ -669,7 +671,7 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
         // retention alike.
         <div className="flex items-center gap-3 text-xs">
           <VolumeX width={20} height={20} className="shrink-0 text-text/30" />
-          <span className="text-text/60">
+          <span className="text-text/60 whitespace-nowrap">
             {t("settings.history.noAudio.title")}
           </span>
           <span className="text-text/40">
