@@ -36,7 +36,9 @@ recording_*
 *.app/
 *.app.tar.gz
 /brand/
-/docs/
+# docs/ holds internal notes; only the README's images are published.
+/docs/*
+!/docs/images/
 
 # Playwright
 playwright-report/
