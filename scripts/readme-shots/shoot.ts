@@ -6,8 +6,13 @@
 // mock.ts in your installed Chrome with a fresh profile, and writes
 // docs/images/{icon,app,overlay}.png. Nothing reads your real settings or
 // history; every word on screen comes from fixtures.ts.
+//
+// The icon is taken from an installed app (CRWBAR_APP, default
+// /Applications/crwbar voice.app) as macOS draws it, rim and shadow included —
+// the bundle's raw artwork is only the inner tile.
 import { chromium, type Page } from "@playwright/test";
-import { copyFile, mkdir } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
+import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { createServer } from "vite";
 
@@ -130,11 +135,16 @@ const img = (data: string, w: number, h: number) =>
 
 try {
   await mkdir(OUT, { recursive: true });
-  await copyFile(
-    join(ROOT, "src-tauri/icons/128x128@2x.png"),
+  const app = process.env.CRWBAR_APP ?? "/Applications/crwbar voice.app";
+  execFileSync("osascript", [
+    "-l",
+    "JavaScript",
+    join(ROOT, "scripts/readme-shots/system-icon.js"),
+    app,
     join(OUT, "icon.png"),
-  );
-  console.log("wrote docs/images/icon.png");
+    "256",
+  ]);
+  console.log(`wrote docs/images/icon.png (from ${app})`);
 
   const [transcribe, history] = [await transcribeScene(), await historyScene()];
   await compose(
