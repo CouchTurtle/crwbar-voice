@@ -348,6 +348,19 @@ the fastest reproduction is the CLI, which runs the same decoder as the app:
 cd src-tauri && cargo run -- --transcribe-file /path/to/recording.m4a
 ```
 
+### README images
+
+`bun scripts/readme-shots/shoot.ts` redraws `docs/images/` from the real UI. It
+starts its own Vite server (not on port 1420), loads `app.html`/`overlay.html`,
+which install `mock.ts` before the app's own entry point, and photographs scenes
+in the installed Chrome with a fresh profile. Every word on screen comes from
+`fixtures.ts` — never point it at real data; a History screenshot would publish
+someone's transcripts. `default-settings.json` is the real defaults, dumped
+from `get_default_settings()`. When the frontend starts calling a new command
+at boot, `mock.ts` logs `[mock] unhandled command` and returns `null`; answer it
+there or the scene renders an error state. Chrome draws unstyled native controls
+(range sliders) differently from the app's WebKit.
+
 ## Distribution notes
 
 Local bundles are ad-hoc signed and not notarized. Release bundles go to

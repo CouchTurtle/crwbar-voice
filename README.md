@@ -1,95 +1,151 @@
-# crwbar voice
+<p align="center"><img src="docs/images/icon.png" width="128" height="128" alt=""></p>
 
-`crwbar voice` is a local-first desktop transcription tool. Hold a shortcut,
-speak, and paste the transcription into the active app. Audio files can also be
-dropped into the app and transcribed locally.
+<h1 align="center">crwbar voice</h1>
 
-This is mostly a personal fork of Handy. I added some features that i wanted:
+<p align="center">
+Hold a shortcut, speak, and the text lands where you're typing — transcribed on your Mac, not in the cloud.<br>
+Drop in a voice note or a recorded meeting, and find anything you ever said again.
+</p>
 
-- audio files and voice notes can be dropped onto the recording bar or the
-  main window, or picked from _General_;
-- a finished transcription can be copied to the clipboard automatically;
-- microphone and file transcriptions are easier to distinguish in the history;
-- the app has its own bundle identity, icon, tray states, and recording overlay.
+## Dictation
 
-The current fork has been built and tested on macOS. It inherits Windows and
-Linux build targets from Handy, but those versions have not been verified yet
-and should not currently be treated as supported releases.
+<p align="center"><img src="docs/images/overlay.png" width="480" alt="The recording bar while listening, with live text, and after copying"></p>
 
-This project is built on the complete codebase of
-[Handy by CJ Pais](https://github.com/cjpais/Handy). It is a refinement of that
-foundation with its own fixes, workflow changes, and visual direction not an
-independent rewrite. It uses its own name, bundle identifier, icon, wordmark,
-and tray assets, and is not affiliated with or endorsed by the Handy project.
+Hold **⌥ Space** and speak. A small bar at the bottom of the screen shows it's
+listening; with a streaming model the words appear while you say them. Let go
+and the text is pasted into the app you were typing in.
 
-## Current status
+- **⌥ C** copies the last transcript, **⌥ V** inserts it again. Both can be
+  reassigned or switched off.
+- **Esc** cancels. What was said up to then is kept in History.
+- **Keep recording after release** _(General)_ adds up to two seconds, so the
+  last word isn't cut off.
 
-The fork runs its own release line, currently `0.4.0`, and is intended for
-direct GitHub distribution, not an app store. Automatic updates are
-intentionally disabled until this repository has its own signed release channel.
+## Files and History
 
-The app currently includes:
+<p align="center"><img src="docs/images/app.png" width="760" alt="A meeting being transcribed with the time left, and a History search with the matches highlighted"></p>
 
-- global push-to-talk or toggle-to-talk transcription;
-- local Whisper-, Parakeet-, and other compatible speech models;
-- audio file transcription in its own tab, by drag-and-drop or from a file
-  picker, covering WAV, MP3, M4A (AAC and Apple Lossless), FLAC, OGG/OGA, OPUS
-  and CAF — WhatsApp voice notes and iPhone voice memos included;
-- long recordings transcribed in pieces, so a talk-length file finishes instead
-  of exhausting memory;
-- a searchable transcription history that keeps every transcript, with
-  microphone/upload filters; audio is kept for the newest recordings;
-- optional extra recording time after the shortcut is released, so a word you
-  are still finishing is not cut off;
-- optional automatic clipboard copy and paste;
-- shortcuts to reach for the last transcript again: one copies it to the
-  clipboard, one inserts it into the focused field and restores the clipboard
-  afterwards;
-- a custom accent color for the interface and the recording bar;
-- audio ducking that lowers other playback while recording, at a speed you pick;
-- optional AI post-processing through a provider configured by the user.
+The **Transcribe** tab takes a recording — drop it in or pick it — and
+transcribes it inside the app instead of typing into another window. Long
+meetings are split into pieces, with the time left measured on your Mac, and a
+run you stop keeps what it has done. Files can use their own model: a slower,
+more accurate one for recordings, a fast one for dictation.
 
-Speech recognition runs locally. AI post-processing is the exception: when it
-is explicitly enabled, the transcription is sent to the selected provider.
+**History** keeps every transcript and searches all of them. The newest ten
+recordings keep their audio as well.
 
-I may add more optional writing or general tools later, for example, turning a rough
-transcription into an email, but that is not part of the current release.
+Imports: WAV, MP3, M4A (AAC and Apple Lossless), FLAC, OGG, Opus and CAF —
+WhatsApp voice notes and Apple Voice Memos included.
 
-## Develop locally
+## Contents
 
-Requirements: current stable Rust and [Bun](https://bun.sh/).
+- [Install](#install)
+- [Shortcuts](#shortcuts)
+- [Privacy](#privacy)
+- [Limits](#limits)
+- [Development](#development)
+- [Credits](#credits)
+- [License](#license)
+- [Disclaimer](#disclaimer)
+
+## Install
+
+Download the **.dmg** from the [latest release](../../releases/latest), open it
+and drag crwbar voice to Applications. It runs on Apple silicon, built for
+macOS 11 and later and tested on macOS 26.
+
+crwbar voice isn't notarized by Apple, so macOS won't open it the first time.
+Go to **System Settings → Privacy & Security**, scroll down and click **Open
+Anyway**. Or, in Terminal:
+
+```bash
+xattr -dr com.apple.quarantine "/Applications/crwbar voice.app"
+```
+
+Then:
+
+1. **Microphone**: allow it when asked.
+2. **Accessibility**: allow crwbar voice under System Settings → Privacy &
+   Security → Accessibility. It's what makes the global shortcut work and lets
+   the text be pasted. After an update, remove it there with "−" and add it
+   again — macOS drops the permission when the app is replaced.
+3. **A model**: pick one on first launch. It's downloaded once and runs on your
+   Mac from then on.
+
+Coming from Handy? On first launch crwbar voice can take over your existing
+models, settings and history. Handy's own data stays where it is.
+
+## Shortcuts
+
+| Shortcut | What it does                                                         |
+| -------- | -------------------------------------------------------------------- |
+| ⌥ Space  | dictate — hold to talk, or switch push-to-talk off to press to start |
+| ⌥ C      | copy the last transcript                                             |
+| ⌥ V      | insert the last transcript; your clipboard is put back afterwards    |
+| Esc      | cancel; the text so far goes to History                              |
+
+All of them can be changed in _General_; the ✕ next to one switches it off.
+
+## Privacy
+
+Speech is transcribed on your Mac and audio never leaves it. There's no account,
+no analytics and no update check. The app goes online for two things:
+downloading a model you choose, and — only if you switch them on — AI
+post-processing and voice actions, which send the _text_ to the provider or
+CLI you set up.
+
+## Limits
+
+- **macOS only.** The Windows and Linux targets come from Handy and haven't
+  been tested, so there are no builds for them.
+- **Not notarized**, so Accessibility has to be granted again after each update.
+- **The model list is built into each release.** New models arrive with an
+  update, not on their own.
+- **A crash mid-transcription loses that run.** Cancelling keeps the text;
+  only a hard crash doesn't.
+- **Search highlights the raw text.** A word found only in AI-post-processed
+  text still finds the entry, but isn't marked.
+
+## Development
+
+You need current stable Rust and [Bun](https://bun.sh/).
 
 ```bash
 bun install
 bun run tauri dev
 ```
 
-Build the frontend or a desktop bundle with:
+| Command                                  | What it does                                               |
+| ---------------------------------------- | ---------------------------------------------------------- |
+| `bun run verify`                         | typecheck, lint, formatting, translations, build           |
+| `cargo test` (in `src-tauri/`)           | the Rust tests                                             |
+| `bun run tauri build`                    | the app and the DMG                                        |
+| `cargo run -- --transcribe-file <audio>` | transcribe a file without the UI, through the same decoder |
+| `bun scripts/readme-shots/shoot.ts`      | redraw the images in this README from demo data            |
 
-```bash
-bun run build
-bun run tauri build
-```
+[AGENTS.md](AGENTS.md) explains how the app is put together and where it's easy
+to go wrong; [BUILD.md](BUILD.md) covers building in more detail.
 
-Before pushing, `bun run verify` runs the frontend gate (typecheck, lint,
-formatting, translation parity, build). The backend tests live in `src-tauri`
-and run with `cargo test`.
+## Credits
 
-On macOS, a locally built or unsigned GitHub app may require a one-time
-Gatekeeper confirmation and its own microphone/accessibility permissions.
-Those permissions belong to `bar.crw.voice`; existing Handy installations and
-their permissions are not changed.
+crwbar voice is built on the complete codebase of
+[Handy by CJ Pais](https://github.com/cjpais/Handy) — a refinement with its own
+fixes, workflow and look, not a rewrite. It has its own name, bundle identifier,
+icon and artwork, and isn't affiliated with or endorsed by the Handy project.
 
-## Data compatibility
+## License
 
-On first launch, crwbar voice can import existing data from the legacy
-`com.pais.handy` application-data directory. The original data is left in
-place. Large model files are hard-linked when possible to avoid duplicating
-several gigabytes; all mutable files use independent copies.
+MIT, see [LICENSE](LICENSE). Handy's copyright and contribution history are
+kept intact.
 
-## License and attribution
+## Disclaimer
 
-The application code remains available under the [MIT License](LICENSE).
-Copyright and contribution history from the upstream Handy project remain
-intact. The crwbar voice branding and replacement assets in this fork are new
-and do not reuse the Handy artwork.
+- **Made with AI.** The changes in this fork were made with Claude, Anthropic's
+  AI model, and tested by hand on a Mac. Handy itself is the work of CJ Pais and
+  its contributors.
+- **Unofficial.** Not affiliated with the Handy project or with the makers of
+  the speech models it runs. Their names are used only to say what works.
+- **Your data.** Recordings, transcripts and settings stay on your Mac.
+- **Permissions.** It needs the microphone and Accessibility. Like any app with
+  that access it can do a lot; the code is here to read.
+- **No warranty.** It's provided as is, as the license says.
