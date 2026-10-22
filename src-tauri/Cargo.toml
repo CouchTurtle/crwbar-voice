@@ -151,6 +151,10 @@ transcribe-cpp = { version = "0.1.3", default-features = false }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 tauri-nspanel = { git = "https://github.com/ahkohd/tauri-nspanel", branch = "v2.1" }
+# Liquid Glass behind the recording overlay (overlay.rs::glass).
+objc2 = "0.6.4"
+objc2-app-kit = { version = "0.3.2", features = ["NSGlassEffectView", "NSGraphics", "NSResponder", "NSView", "NSWindow"] }
+objc2-foundation = { version = "0.3.2", features = ["NSGeometry"] }
 transcribe-cpp = { version = "0.1.3", default-features = false, features = ["metal"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]

@@ -73,6 +73,104 @@ const DONE_OVERLAY_MS: u64 = 3500;
 struct OverlayDisplayEvent {
     state: String,
     mode: String,
+    /// Native Liquid Glass sits under the page, so the page drops its own surface.
+    glass: bool,
+}
+
+/// Where the overlay card is, in the page's CSS pixels (top-left origin), as
+/// the overlay page measures it every frame the card changes.
+#[derive(Clone, Copy, Debug, serde::Deserialize, specta::Type)]
+pub struct GlassFrame {
+    pub x: f64,
+    pub y: f64,
+    pub width: f64,
+    pub height: f64,
+    pub radius: f64,
+    pub opacity: f64,
+}
+
+/// Liquid Glass for the overlay card on macOS 26. The card is drawn by the
+/// webview, and a webview cannot sample what lies behind its window, so the
+/// glass is a native `NSGlassEffectView` under the webview that follows the
+/// card frame by frame. Earlier macOS has no such class; the page then keeps
+/// drawing its own opaque card.
+#[cfg(target_os = "macos")]
+mod glass {
+    use super::GlassFrame;
+    use objc2::rc::Retained;
+    use objc2::runtime::AnyClass;
+    use objc2::MainThreadMarker;
+    use objc2_app_kit::{
+        NSGlassEffectView, NSGlassEffectViewStyle, NSView, NSWindow, NSWindowOrderingMode,
+    };
+    use objc2_foundation::{NSPoint, NSRect, NSSize};
+    use std::cell::RefCell;
+    use std::sync::atomic::{AtomicBool, Ordering};
+
+    static ACTIVE: AtomicBool = AtomicBool::new(false);
+
+    thread_local! {
+        // AppKit views belong to the main thread, and so does this handle: the
+        // glass and the content view it lives in.
+        static VIEW: RefCell<Option<(Retained<NSGlassEffectView>, Retained<NSView>)>> =
+            const { RefCell::new(None) };
+    }
+
+    pub fn active() -> bool {
+        ACTIVE.load(Ordering::Relaxed)
+    }
+
+    /// Main thread only.
+    pub fn install(window: &tauri::WebviewWindow) {
+        let Some(mtm) = MainThreadMarker::new() else {
+            return;
+        };
+        if AnyClass::get(c"NSGlassEffectView").is_none() {
+            log::info!("No Liquid Glass before macOS 26; the overlay draws its own card");
+            return;
+        }
+        let Ok(ns_window) = window.ns_window() else {
+            return;
+        };
+        // SAFETY: Tauri hands out the live NSWindow of this webview window.
+        let ns_window: &NSWindow = unsafe { &*ns_window.cast() };
+        let Some(content) = ns_window.contentView() else {
+            return;
+        };
+        let view = NSGlassEffectView::new(mtm);
+        view.setStyle(NSGlassEffectViewStyle::Regular);
+        view.setAlphaValue(0.0);
+        // Below every sibling, i.e. under the webview.
+        content.addSubview_positioned_relativeTo(&view, NSWindowOrderingMode::Below, None);
+        VIEW.with(|slot| *slot.borrow_mut() = Some((view, content)));
+        ACTIVE.store(true, Ordering::Relaxed);
+    }
+
+    /// Main thread only.
+    pub fn update(frame: GlassFrame) {
+        VIEW.with(|slot| {
+            let slot = slot.borrow();
+            let Some((view, parent)) = slot.as_ref() else {
+                return;
+            };
+            // The page measures from the top, AppKit from the bottom.
+            let y = parent.bounds().size.height - frame.y - frame.height;
+            view.setFrame(NSRect::new(
+                NSPoint::new(frame.x, y),
+                NSSize::new(frame.width, frame.height),
+            ));
+            view.setCornerRadius(frame.radius);
+            view.setAlphaValue(frame.opacity);
+        });
+    }
+}
+
+/// Moves the overlay's glass to where the page drew the card.
+pub fn set_glass_frame(app: &AppHandle, frame: GlassFrame) {
+    #[cfg(target_os = "macos")]
+    let _ = app.run_on_main_thread(move || glass::update(frame));
+    #[cfg(not(target_os = "macos"))]
+    let _ = (app, frame);
 }
 
 #[cfg(target_os = "macos")]
@@ -377,6 +475,9 @@ pub fn create_recording_overlay(app_handle: &AppHandle) {
         {
             Ok(panel) => {
                 panel.hide();
+                if let Some(window) = app_handle.get_webview_window("recording_overlay") {
+                    let _ = app_handle.run_on_main_thread(move || glass::install(&window));
+                }
             }
             Err(e) => {
                 log::error!("Failed to create recording overlay panel: {}", e);
@@ -429,6 +530,10 @@ fn show_overlay_state_with_mode(app_handle: &AppHandle, state: &str, mode: &str)
             OverlayDisplayEvent {
                 state: state.to_string(),
                 mode: mode.to_string(),
+                #[cfg(target_os = "macos")]
+                glass: glass::active(),
+                #[cfg(not(target_os = "macos"))]
+                glass: false,
             },
         );
         log::debug!(

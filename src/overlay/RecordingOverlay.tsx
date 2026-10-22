@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import "./RecordingOverlay.css";
 import { commands, events } from "@/bindings";
 import type {
+  GlassFrame,
   StreamPhase,
   StreamPhaseEvent,
   StreamTextEvent,
@@ -25,7 +26,7 @@ type OverlayState =
 type OverlayMode = "transcription" | "voice_action";
 type OverlayDisplayEvent =
   | OverlayState
-  | { state: OverlayState; mode?: OverlayMode };
+  | { state: OverlayState; mode?: OverlayMode; glass?: boolean };
 
 // Number of reactive bars in the waveform (the simple, smoothed style shared by
 // every overlay form). Mic levels arrive as 16 FFT buckets; we take the first N.
@@ -37,6 +38,30 @@ const WAVE_VISUAL_GAIN = 2.25;
 const WAVE_ATTACK = 0.62;
 const WAVE_RELEASE = 0.18;
 const WAVE_HEIGHT_CURVE = 0.5;
+
+// How long the glass keeps following after the overlay hides: long enough for
+// the slowest fade-out (`.scard.leaving`, 300 ms).
+const GLASS_TRAIL_MS = 400;
+
+/// The card as the browser draws it right now — mid-transition width, pop-in
+/// scale and fade included — for the native glass to copy.
+const measureGlass = (card: HTMLElement): GlassFrame => {
+  const rect = card.getBoundingClientRect();
+  // Opacity multiplies down the tree: the stage fades, the card pops and leaves.
+  let opacity = 1;
+  for (let el: HTMLElement | null = card; el; el = el.parentElement) {
+    opacity *= Number(getComputedStyle(el).opacity);
+  }
+  // A transform scales the corners too, and CSS caps them at half a side.
+  const scale = card.offsetWidth ? rect.width / card.offsetWidth : 1;
+  const radius = Math.min(
+    parseFloat(getComputedStyle(card).borderTopLeftRadius) * scale,
+    rect.height / 2,
+    rect.width / 2,
+  );
+  const { x, y, width, height } = rect;
+  return { x, y, width, height, radius, opacity };
+};
 
 const RecordingOverlay: React.FC = () => {
   const { t } = useTranslation();
@@ -66,6 +91,9 @@ const RecordingOverlay: React.FC = () => {
   // The completion pill distinguishes a completed paste from an automatic or
   // explicit clipboard copy, so disabling Auto Copy never shows a false claim.
   const [doneCopied, setDoneCopied] = useState(false);
+  // macOS 26: native Liquid Glass under the page is the card's surface.
+  const [glass, setGlass] = useState(false);
+  const lastGlassRef = useRef("");
 
   const smoothedLevelsRef = useRef<number[]>(Array(16).fill(0));
   // Live-text scroll-back: the text region "sticks" to the newest line while the
@@ -113,6 +141,7 @@ const RecordingOverlay: React.FC = () => {
         } catch {
           // Keep the previous/default placement if settings can't be read.
         }
+        setGlass(typeof payload !== "string" && payload.glass === true);
         setMode(overlayMode);
         setState(overlayState);
         if (overlayState === "recording" || overlayState === "streaming") {
@@ -200,6 +229,30 @@ const RecordingOverlay: React.FC = () => {
       if (unlisten) unlisten();
     };
   }, []);
+
+  // Keep the glass on the card every frame something about the card changes,
+  // and for a moment after hiding so it fades out with the page.
+  useEffect(() => {
+    if (!glass) return;
+    const stopAt = isVisible ? Infinity : performance.now() + GLASS_TRAIL_MS;
+    let frame = 0;
+    const tick = () => {
+      const card = document.querySelector<HTMLElement>(".scard");
+      if (card) {
+        const next = measureGlass(card);
+        // Exact: at rest the values repeat exactly, and rounding would drop
+        // the last step of a fade (0.96 and 1 look alike to one decimal).
+        const key = Object.values(next).join();
+        if (key !== lastGlassRef.current) {
+          lastGlassRef.current = key;
+          void commands.setOverlayGlass(next);
+        }
+      }
+      if (performance.now() < stopAt) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [glass, isVisible]);
 
   // Elapsed timer while the Live overlay is visible.
   useEffect(() => {
@@ -406,7 +459,10 @@ const RecordingOverlay: React.FC = () => {
     const collapsed = working && !hasText;
 
     return (
-      <div dir={direction} className={`ov-stage ${position}`}>
+      <div
+        dir={direction}
+        className={`ov-stage ${position} ${glass ? "glass" : ""}`}
+      >
         <div
           key={session}
           className={`scard ${isVoiceAction ? "voice-action" : ""} ${
@@ -457,7 +513,9 @@ const RecordingOverlay: React.FC = () => {
     return (
       <div
         dir={direction}
-        className={`ov-stage ${position} ov-fade ${isVisible ? "show" : ""}`}
+        className={`ov-stage ${position} ${glass ? "glass" : ""} ov-fade ${
+          isVisible ? "show" : ""
+        }`}
       >
         <div
           className={`scard compact cdone ${isVoiceAction ? "voice-action" : ""}`}
@@ -483,7 +541,9 @@ const RecordingOverlay: React.FC = () => {
   return (
     <div
       dir={direction}
-      className={`ov-stage ${position} ov-fade ${isVisible ? "show" : ""}`}
+      className={`ov-stage ${position} ${glass ? "glass" : ""} ov-fade ${
+        isVisible ? "show" : ""
+      }`}
     >
       <div
         className={`scard compact ${isVoiceAction ? "voice-action" : ""} ${

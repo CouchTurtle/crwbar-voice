@@ -665,6 +665,13 @@ async initializeShortcuts() : Promise<Result<null, string>> {
 async copyLastTranscript() : Promise<void> {
     await TAURI_INVOKE("copy_last_transcript");
 },
+/**
+ * The overlay page reports where its card is, so the native Liquid Glass under
+ * it can follow (macOS 26; a no-op elsewhere).
+ */
+async setOverlayGlass(frame: GlassFrame) : Promise<void> {
+    await TAURI_INVOKE("set_overlay_glass", { frame });
+},
 async getAvailableModels() : Promise<Result<ModelInfo[], string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("get_available_models") };
@@ -1109,6 +1116,11 @@ export type EngineType =
  * flag exists so the caller never presents it as the whole recording.
  */
 export type FileTranscription = { text: string; complete: boolean }
+/**
+ * Where the overlay card is, in the page's CSS pixels (top-left origin), as
+ * the overlay page measures it every frame the card changes.
+ */
+export type GlassFrame = { x: number; y: number; width: number; height: number; radius: number; opacity: number }
 export type GpuDeviceOption = { id: number; name: string; total_vram_mb: number }
 export type HistoryEntry = { id: number; file_name: string; timestamp: number; saved: boolean; title: string; transcription_text: string; post_processed_text: string | null; post_process_prompt: string | null; post_process_requested: boolean; source: HistorySource; 
 /**

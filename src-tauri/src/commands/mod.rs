@@ -193,3 +193,11 @@ pub fn initialize_shortcuts(app: AppHandle) -> Result<(), String> {
 pub fn copy_last_transcript(app: AppHandle) {
     crate::tray::copy_last_transcript(&app);
 }
+
+/// The overlay page reports where its card is, so the native Liquid Glass under
+/// it can follow (macOS 26; a no-op elsewhere).
+#[specta::specta]
+#[tauri::command]
+pub fn set_overlay_glass(app: AppHandle, frame: crate::overlay::GlassFrame) {
+    crate::overlay::set_glass_frame(&app, frame);
+}
