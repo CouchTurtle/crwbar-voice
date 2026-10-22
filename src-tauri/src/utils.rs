@@ -13,6 +13,18 @@ pub use crate::clipboard::*;
 pub use crate::overlay::*;
 pub use crate::tray::*;
 
+/// Keep transcript text in development logs, but not in release builds: the
+/// log file outlives the dictation and is what gets attached to a bug report.
+/// Ported from upstream Handy (258899a). Not for secrets such as API keys,
+/// which must be redacted in every build.
+pub fn redact_text(text: &str) -> &str {
+    if cfg!(debug_assertions) {
+        text
+    } else {
+        "[REDACTED]"
+    }
+}
+
 /// Centralized cancellation function that can be called from anywhere in the app.
 /// Handles cancelling both recording and transcription operations and updates UI state.
 pub fn cancel_current_operation(app: &AppHandle) {
