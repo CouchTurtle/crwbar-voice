@@ -8,6 +8,7 @@ pub mod cli;
 mod clipboard;
 mod commands;
 mod file_import;
+mod glass;
 mod helpers;
 mod input;
 mod last_transcript;
@@ -625,7 +626,7 @@ pub fn run(cli_args: CliArgs) {
             commands::initialize_enigo,
             commands::initialize_shortcuts,
             commands::copy_last_transcript,
-            commands::set_overlay_glass,
+            commands::set_glass_frame,
             commands::models::get_available_models,
             commands::models::get_model_info,
             commands::models::download_model,
@@ -839,11 +840,24 @@ pub fn run(cli_args: CliArgs) {
                     .maximizable(false)
                     .visible(false);
 
+            // macOS 26: the sidebar floats as Liquid Glass with the window
+            // controls inside it, so the title bar gives way to the page.
+            #[cfg(target_os = "macos")]
+            if glass::supported() {
+                win_builder = win_builder
+                    .title_bar_style(tauri::TitleBarStyle::Overlay)
+                    .hidden_title(true)
+                    .traffic_light_position(tauri::LogicalPosition::new(22.0, 26.0))
+                    .transparent(true)
+                    .initialization_script(glass::INIT_SCRIPT);
+            }
+
             if let Some(data_dir) = portable::data_dir() {
                 win_builder = win_builder.data_directory(data_dir.join("webview"));
             }
 
-            win_builder.build()?;
+            let main_window = win_builder.build()?;
+            glass::install(&main_window, true);
 
             let mut settings = get_settings(app.handle());
 

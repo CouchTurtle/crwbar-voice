@@ -15,6 +15,7 @@ import type {
 import BuiltStateIcon from "@/components/icons/BuiltStateIcon";
 import i18n, { syncLanguageFromSettings } from "@/i18n";
 import { getLanguageDirection } from "@/lib/utils/rtl";
+import { hasGlass } from "@/lib/glass";
 import { applyRgbMode } from "@/lib/utils/theme";
 
 type OverlayState =
@@ -26,7 +27,7 @@ type OverlayState =
 type OverlayMode = "transcription" | "voice_action";
 type OverlayDisplayEvent =
   | OverlayState
-  | { state: OverlayState; mode?: OverlayMode; glass?: boolean };
+  | { state: OverlayState; mode?: OverlayMode };
 
 // Number of reactive bars in the waveform (the simple, smoothed style shared by
 // every overlay form). Mic levels arrive as 16 FFT buckets; we take the first N.
@@ -92,7 +93,7 @@ const RecordingOverlay: React.FC = () => {
   // explicit clipboard copy, so disabling Auto Copy never shows a false claim.
   const [doneCopied, setDoneCopied] = useState(false);
   // macOS 26: native Liquid Glass under the page is the card's surface.
-  const [glass, setGlass] = useState(false);
+  const glass = hasGlass();
   const lastGlassRef = useRef("");
 
   const smoothedLevelsRef = useRef<number[]>(Array(16).fill(0));
@@ -141,7 +142,6 @@ const RecordingOverlay: React.FC = () => {
         } catch {
           // Keep the previous/default placement if settings can't be read.
         }
-        setGlass(typeof payload !== "string" && payload.glass === true);
         setMode(overlayMode);
         setState(overlayState);
         if (overlayState === "recording" || overlayState === "streaming") {
@@ -245,7 +245,7 @@ const RecordingOverlay: React.FC = () => {
         const key = Object.values(next).join();
         if (key !== lastGlassRef.current) {
           lastGlassRef.current = key;
-          void commands.setOverlayGlass(next);
+          void commands.setGlassFrame(next);
         }
       }
       if (performance.now() < stopAt) frame = requestAnimationFrame(tick);

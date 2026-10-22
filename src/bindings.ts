@@ -666,11 +666,10 @@ async copyLastTranscript() : Promise<void> {
     await TAURI_INVOKE("copy_last_transcript");
 },
 /**
- * The overlay page reports where its card is, so the native Liquid Glass under
- * it can follow (macOS 26; a no-op elsewhere).
+ * A page reports where its Liquid Glass should be (macOS 26; a no-op elsewhere).
  */
-async setOverlayGlass(frame: GlassFrame) : Promise<void> {
-    await TAURI_INVOKE("set_overlay_glass", { frame });
+async setGlassFrame(frame: GlassFrame) : Promise<void> {
+    await TAURI_INVOKE("set_glass_frame", { frame });
 },
 async getAvailableModels() : Promise<Result<ModelInfo[], string>> {
     try {
@@ -1117,8 +1116,7 @@ export type EngineType =
  */
 export type FileTranscription = { text: string; complete: boolean }
 /**
- * Where the overlay card is, in the page's CSS pixels (top-left origin), as
- * the overlay page measures it every frame the card changes.
+ * Where a page wants its glass, in CSS pixels from the top-left.
  */
 export type GlassFrame = { x: number; y: number; width: number; height: number; radius: number; opacity: number }
 export type GpuDeviceOption = { id: number; name: string; total_vram_mb: number }

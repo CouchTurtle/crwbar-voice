@@ -161,15 +161,14 @@
 }
 
 /* Liquid Glass (macOS 26): a native glass view under the page follows the card
-   (overlay.rs::glass) and is its surface and edge, so the page draws neither.
-   The drop-target ring stays: it is a highlight, not the card's edge. */
-.ov-stage.glass .scard,
-.ov-stage.glass .scard.voice-action {
+   (src-tauri/src/glass.rs) and is its surface and edge, so the page draws
+   neither. The drop-target border stays: a highlight, not the card's edge. */
+.ov-stage.glass .scard {
   background: transparent;
   border-color: transparent;
 }
 .ov-stage.glass .scard.dragging {
-  background: transparent;
+  border-color: var(--s-accent);
 }
 
 /* Voice Actions are agentic work, not plain transcription. Keep the same visual

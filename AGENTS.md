@@ -96,6 +96,7 @@ src/
 | RGB accent cycling ("Emil mode")                            | `settings.rgb_mode`, `theme.ts::startRgbMode`, `RgbModeToggle.tsx`                                                |
 | Voice actions (API / Codex CLI / Claude CLI)                | `actions.rs`, `post-processing/VoiceActionSettings.tsx`                                                           |
 | Audio ducking instead of hard mute, at a configurable speed | `managers/audio.rs`, `settings.rs::DuckingSpeed`                                                                  |
+| Liquid Glass overlay card and sidebar (macOS 26)            | `glass.rs`, `src/lib/glass.ts`, `RecordingOverlay.tsx::measureGlass`, `Sidebar.tsx`, `App.css`                    |
 
 `transcribe_file` is deliberately **not** gated on `drag_drop_enabled`: the drop
 sites check the setting themselves, and clicking the picker is consent enough.
@@ -257,6 +258,24 @@ reads rows lazily in id order and stops once a page is full, so the `id <
 cursor` pagination keeps working. Every search word must appear, in any order,
 in raw or post-processed text (`matches_search`; the frontend mirrors it only
 to decide whether a live-added entry belongs in the current results).
+
+**Liquid Glass is native, and the page only says where.** A webview cannot
+sample what lies behind its window, so `backdrop-filter` is never real glass.
+`glass.rs` puts an `NSGlassEffectView` _under_ the webview of the overlay and
+the main window, and the page reports the frame it wants through
+`set_glass_frame`: the overlay every animation frame its card changes
+(`measureGlass` reads the drawn rect, so mid-morph widths, the pop-in scale and
+every fade are copied), the main window whenever the sidebar resizes. Where the
+glass shows, the page draws nothing — the overlay card goes transparent, and the
+main window's page is transparent with the sidebar as a _hole_: the pane's
+`box-shadow: 0 0 0 100vmax` paints the background everywhere else. `data-glass`
+is set only while the sidebar is mounted, so onboarding and the first paint stay
+opaque instead of showing the desktop through a transparent window. Whether a
+window has glass is decided once, before its page loads
+(`glass::INIT_SCRIPT` sets `window.__CRWBAR_GLASS__`); `install` runs directly
+during setup for the same reason — a frame reported before the view existed
+would be lost. Before macOS 26 the class is missing, nothing is installed, and
+both windows look as they did, title bar included.
 
 **The end of a recording used to be thrown away twice.** The cpal block that
 first saw the stop flag was dropped although it was captured before the stop

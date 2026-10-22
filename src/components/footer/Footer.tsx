@@ -13,7 +13,6 @@ const Footer: React.FC = () => {
         setVersion(appVersion);
       } catch (error) {
         console.error("Failed to get app version:", error);
-        setVersion("0.1.0");
       }
     };
 
@@ -29,7 +28,7 @@ const Footer: React.FC = () => {
 
         <div className="flex items-center gap-1">
           {/* eslint-disable-next-line i18next/no-literal-string */}
-          <span>v{version}</span>
+          <span>{version && `v${version}`}</span>
         </div>
       </div>
     </div>
