@@ -491,7 +491,6 @@
         "file": "Dosya"
       },
       "emptyFiltered": "Bu kategoride kayıt yok.",
-      "title": "Geçmiş",
       "openFolder": "Kayıtlar Klasörünü Aç",
       "loading": "Geçmiş yükleniyor...",
       "empty": "Henüz transkripsiyon yok. Geçmişinizi oluşturmak için kayda başlayın!",
@@ -515,7 +514,8 @@
         "placeholder": "Search transcripts",
         "clear": "Clear search",
         "noResults": "Nothing matches “{{query}}”."
-      }
+      },
+      "more": "Daha fazla"
     },
     "debug": {
       "title": "Hata Ayıklama",

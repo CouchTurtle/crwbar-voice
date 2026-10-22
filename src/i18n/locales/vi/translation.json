@@ -491,7 +491,6 @@
         "file": "Tệp"
       },
       "emptyFiltered": "Không có mục nào trong danh mục này.",
-      "title": "Lịch sử",
       "openFolder": "Mở thư mục ghi âm",
       "loading": "Đang tải lịch sử...",
       "empty": "Chưa có bản ghi nào. Bắt đầu ghi âm để xây dựng lịch sử của bạn!",
@@ -515,7 +514,8 @@
         "placeholder": "Search transcripts",
         "clear": "Clear search",
         "noResults": "Nothing matches “{{query}}”."
-      }
+      },
+      "more": "Thêm"
     },
     "debug": {
       "title": "Gỡ lỗi",

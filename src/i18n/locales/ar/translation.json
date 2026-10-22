@@ -470,7 +470,6 @@
         "file": "ملف"
       },
       "emptyFiltered": "لا توجد عناصر في هذه الفئة.",
-      "title": "السجل",
       "openFolder": "فتح مجلد التسجيلات",
       "loading": "...جاري تحميل السجل",
       "empty": "!لا يوجد تفريغ صوتي بعد. ابدأ التسجيل لبناء سجلك",
@@ -494,7 +493,8 @@
         "placeholder": "Search transcripts",
         "clear": "Clear search",
         "noResults": "Nothing matches “{{query}}”."
-      }
+      },
+      "more": "المزيد"
     },
     "debug": {
       "title": "تصحيح الأخطاء",

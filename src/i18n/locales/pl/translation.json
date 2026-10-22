@@ -491,7 +491,6 @@
         "file": "Plik"
       },
       "emptyFiltered": "Brak wpisów w tej kategorii.",
-      "title": "Historia",
       "openFolder": "Otwórz folder nagrań",
       "loading": "Wczytywanie historii...",
       "empty": "Brak transkrypcji. Rozpocznij nagrywanie, aby zbudować historię!",
@@ -515,7 +514,8 @@
         "placeholder": "Search transcripts",
         "clear": "Clear search",
         "noResults": "Nothing matches “{{query}}”."
-      }
+      },
+      "more": "Więcej"
     },
     "debug": {
       "title": "Debugowanie",

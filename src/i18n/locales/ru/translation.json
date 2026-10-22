@@ -491,7 +491,6 @@
         "file": "Файл"
       },
       "emptyFiltered": "В этой категории нет записей.",
-      "title": "История",
       "openFolder": "Открыть папку с записями",
       "loading": "Загрузка истории...",
       "empty": "Транскрипций пока нет. Начните запись, чтобы создать свою историю!",
@@ -515,7 +514,8 @@
         "placeholder": "Search transcripts",
         "clear": "Clear search",
         "noResults": "Nothing matches “{{query}}”."
-      }
+      },
+      "more": "Ещё"
     },
     "debug": {
       "title": "Отлаживать",

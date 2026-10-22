@@ -491,7 +491,6 @@
         "file": "קובץ"
       },
       "emptyFiltered": "אין רשומות בקטגוריה זו.",
-      "title": "היסטוריה",
       "openFolder": "פתח את תיקיית ההקלטות",
       "loading": "טוען היסטוריה...",
       "empty": "עדיין אין תמלולים. התחל להקליט כדי לבנות את ההיסטוריה שלך!",
@@ -515,7 +514,8 @@
         "placeholder": "Search transcripts",
         "clear": "Clear search",
         "noResults": "Nothing matches “{{query}}”."
-      }
+      },
+      "more": "עוד"
     },
     "debug": {
       "title": "ניפוי שגיאות",

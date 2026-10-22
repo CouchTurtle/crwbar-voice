@@ -491,7 +491,6 @@
         "file": "File"
       },
       "emptyFiltered": "Nessuna voce in questa categoria.",
-      "title": "Cronologia",
       "openFolder": "Apri la cartella delle registrazioni",
       "loading": "Caricamento cronologia...",
       "empty": "Non ci sono ancora trascrizioni. Comincia a registrare per costruire la tua cronologia!",
@@ -515,7 +514,8 @@
         "placeholder": "Search transcripts",
         "clear": "Clear search",
         "noResults": "Nothing matches “{{query}}”."
-      }
+      },
+      "more": "Altro"
     },
     "debug": {
       "title": "Debug",

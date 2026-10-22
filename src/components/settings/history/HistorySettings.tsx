@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { readFile } from "@tauri-apps/plugin-fs";
 import {
-  AlertCircle,
   Check,
   Copy,
   Search,
@@ -11,9 +10,8 @@ import {
   FileAudio,
   FolderOpen,
   Mic,
-  RotateCcw,
+  MoreHorizontal,
   Star,
-  Trash2,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -26,31 +24,134 @@ import {
   type HistoryUpdatePayload,
 } from "@/bindings";
 import { useOsType } from "@/hooks/useOsType";
-import { formatDateTime } from "@/utils/dateFormat";
 import { highlightPieces } from "@/lib/utils/highlight";
 import { AudioPlayer, AudioPlayerGroup } from "../../ui/AudioPlayer";
-import { Button } from "../../ui/Button";
 
 const IconButton: React.FC<{
   onClick: () => void;
   title: string;
   disabled?: boolean;
   active?: boolean;
+  expanded?: boolean;
   children: React.ReactNode;
-}> = ({ onClick, title, disabled, active, children }) => (
+}> = ({ onClick, title, disabled, active, expanded, children }) => (
   <button
+    type="button"
     onClick={onClick}
     disabled={disabled}
-    className={`p-1.5 rounded-md flex items-center justify-center transition-colors cursor-pointer disabled:cursor-not-allowed disabled:text-text/20 ${
+    aria-label={title}
+    aria-expanded={expanded}
+    className={`w-7 h-7 rounded-[8px] flex items-center justify-center transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-logo-primary/40 disabled:cursor-not-allowed disabled:text-text/20 ${
       active
-        ? "text-logo-primary hover:text-logo-primary/80"
-        : "text-text/50 hover:text-logo-primary"
+        ? "text-logo-primary hover:bg-logo-primary/10"
+        : "text-text/45 hover:text-text hover:bg-text/8"
     }`}
     title={title}
   >
     {children}
   </button>
 );
+
+interface MenuItem {
+  label: string;
+  onSelect: () => void;
+  disabled?: boolean;
+  danger?: boolean;
+}
+
+/// Re-transcribe and delete, kept out of the way of copy and star: the two
+/// actions you rarely want are the two you least want by accident.
+const EntryMenu: React.FC<{ label: string; items: MenuItem[] }> = ({
+  label,
+  items,
+}) => {
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const closeOutside = (event: MouseEvent) => {
+      if (!menuRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", closeOutside);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("mousedown", closeOutside);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [open]);
+
+  return (
+    <div className="relative" ref={menuRef}>
+      <IconButton onClick={() => setOpen(!open)} title={label} expanded={open}>
+        <MoreHorizontal width={16} height={16} />
+      </IconButton>
+      {open && (
+        <div
+          role="menu"
+          className="absolute end-0 top-full mt-1 w-52 p-1 bg-surface border border-line rounded-field shadow-lg z-20"
+        >
+          {items.map((item) => (
+            <button
+              key={item.label}
+              type="button"
+              role="menuitem"
+              disabled={item.disabled}
+              onClick={() => {
+                setOpen(false);
+                item.onSelect();
+              }}
+              className={`w-full px-2.5 py-1.5 text-control text-start rounded-[6px] hover:bg-text/8 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                item.danger ? "text-red-500" : ""
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+/** Local calendar day, the key entries are grouped by. */
+const dayKey = (date: Date) =>
+  `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+
+/** "Today", "Yesterday", then "Monday, Oct 20" (with the year once it is not this one). */
+const dayLabel = (date: Date, locale: string): string => {
+  const today = new Date();
+  const startOf = (d: Date) =>
+    new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const daysAgo = Math.round((startOf(today) - startOf(date)) / 86_400_000);
+  if (daysAgo === 0 || daysAgo === 1) {
+    const word = new Intl.RelativeTimeFormat(locale, {
+      numeric: "auto",
+    }).format(-daysAgo, "day");
+    return word.charAt(0).toLocaleUpperCase(locale) + word.slice(1);
+  }
+  return new Intl.DateTimeFormat(locale, {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+    year: date.getFullYear() === today.getFullYear() ? undefined : "numeric",
+  }).format(date);
+};
+
+const groupByDay = (entries: HistoryEntry[], locale: string) => {
+  const groups: { key: string; label: string; entries: HistoryEntry[] }[] = [];
+  for (const entry of entries) {
+    const date = new Date(entry.timestamp * 1000);
+    const key = dayKey(date);
+    const last = groups[groups.length - 1];
+    if (last?.key === key) last.entries.push(entry);
+    else groups.push({ key, label: dayLabel(date, locale), entries: [entry] });
+  }
+  return groups;
+};
 
 const PAGE_SIZE = 30;
 /** Long enough not to query on every keystroke, short enough to feel live. */
@@ -77,14 +178,8 @@ const SourceBadge: React.FC<{ source: HistorySource }> = ({ source }) => {
   const isFile = source === "file";
   const Icon = isFile ? FileAudio : Mic;
   return (
-    <span
-      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${
-        isFile
-          ? "bg-logo-primary/10 text-logo-primary"
-          : "bg-mid-gray/15 text-text/50"
-      }`}
-    >
-      <Icon width={11} height={11} />
+    <span className="inline-flex items-center gap-1 text-caption text-text/60">
+      <Icon width={12} height={12} />
       {isFile
         ? t("settings.history.sourceFile")
         : t("settings.history.sourceMic")}
@@ -98,38 +193,16 @@ const PartialBadge: React.FC = () => {
   const { t } = useTranslation();
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-full bg-logo-primary/15 px-2 py-0.5 text-[11px] font-medium text-logo-primary"
+      className="rounded-[6px] bg-logo-primary/15 px-1.5 py-px text-caption font-semibold text-accent-text"
       title={t("settings.history.partialHint")}
     >
-      <AlertCircle width={11} height={11} />
       {t("settings.history.partial")}
     </span>
   );
 };
 
-interface OpenRecordingsButtonProps {
-  onClick: () => void;
-  label: string;
-}
-
-const OpenRecordingsButton: React.FC<OpenRecordingsButtonProps> = ({
-  onClick,
-  label,
-}) => (
-  <Button
-    onClick={onClick}
-    variant="secondary"
-    size="sm"
-    className="flex items-center gap-2"
-    title={label}
-  >
-    <FolderOpen className="w-4 h-4" />
-    <span>{label}</span>
-  </Button>
-);
-
 export const HistorySettings: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const osType = useOsType();
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -370,46 +443,49 @@ export const HistorySettings: React.FC = () => {
     }
   };
 
+  const message = (text: string) => (
+    <div className="bg-surface border border-line rounded-card px-4 py-6 text-center text-label text-text/60">
+      {text}
+    </div>
+  );
+
   let content: React.ReactNode;
 
   if (loading) {
-    content = (
-      <div className="px-4 py-3 text-center text-text/60">
-        {t("settings.history.loading")}
-      </div>
-    );
+    content = message(t("settings.history.loading"));
   } else if (entries.length === 0 && filter === "all" && !search) {
-    content = (
-      <div className="px-4 py-3 text-center text-text/60">
-        {t("settings.history.empty")}
-      </div>
-    );
+    content = message(t("settings.history.empty"));
   } else if (entries.length === 0) {
-    content = (
-      <div className="px-4 py-3 text-center text-text/60">
-        {search
-          ? t("settings.history.search.noResults", { query: search })
-          : t("settings.history.emptyFiltered")}
-      </div>
+    content = message(
+      search
+        ? t("settings.history.search.noResults", { query: search })
+        : t("settings.history.emptyFiltered"),
     );
   } else {
     content = (
       <>
         <AudioPlayerGroup>
-          <div className="divide-y divide-mid-gray/20">
-            {entries.map((entry) => (
-              <HistoryEntryComponent
-                key={entry.id}
-                entry={entry}
-                onToggleSaved={() => toggleSaved(entry.id)}
-                onCopyText={() => copyToClipboard(entry.transcription_text)}
-                getAudioUrl={getAudioUrl}
-                deleteAudio={deleteAudioEntry}
-                retryTranscription={retryHistoryEntry}
-                search={search}
-              />
-            ))}
-          </div>
+          {groupByDay(entries, i18n.language).map((group) => (
+            <section key={group.key} className="space-y-1.5">
+              <h2 className="ms-1 text-section font-semibold text-text/60">
+                {group.label}
+              </h2>
+              <div className="bg-surface border border-line rounded-card px-4.5 divide-y divide-line">
+                {group.entries.map((entry) => (
+                  <HistoryEntryComponent
+                    key={entry.id}
+                    entry={entry}
+                    onToggleSaved={() => toggleSaved(entry.id)}
+                    onCopyText={() => copyToClipboard(entry.transcription_text)}
+                    getAudioUrl={getAudioUrl}
+                    deleteAudio={deleteAudioEntry}
+                    retryTranscription={retryHistoryEntry}
+                    search={search}
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
         </AudioPlayerGroup>
         {/* Sentinel for infinite scroll */}
         <div ref={sentinelRef} className="h-1" />
@@ -419,72 +495,62 @@ export const HistorySettings: React.FC = () => {
 
   return (
     <div className="max-w-3xl w-full mx-auto space-y-3.5">
-      <div className="space-y-2">
-        <div className="px-4 flex items-center justify-between">
-          <div>
-            <h2 className="text-xs font-medium text-mid-gray uppercase tracking-wide">
-              {t("settings.history.title")}
-            </h2>
-          </div>
-          <OpenRecordingsButton
-            onClick={openRecordingsFolder}
-            label={t("settings.history.openFolder")}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1 min-w-0">
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text/45 pointer-events-none" />
+          <input
+            type="search"
+            value={searchInput}
+            onChange={(event) => setSearchInput(event.target.value)}
+            placeholder={t("settings.history.search.placeholder")}
+            aria-label={t("settings.history.search.placeholder")}
+            className="w-full h-[34px] rounded-field border border-line bg-field ps-8 pe-8 text-control text-text placeholder:text-text/45 hover:border-text/25 focus:border-logo-primary focus:ring-2 focus:ring-logo-primary/20 focus:outline-none [&::-webkit-search-cancel-button]:hidden"
           />
+          {searchInput && (
+            <button
+              type="button"
+              onClick={() => setSearchInput("")}
+              aria-label={t("settings.history.search.clear")}
+              className="absolute end-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-text/45 hover:text-text"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
-        <div className="px-4">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text/40 pointer-events-none" />
-            <input
-              type="search"
-              value={searchInput}
-              onChange={(event) => setSearchInput(event.target.value)}
-              placeholder={t("settings.history.search.placeholder")}
-              aria-label={t("settings.history.search.placeholder")}
-              className="w-full rounded-lg border border-mid-gray/20 bg-background py-1.5 pl-8 pr-8 text-sm text-text placeholder:text-text/40 focus:border-logo-primary focus:outline-none [&::-webkit-search-cancel-button]:hidden"
-            />
-            {searchInput && (
-              <button
-                type="button"
-                onClick={() => setSearchInput("")}
-                aria-label={t("settings.history.search.clear")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-text/40 hover:text-text"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-        </div>
-        {!loading && sourceCounts && (
-          <div className="px-4 flex items-center gap-1">
+        {sourceCounts && (
+          <div className="flex gap-0.5 p-[3px] rounded-field bg-field border border-line">
             {(["all", "microphone", "file"] as const).map((f) => {
               const count = f === "all" ? sourceCounts.total : sourceCounts[f];
-              const disabled = count === 0;
-
               return (
                 <button
                   key={f}
+                  type="button"
                   onClick={() => setFilter(f)}
                   aria-pressed={filter === f}
-                  disabled={disabled}
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:text-text/20 ${
+                  disabled={count === 0}
+                  className={`h-7 px-2.5 rounded-[7px] text-caption transition-colors cursor-pointer disabled:cursor-not-allowed disabled:text-text/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-logo-primary/40 ${
                     filter === f
-                      ? "bg-logo-primary/15 text-logo-primary"
-                      : "text-text/50 hover:text-text"
+                      ? "bg-logo-primary/15 text-accent-text font-semibold"
+                      : "text-text/60 font-medium hover:text-text"
                   }`}
                 >
-                  <span>{t(`settings.history.filter.${f}`)}</span>
-                  <span className="min-w-4 rounded-full bg-mid-gray/10 px-1 text-[10px] tabular-nums text-current">
-                    {count}
-                  </span>
+                  {t(`settings.history.filter.${f}`)}
                 </button>
               );
             })}
           </div>
         )}
-        <div className="bg-background border border-mid-gray/20 rounded-lg overflow-visible">
-          {content}
-        </div>
+        <button
+          type="button"
+          onClick={openRecordingsFolder}
+          title={t("settings.history.openFolder")}
+          aria-label={t("settings.history.openFolder")}
+          className="w-[34px] h-[34px] shrink-0 flex items-center justify-center rounded-field bg-field border border-line text-text/60 hover:text-text hover:border-text/25 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-logo-primary/40"
+        >
+          <FolderOpen className="w-4 h-4" />
+        </button>
       </div>
+      {content}
     </div>
   );
 };
@@ -551,28 +617,31 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
     }
   };
 
-  const formattedDate = formatDateTime(String(entry.timestamp), i18n.language);
+  const time = new Intl.DateTimeFormat(i18n.language, {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(entry.timestamp * 1000));
 
   return (
-    <div className="px-4 py-2 pb-5 flex flex-col gap-3">
+    <article className="py-3.5 flex flex-col gap-2">
       <div className="flex justify-between items-center gap-2">
-        <div className="flex flex-wrap items-center gap-2 min-w-0">
-          <p className="text-sm font-medium whitespace-nowrap">
-            {formattedDate}
-          </p>
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 min-w-0">
+          <span className="text-control font-semibold whitespace-nowrap tabular-nums">
+            {time}
+          </span>
           <SourceBadge source={entry.source} />
           {entry.partial && <PartialBadge />}
         </div>
-        <div className="flex items-center shrink-0">
+        <div className="flex items-center gap-0.5 shrink-0">
           <IconButton
             onClick={handleCopyText}
             disabled={!hasTranscription || retrying}
             title={t("settings.history.copyToClipboard")}
           >
             {showCopied ? (
-              <Check width={16} height={16} />
+              <Check width={15} height={15} />
             ) : (
-              <Copy width={16} height={16} />
+              <Copy width={15} height={15} />
             )}
           </IconButton>
           <IconButton
@@ -586,46 +655,38 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
             }
           >
             <Star
-              width={16}
-              height={16}
+              width={15}
+              height={15}
               fill={entry.saved ? "currentColor" : "none"}
             />
           </IconButton>
-          <IconButton
-            onClick={handleRetranscribe}
-            disabled={retrying || !entry.has_audio}
-            title={
-              entry.has_audio
-                ? t("settings.history.retranscribe")
-                : t("settings.history.noAudio.title")
-            }
-          >
-            <RotateCcw
-              width={16}
-              height={16}
-              style={
-                retrying
-                  ? { animation: "spin 1s linear infinite reverse" }
-                  : undefined
-              }
-            />
-          </IconButton>
-          <IconButton
-            onClick={handleDeleteEntry}
-            disabled={retrying}
-            title={t("settings.history.delete")}
-          >
-            <Trash2 width={16} height={16} />
-          </IconButton>
+          <EntryMenu
+            label={t("settings.history.more")}
+            items={[
+              {
+                label: entry.has_audio
+                  ? t("settings.history.retranscribe")
+                  : t("settings.history.noAudio.title"),
+                onSelect: handleRetranscribe,
+                disabled: retrying || !entry.has_audio,
+              },
+              {
+                label: t("settings.history.delete"),
+                onSelect: handleDeleteEntry,
+                disabled: retrying,
+                danger: true,
+              },
+            ]}
+          />
         </div>
       </div>
 
       <p
-        className={`italic text-sm pb-2 ${
+        className={`text-label leading-[1.45] ${
           retrying
             ? ""
             : hasTranscription
-              ? "text-text/90 select-text cursor-text whitespace-pre-wrap break-words"
+              ? "select-text cursor-text whitespace-pre-wrap break-words"
               : "text-text/40"
         }`}
         style={
@@ -650,7 +711,7 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
                   piece.match ? (
                     <mark
                       key={index}
-                      className="rounded-sm bg-logo-primary/30 px-0.5 text-text"
+                      className="rounded-[3px] bg-logo-primary/30 px-0.5 text-text"
                     >
                       {piece.text}
                     </mark>
@@ -664,23 +725,20 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
       {entry.has_audio ? (
         <AudioPlayer onLoadRequest={handleLoadAudio} className="w-full" />
       ) : (
-        // Same row shape as the player, so entries with and without audio line
-        // up. Both reasons are worded to hold for every case they cover: a
+        // Both reasons are worded to hold for every case they cover: a
         // partial entry either never had a recording (cancelled dictation) or
         // lost it later, and "older recordings" fits count- and time-based
         // retention alike.
-        <div className="flex items-center gap-3 text-xs">
-          <VolumeX width={20} height={20} className="shrink-0 text-text/30" />
-          <span className="text-text/60 whitespace-nowrap">
-            {t("settings.history.noAudio.title")}
-          </span>
-          <span className="text-text/40">
+        <p className="flex items-start gap-1.5 text-caption text-text/45">
+          <VolumeX width={13} height={13} className="shrink-0 mt-px" />
+          <span>
+            {t("settings.history.noAudio.title")} ·{" "}
             {entry.partial
               ? t("settings.history.noAudio.stopped")
               : t("settings.history.noAudio.removed")}
           </span>
-        </div>
+        </p>
       )}
-    </div>
+    </article>
   );
 };

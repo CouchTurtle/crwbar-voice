@@ -491,7 +491,6 @@
         "file": "Fichier"
       },
       "emptyFiltered": "Aucune entrée dans cette catégorie.",
-      "title": "Historique",
       "openFolder": "Ouvrir le dossier des enregistrements",
       "loading": "Chargement de l'historique...",
       "empty": "Pas encore de transcriptions. Commencez à enregistrer pour créer votre historique !",
@@ -515,7 +514,8 @@
         "placeholder": "Search transcripts",
         "clear": "Clear search",
         "noResults": "Nothing matches “{{query}}”."
-      }
+      },
+      "more": "Plus"
     },
     "debug": {
       "title": "Débogage",

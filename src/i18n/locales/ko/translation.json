@@ -491,7 +491,6 @@
         "file": "파일"
       },
       "emptyFiltered": "이 범주에는 항목이 없습니다.",
-      "title": "히스토리",
       "openFolder": "녹음 폴더 열기",
       "loading": "히스토리 로딩 중...",
       "empty": "아직 변환된 내용이 없습니다. 녹음을 시작하여 히스토리를 만드세요!",
@@ -515,7 +514,8 @@
         "placeholder": "Search transcripts",
         "clear": "Clear search",
         "noResults": "Nothing matches “{{query}}”."
-      }
+      },
+      "more": "더 보기"
     },
     "debug": {
       "title": "디버그",

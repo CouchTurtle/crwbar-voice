@@ -491,7 +491,6 @@
         "file": "Bestand"
       },
       "emptyFiltered": "Geen items in deze categorie.",
-      "title": "Geschiedenis",
       "openFolder": "Opnamemap openen",
       "loading": "Geschiedenis laden...",
       "empty": "Nog geen transcripties. Start met opnemen om je geschiedenis op te bouwen!",
@@ -515,7 +514,8 @@
         "placeholder": "Search transcripts",
         "clear": "Clear search",
         "noResults": "Nothing matches “{{query}}”."
-      }
+      },
+      "more": "Meer"
     },
     "debug": {
       "title": "Probleemoplossing",
