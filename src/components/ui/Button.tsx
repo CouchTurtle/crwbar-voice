@@ -19,27 +19,24 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseClasses =
-    "font-medium rounded-lg border focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer";
+    "font-semibold rounded-field border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-logo-primary/40 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer";
 
   const variantClasses = {
     primary:
-      "text-white bg-background-ui border-background-ui hover:bg-background-ui/80 hover:border-background-ui/80 focus:ring-1 focus:ring-background-ui",
+      "text-white bg-background-ui border-background-ui hover:bg-background-ui/85",
     "primary-soft":
-      "text-text bg-logo-primary/20 border-transparent hover:bg-logo-primary/30 focus:ring-1 focus:ring-logo-primary",
-    secondary:
-      "bg-mid-gray/10 border-mid-gray/20 hover:bg-background-ui/30 hover:border-logo-primary focus:outline-none",
-    danger:
-      "text-white bg-red-600 border-mid-gray/20 hover:bg-red-700 hover:border-red-700 focus:ring-1 focus:ring-red-500",
+      "text-logo-primary bg-logo-primary/15 border-transparent hover:bg-logo-primary/25",
+    secondary: "bg-field border-line hover:border-text/25",
+    danger: "text-white bg-red-600 border-red-600 hover:bg-red-700",
     "danger-ghost":
-      "text-red-400 border-transparent hover:text-red-300 hover:bg-red-500/10 focus:bg-red-500/20",
-    ghost:
-      "text-current border-transparent hover:bg-mid-gray/10 hover:border-logo-primary focus:bg-mid-gray/20",
+      "text-red-500 border-transparent hover:bg-red-500/10 focus:bg-red-500/15",
+    ghost: "text-current border-transparent hover:bg-text/8",
   };
 
   const sizeClasses = {
-    sm: "px-2 py-1 text-xs",
-    md: "px-4 py-[5px] text-sm",
-    lg: "px-4 py-2 text-base",
+    sm: "h-7 px-2.5 text-caption",
+    md: "h-8 px-3.5 text-control",
+    lg: "h-9 px-4 text-label",
   };
 
   return (

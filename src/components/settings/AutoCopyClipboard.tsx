@@ -4,12 +4,11 @@ import { ToggleSwitch } from "../ui/ToggleSwitch";
 import { useSettings } from "../../hooks/useSettings";
 
 interface AutoCopyClipboardProps {
-  descriptionMode?: "inline" | "tooltip";
   grouped?: boolean;
 }
 
 export const AutoCopyClipboard: React.FC<AutoCopyClipboardProps> = React.memo(
-  ({ descriptionMode = "tooltip", grouped = false }) => {
+  ({ grouped = false }) => {
     const { t } = useTranslation();
     const { getSetting, updateSetting, isUpdating } = useSettings();
 
@@ -29,7 +28,6 @@ export const AutoCopyClipboard: React.FC<AutoCopyClipboardProps> = React.memo(
         isUpdating={isUpdating("clipboard_handling")}
         label={t("settings.general.autoCopy.label")}
         description={t("settings.general.autoCopy.description")}
-        descriptionMode={descriptionMode}
         grouped={grouped}
       />
     );

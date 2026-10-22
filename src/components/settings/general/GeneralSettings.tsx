@@ -26,48 +26,43 @@ export const GeneralSettings: React.FC = () => {
   const duckingEnabled = getSetting("mute_while_recording") ?? false;
   const isLinux = type() === "linux";
   return (
-    <div className="max-w-3xl w-full mx-auto space-y-6">
-      <SettingsGroup title={t("settings.general.title")}>
+    <div className="max-w-3xl w-full mx-auto space-y-3.5">
+      <SettingsGroup title={t("settings.general.groups.shortcuts")}>
         <ShortcutInput shortcutId="transcribe" grouped={true} />
-        <PushToTalk descriptionMode="tooltip" grouped={true} />
-        <RecordingBuffer descriptionMode="tooltip" grouped={true} />
         {/* Cancel shortcut is hidden with push-to-talk (release key cancels) and on Linux (dynamic shortcut instability) */}
         {!isLinux && !pushToTalk && (
           <ShortcutInput shortcutId="cancel" grouped={true} />
         )}
-        <AutoCopyClipboard descriptionMode="tooltip" grouped={true} />
-        {/* The on-demand counterpart to the auto-copy toggle above: reach for
-            the last transcript deliberately instead of copying every one. */}
+        {/* The on-demand counterpart to auto-copy below: reach for the last
+            transcript deliberately instead of copying every one. */}
         <ShortcutInput shortcutId="copy_last_transcript" grouped={true} />
         <ShortcutInput shortcutId="insert_last_transcript" grouped={true} />
-        <DragDropToggle descriptionMode="tooltip" grouped={true} />
+      </SettingsGroup>
+
+      <SettingsGroup title={t("settings.general.groups.recording")}>
+        <PushToTalk grouped={true} />
+        <RecordingBuffer grouped={true} />
+        <AutoCopyClipboard grouped={true} />
+        <DragDropToggle grouped={true} />
       </SettingsGroup>
 
       <ModelSettingsCard />
       <SettingsGroup title={t("settings.sound.title")}>
-        <MicrophoneSelector descriptionMode="tooltip" grouped={true} />
-        <AudioDucking descriptionMode="tooltip" grouped={true} />
-        <AudioDuckingSpeed
-          descriptionMode="tooltip"
-          grouped={true}
-          disabled={!duckingEnabled}
-        />
-        <AudioFeedback descriptionMode="tooltip" grouped={true} />
+        <MicrophoneSelector grouped={true} />
+        <AudioDucking grouped={true} />
+        <AudioDuckingSpeed grouped={true} disabled={!duckingEnabled} />
+        <AudioFeedback grouped={true} />
         <SoundPicker
           label={t("settings.debug.soundTheme.label")}
           description={t("settings.debug.soundTheme.description")}
         />
-        <OutputDeviceSelector
-          descriptionMode="tooltip"
-          grouped={true}
-          disabled={!audioFeedbackEnabled}
-        />
+        <OutputDeviceSelector grouped={true} disabled={!audioFeedbackEnabled} />
         <VolumeSlider disabled={!audioFeedbackEnabled} />
       </SettingsGroup>
 
       <SettingsGroup title={t("settings.appearance.title")}>
-        <AccentColorPicker descriptionMode="tooltip" grouped={true} />
-        <RgbModeToggle descriptionMode="tooltip" grouped={true} />
+        <AccentColorPicker grouped={true} />
+        <RgbModeToggle grouped={true} />
       </SettingsGroup>
     </div>
   );

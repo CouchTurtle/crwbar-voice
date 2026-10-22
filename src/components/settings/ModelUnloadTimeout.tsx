@@ -6,12 +6,10 @@ import { Dropdown } from "../ui/Dropdown";
 import { SettingContainer } from "../ui/SettingContainer";
 
 interface ModelUnloadTimeoutProps {
-  descriptionMode?: "tooltip" | "inline";
   grouped?: boolean;
 }
 
 export const ModelUnloadTimeoutSetting: React.FC<ModelUnloadTimeoutProps> = ({
-  descriptionMode = "inline",
   grouped = false,
 }) => {
   const { t } = useTranslation();
@@ -77,7 +75,6 @@ export const ModelUnloadTimeoutSetting: React.FC<ModelUnloadTimeoutProps> = ({
     <SettingContainer
       title={t("settings.advanced.modelUnload.title")}
       description={t("settings.advanced.modelUnload.description")}
-      descriptionMode={descriptionMode}
       grouped={grouped}
     >
       <Dropdown

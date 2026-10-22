@@ -184,7 +184,6 @@
         "label": "Copia automaticamente negli appunti",
         "description": "Copia automaticamente negli appunti ogni trascrizione completata."
       },
-      "title": "Generale",
       "shortcut": {
         "title": "Scorciatoie di crwbar voice",
         "description": "Configura le scorciatoie per attivare la trascrizione vocale",
@@ -241,6 +240,10 @@
         "title": "Buffer di registrazione extra",
         "description": "Tempo extra (in millisecondi) per continuare a registrare dopo aver rilasciato il tasto, per catturare l'audio finale. 0 = nessun buffer extra.",
         "off": "Off"
+      },
+      "groups": {
+        "shortcuts": "Scorciatoie",
+        "recording": "Registrazione"
       }
     },
     "sound": {

@@ -108,34 +108,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
     .map(([id, config]) => ({ id: id as SidebarSection, ...config }));
 
   return (
-    <div className="flex flex-col w-40 h-full border-e border-mid-gray/20 items-center px-2">
-      <CrwbarVoiceLogo width={128} className="m-4 text-base" />
-      <div className="flex flex-col w-full items-center gap-1 pt-2 border-t border-mid-gray/20">
+    <nav className="flex flex-col w-40 shrink-0 h-full px-2.5 pt-4">
+      <CrwbarVoiceLogo className="self-start ms-2.5 mb-5 text-base" />
+      <div className="flex flex-col w-full gap-[3px]">
         {availableSections.map((section) => {
           const Icon = section.icon;
           const isActive = activeSection === section.id;
 
           return (
-            <div
+            <button
               key={section.id}
-              className={`flex gap-2 items-center p-2 w-full rounded-lg cursor-pointer transition-colors ${
+              type="button"
+              aria-current={isActive ? "page" : undefined}
+              className={`flex gap-2.5 items-center h-8 px-2.5 w-full rounded-[10px] text-label text-start cursor-pointer transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-logo-primary/40 ${
                 isActive
-                  ? "bg-logo-primary/80"
-                  : "hover:bg-mid-gray/20 hover:opacity-100 opacity-85"
+                  ? "bg-logo-primary/15 text-accent-text font-semibold"
+                  : "hover:bg-text/6"
               }`}
               onClick={() => onSectionChange(section.id)}
             >
-              <Icon width={24} height={24} className="shrink-0" />
-              <p
-                className="text-sm font-medium truncate"
-                title={t(section.labelKey)}
-              >
+              <Icon width={17} height={17} className="shrink-0" />
+              <span className="truncate" title={t(section.labelKey)}>
                 {t(section.labelKey)}
-              </p>
-            </div>
+              </span>
+            </button>
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 };

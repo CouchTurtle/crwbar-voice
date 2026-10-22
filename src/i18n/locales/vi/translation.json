@@ -184,7 +184,6 @@
         "label": "Tự động sao chép vào bảng nhớ tạm",
         "description": "Tự động sao chép mọi bản chép lời đã hoàn tất vào bảng nhớ tạm."
       },
-      "title": "Chung",
       "shortcut": {
         "title": "Phím tắt crwbar voice",
         "description": "Cấu hình phím tắt để kích hoạt ghi âm chuyển đổi giọng nói thành văn bản",
@@ -241,6 +240,10 @@
         "title": "Bộ đệm ghi âm thêm",
         "description": "Thời gian thêm (tính bằng mili giây) để tiếp tục ghi âm sau khi nhả phím, để thu âm thanh cuối. 0 = không có bộ đệm thêm.",
         "off": "Off"
+      },
+      "groups": {
+        "shortcuts": "Phím tắt",
+        "recording": "Ghi âm"
       }
     },
     "sound": {

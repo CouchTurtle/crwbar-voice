@@ -11,7 +11,7 @@ import {
 import { ModelStateEvent, RecordingErrorEvent } from "./lib/types/events";
 import "./App.css";
 import AccessibilityPermissions from "./components/AccessibilityPermissions";
-import Footer from "./components/footer";
+import ModelSelector from "./components/model-selector";
 import Onboarding, { AccessibilityOnboarding } from "./components/onboarding";
 import { Sidebar, SidebarSection, SECTIONS_CONFIG } from "./components/Sidebar";
 import { WhatsNewGate } from "./components/whats-new";
@@ -332,27 +332,28 @@ function App() {
     content = (
       <div
         dir={direction}
-        className="h-screen flex flex-col select-none cursor-default"
+        className="h-screen flex overflow-hidden select-none cursor-default"
       >
         <WhatsNewGate />
-        {/* Main content area that takes remaining space */}
-        <div className="flex-1 flex overflow-hidden">
-          <Sidebar
-            activeSection={currentSection}
-            onSectionChange={setCurrentSection}
-          />
-          {/* Scrollable content area */}
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <div className="flex-1 overflow-y-auto">
-              <div className="flex flex-col items-center p-4 gap-4">
-                <AccessibilityPermissions />
-                {renderSettingsContent(currentSection)}
-              </div>
+        <Sidebar
+          activeSection={currentSection}
+          onSectionChange={setCurrentSection}
+        />
+        <div className="flex-1 min-w-0 flex flex-col">
+          {/* The page title and the model in use stay put while the page scrolls. */}
+          <header className="flex items-center justify-between gap-4 ps-2.5 pe-4.5 pt-3.5 pb-3">
+            <h1 className="text-title font-semibold tracking-[-0.015em]">
+              {t(SECTIONS_CONFIG[currentSection].labelKey)}
+            </h1>
+            <ModelSelector />
+          </header>
+          <div className="flex-1 overflow-y-auto">
+            <div className="flex flex-col items-center ps-1.5 pe-4.5 pb-4 gap-3.5">
+              <AccessibilityPermissions />
+              {renderSettingsContent(currentSection)}
             </div>
           </div>
         </div>
-        {/* Fixed footer at bottom */}
-        <Footer />
       </div>
     );
   }

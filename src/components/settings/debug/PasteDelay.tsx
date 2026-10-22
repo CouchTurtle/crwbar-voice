@@ -6,7 +6,6 @@ import { useSettings } from "../../../hooks/useSettings";
 type PasteDelayKey = "paste_delay_ms" | "paste_delay_after_ms";
 
 interface PasteDelayProps {
-  descriptionMode?: "tooltip" | "inline";
   grouped?: boolean;
   settingKey?: PasteDelayKey;
   labelKey?: string;
@@ -14,7 +13,6 @@ interface PasteDelayProps {
 }
 
 export const PasteDelay: React.FC<PasteDelayProps> = ({
-  descriptionMode = "tooltip",
   grouped = false,
   settingKey = "paste_delay_ms",
   labelKey = "settings.debug.pasteDelay.title",
@@ -36,7 +34,6 @@ export const PasteDelay: React.FC<PasteDelayProps> = ({
       step={10}
       label={t(labelKey)}
       description={t(descriptionKey)}
-      descriptionMode={descriptionMode}
       grouped={grouped}
       formatValue={(v) => `${v}ms`}
     />

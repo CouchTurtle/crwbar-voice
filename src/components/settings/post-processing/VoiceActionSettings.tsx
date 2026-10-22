@@ -96,7 +96,6 @@ export const VoiceActionSettings: React.FC = () => {
         description={t(
           "settings.postProcessing.voiceAction.backend.description",
         )}
-        descriptionMode="tooltip"
         layout="horizontal"
         grouped={true}
       >
@@ -143,7 +142,6 @@ export const VoiceActionSettings: React.FC = () => {
         description={t(
           "settings.postProcessing.voiceAction.clipboardContext.description",
         )}
-        descriptionMode="tooltip"
         grouped={true}
       />
 
@@ -152,7 +150,6 @@ export const VoiceActionSettings: React.FC = () => {
         description={t(
           "settings.postProcessing.voiceAction.context.description",
         )}
-        descriptionMode="tooltip"
         layout="stacked"
         grouped={true}
       >

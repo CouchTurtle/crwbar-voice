@@ -11,6 +11,26 @@
   --color-logo-stroke: var(--color-logo-stroke);
   --color-text-stroke: var(--color-text-stroke);
   --color-mid-gray: var(--color-mid-gray);
+  --color-surface: var(--color-surface);
+  --color-field: var(--color-field);
+  --color-line: var(--color-line);
+  --color-accent-text: var(--color-accent-text);
+
+  /* Type scale for settings pages: page title, a card's section title, a
+     row's label, and the caption under it. */
+  --text-title: 20px;
+  --text-title--line-height: 26px;
+  --text-section: 12.5px;
+  --text-section--line-height: 18px;
+  --text-label: 14px;
+  --text-label--line-height: 19px;
+  --text-caption: 12px;
+  --text-caption--line-height: 16px;
+  --text-control: 13px;
+  --text-control--line-height: 18px;
+
+  --radius-card: 18px;
+  --radius-field: 9px;
 }
 
 :root {
@@ -67,15 +87,21 @@
  * `system` (or no attribute) leaves the OS in charge.
  */
 :root[data-theme="light"] {
+  --color-accent-text: color-mix(in srgb, var(--color-logo-primary) 72%, #000);
   --color-text: var(--light-color-text);
   --color-background: var(--light-color-background);
+  --color-surface: var(--light-color-surface);
+  --color-field: var(--light-color-field);
   --color-logo-primary: var(--light-color-logo-primary);
   --color-logo-stroke: var(--light-color-logo-stroke);
 }
 
 :root[data-theme="dark"] {
+  --color-accent-text: var(--color-logo-primary);
   --color-text: var(--dark-color-text);
   --color-background: var(--dark-color-background);
+  --color-surface: var(--dark-color-surface);
+  --color-field: var(--dark-color-field);
   --color-logo-primary: var(--dark-color-logo-primary);
   --color-logo-stroke: var(--dark-color-logo-stroke);
 }

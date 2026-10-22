@@ -5,7 +5,6 @@ import { useSettings } from "../../hooks/useSettings";
 import { applyRgbMode, getRgbSpeed, setRgbSpeed } from "@/lib/utils/theme";
 
 interface RgbModeToggleProps {
-  descriptionMode?: "inline" | "tooltip";
   grouped?: boolean;
 }
 
@@ -21,7 +20,7 @@ const BOOSTED_SPEED = 2;
  * same origin) picks it up too.
  */
 export const RgbModeToggle: React.FC<RgbModeToggleProps> = React.memo(
-  ({ descriptionMode = "tooltip", grouped = false }) => {
+  ({ grouped = false }) => {
     const { t } = useTranslation();
     const { getSetting, updateSetting, isUpdating } = useSettings();
 
@@ -73,7 +72,6 @@ export const RgbModeToggle: React.FC<RgbModeToggleProps> = React.memo(
         isUpdating={isUpdating("rgb_mode")}
         label={label}
         description={t("settings.appearance.rgbMode.description")}
-        descriptionMode={descriptionMode}
         grouped={grouped}
       />
     );

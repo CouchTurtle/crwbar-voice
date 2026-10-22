@@ -184,7 +184,6 @@
         "label": "Automaticky kopírovat do schránky",
         "description": "Automaticky zkopíruje každý dokončený přepis do schránky."
       },
-      "title": "Obecné",
       "shortcut": {
         "title": "Zkratky crwbar voice",
         "description": "Nastavte klávesové zkratky pro spuštění nahrávání řeči na text",
@@ -241,6 +240,10 @@
         "title": "Extra vyrovnávací paměť nahrávání",
         "description": "Extra čas (v milisekundách) pro pokračování nahrávání po uvolnění klávesy, pro zachycení zbývajícího zvuku. 0 = žádná extra vyrovnávací paměť.",
         "off": "Off"
+      },
+      "groups": {
+        "shortcuts": "Zkratky",
+        "recording": "Nahrávání"
       }
     },
     "sound": {

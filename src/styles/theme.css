@@ -16,12 +16,18 @@
      crw.bar is dark-first; the light pair is a warm daylight variant of the
      same identity so OS light mode still looks on-brand. */
   --light-color-text: #1a1512;
-  --light-color-background: #faf8f4;
+  --light-color-background: #f3f1ed;
+  --light-color-surface: #ffffff;
+  --light-color-field: #ffffff;
   --light-color-logo-primary: #ff6600;
   --light-color-logo-stroke: #2a1408;
 
+  /* The window sits a step above the brand's near-black so the cards on it
+     (surface) read as a layer; fields sit back into the card. */
   --dark-color-text: #ece7dd;
-  --dark-color-background: #0c0e0d;
+  --dark-color-background: #141615;
+  --dark-color-surface: #1f2120;
+  --dark-color-field: #191b1a;
   --dark-color-logo-primary: #ff6600;
   --dark-color-logo-stroke: #ffce9e;
 
@@ -34,15 +40,26 @@
      below, or is forced by `data-theme` (see App.css). */
   --color-text: var(--light-color-text);
   --color-background: var(--light-color-background);
+  --color-surface: var(--light-color-surface);
+  --color-field: var(--light-color-field);
   --color-logo-primary: var(--light-color-logo-primary);
   --color-logo-stroke: var(--light-color-logo-stroke);
+
+  /* Hairlines around cards and fields, derived so they follow the theme. */
+  --color-line: color-mix(in srgb, var(--color-text) 9%, transparent);
+  /* Accent as text. Orange on a light ground is about 3:1, too faint to read,
+     so light mode darkens it; derived, so a custom accent follows. */
+  --color-accent-text: color-mix(in srgb, var(--color-logo-primary) 72%, #000);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --color-text: var(--dark-color-text);
     --color-background: var(--dark-color-background);
+    --color-surface: var(--dark-color-surface);
+    --color-field: var(--dark-color-field);
     --color-logo-primary: var(--dark-color-logo-primary);
     --color-logo-stroke: var(--dark-color-logo-stroke);
+    --color-accent-text: var(--color-logo-primary);
   }
 }

@@ -166,7 +166,6 @@
         "label": "Kopiera automatiskt till urklipp",
         "description": "Kopierar varje färdig transkription automatiskt till urklipp."
       },
-      "title": "Allmänt",
       "shortcut": {
         "title": "crwbar voice-kortkommandon",
         "description": "Konfigurera kortkommandon för att starta tal-till-text-inspelning",
@@ -223,6 +222,10 @@
         "title": "Extra inspelningsbuffert",
         "description": "Extra tid (i millisekunder) för att fortsätta spela in efter att du släppt tangenten, för att fånga upp avslutande ljud. 0 = ingen extra buffert.",
         "off": "Off"
+      },
+      "groups": {
+        "shortcuts": "Kortkommandon",
+        "recording": "Inspelning"
       }
     },
     "models": {

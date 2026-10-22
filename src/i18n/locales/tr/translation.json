@@ -184,7 +184,6 @@
         "label": "Panoya otomatik olarak kopyala",
         "description": "Tamamlanan her transkripsiyonu otomatik olarak panoya kopyalar."
       },
-      "title": "Genel",
       "shortcut": {
         "title": "crwbar voice Kısayolları",
         "description": "Sesle yazma kaydını başlatmak için klavye kısayollarını yapılandırın",
@@ -241,6 +240,10 @@
         "title": "Ekstra kayıt tamponu",
         "description": "Tuşu bıraktıktan sonra arka plandaki sesi yakalamak için kaydı sürdürme süresi (milisaniye). 0 = ekstra tampon yok.",
         "off": "Off"
+      },
+      "groups": {
+        "shortcuts": "Kısayollar",
+        "recording": "Kayıt"
       }
     },
     "sound": {

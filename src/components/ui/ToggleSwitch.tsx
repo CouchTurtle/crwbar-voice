@@ -8,9 +8,7 @@ interface ToggleSwitchProps {
   isUpdating?: boolean;
   label: React.ReactNode;
   description: string;
-  descriptionMode?: "inline" | "tooltip";
   grouped?: boolean;
-  tooltipPosition?: "top" | "bottom";
 }
 
 export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
@@ -20,18 +18,14 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
   isUpdating = false,
   label,
   description,
-  descriptionMode = "tooltip",
   grouped = false,
-  tooltipPosition = "top",
 }) => {
   return (
     <SettingContainer
       title={label}
       description={description}
-      descriptionMode={descriptionMode}
       grouped={grouped}
       disabled={disabled}
-      tooltipPosition={tooltipPosition}
     >
       <label
         className={`flex items-center ${disabled || isUpdating ? "cursor-not-allowed" : "cursor-pointer"}`}
@@ -44,7 +38,7 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
           disabled={disabled || isUpdating}
           onChange={(e) => onChange(e.target.checked)}
         />
-        <div className="relative w-11 h-6 bg-mid-gray/20 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-logo-primary rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-background-ui peer-disabled:opacity-50"></div>
+        <div className="relative w-[42px] h-6 rounded-full bg-text/15 transition-colors peer-checked:bg-background-ui peer-focus-visible:ring-2 peer-focus-visible:ring-logo-primary/50 peer-disabled:opacity-50 after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow-sm after:transition-transform peer-checked:after:translate-x-[18px] rtl:peer-checked:after:-translate-x-[18px]"></div>
       </label>
       {isUpdating && (
         <div className="absolute inset-0 flex items-center justify-center">

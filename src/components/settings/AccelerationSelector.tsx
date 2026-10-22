@@ -18,7 +18,6 @@ const ORT_LABELS: Record<OrtAcceleratorSetting, string> = {
 };
 
 interface AccelerationSelectorProps {
-  descriptionMode?: "tooltip" | "inline";
   grouped?: boolean;
 }
 
@@ -51,7 +50,6 @@ function decodeTranscribeValue(value: string): {
 }
 
 export const AccelerationSelector: FC<AccelerationSelectorProps> = ({
-  descriptionMode = "tooltip",
   grouped = false,
 }) => {
   const { t } = useTranslation();
@@ -118,7 +116,6 @@ export const AccelerationSelector: FC<AccelerationSelectorProps> = ({
       <SettingContainer
         title={t("settings.advanced.acceleration.transcribe.title")}
         description={t("settings.advanced.acceleration.transcribe.description")}
-        descriptionMode={descriptionMode}
         grouped={grouped}
         layout="horizontal"
       >
@@ -136,7 +133,6 @@ export const AccelerationSelector: FC<AccelerationSelectorProps> = ({
         <SettingContainer
           title={t("settings.advanced.acceleration.ort.title")}
           description={t("settings.advanced.acceleration.ort.description")}
-          descriptionMode={descriptionMode}
           grouped={grouped}
           layout="horizontal"
         >

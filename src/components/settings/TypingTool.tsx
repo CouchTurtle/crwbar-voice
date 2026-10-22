@@ -8,7 +8,6 @@ import { commands } from "@/bindings";
 import type { TypingTool } from "@/bindings";
 
 interface TypingToolProps {
-  descriptionMode?: "inline" | "tooltip";
   grouped?: boolean;
 }
 
@@ -21,7 +20,7 @@ const allToolLabels: Record<string, string> = {
 };
 
 export const TypingToolSetting: React.FC<TypingToolProps> = React.memo(
-  ({ descriptionMode = "tooltip", grouped = false }) => {
+  ({ grouped = false }) => {
     const { t } = useTranslation();
     const { getSetting, updateSetting, isUpdating } = useSettings();
     const osType = useOsType();
@@ -64,9 +63,7 @@ export const TypingToolSetting: React.FC<TypingToolProps> = React.memo(
       <SettingContainer
         title={t("settings.advanced.typingTool.title")}
         description={t("settings.advanced.typingTool.description")}
-        descriptionMode={descriptionMode}
         grouped={grouped}
-        tooltipPosition="bottom"
       >
         <Dropdown
           options={typingToolOptions}

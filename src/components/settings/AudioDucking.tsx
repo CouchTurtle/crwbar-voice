@@ -4,12 +4,11 @@ import { ToggleSwitch } from "../ui/ToggleSwitch";
 import { useSettings } from "../../hooks/useSettings";
 
 interface AudioDuckingToggleProps {
-  descriptionMode?: "inline" | "tooltip";
   grouped?: boolean;
 }
 
 export const AudioDucking: React.FC<AudioDuckingToggleProps> = React.memo(
-  ({ descriptionMode = "tooltip", grouped = false }) => {
+  ({ grouped = false }) => {
     const { t } = useTranslation();
     const { getSetting, updateSetting, isUpdating } = useSettings();
 
@@ -24,7 +23,6 @@ export const AudioDucking: React.FC<AudioDuckingToggleProps> = React.memo(
         isUpdating={isUpdating("mute_while_recording")}
         label={t("settings.debug.muteWhileRecording.label")}
         description={t("settings.debug.muteWhileRecording.description")}
-        descriptionMode={descriptionMode}
         grouped={grouped}
       />
     );

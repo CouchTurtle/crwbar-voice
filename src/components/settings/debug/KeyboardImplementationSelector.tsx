@@ -12,13 +12,12 @@ const KEYBOARD_IMPLEMENTATION_OPTIONS: DropdownOption[] = [
 ];
 
 interface KeyboardImplementationSelectorProps {
-  descriptionMode?: "tooltip" | "inline";
   grouped?: boolean;
 }
 
 export const KeyboardImplementationSelector: React.FC<
   KeyboardImplementationSelectorProps
-> = ({ descriptionMode = "tooltip", grouped = false }) => {
+> = ({ grouped = false }) => {
   const { t } = useTranslation();
   const { getSetting, isUpdating, refreshSettings } = useSettings();
   const currentImplementation =
@@ -55,7 +54,6 @@ export const KeyboardImplementationSelector: React.FC<
     <SettingContainer
       title={t("settings.debug.keyboardImplementation.title")}
       description={t("settings.debug.keyboardImplementation.description")}
-      descriptionMode={descriptionMode}
       grouped={grouped}
       layout="horizontal"
     >

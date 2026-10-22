@@ -39,35 +39,34 @@ type NonCreatableProps = {
 
 export type SelectProps = BaseProps & (CreatableProps | NonCreatableProps);
 
-const baseBackground =
-  "color-mix(in srgb, var(--color-mid-gray) 10%, transparent)";
-const hoverBackground =
-  "color-mix(in srgb, var(--color-logo-primary) 12%, transparent)";
+const hoverBackground = "color-mix(in srgb, var(--color-text) 8%, transparent)";
 const focusBackground =
-  "color-mix(in srgb, var(--color-logo-primary) 20%, transparent)";
-const neutralBorder =
-  "color-mix(in srgb, var(--color-mid-gray) 80%, transparent)";
+  "color-mix(in srgb, var(--color-logo-primary) 15%, transparent)";
+const hoverBorder = "color-mix(in srgb, var(--color-text) 25%, transparent)";
 
 const selectStyles: StylesConfig<SelectOption, false> = {
   control: (base, state) => ({
     ...base,
-    minHeight: 40,
-    borderRadius: 6,
-    borderColor: state.isFocused ? "var(--color-logo-primary)" : neutralBorder,
-    boxShadow: state.isFocused ? "0 0 0 1px var(--color-logo-primary)" : "none",
-    backgroundColor: state.isFocused ? focusBackground : baseBackground,
-    fontSize: "0.875rem",
+    minHeight: 34,
+    borderRadius: 9,
+    borderColor: state.isFocused
+      ? "var(--color-logo-primary)"
+      : "var(--color-line)",
+    boxShadow: state.isFocused
+      ? "0 0 0 2px color-mix(in srgb, var(--color-logo-primary) 20%, transparent)"
+      : "none",
+    backgroundColor: "var(--color-field)",
+    fontSize: "13px",
     color: "var(--color-text)",
-    transition: "all 150ms ease",
+    transition: "border-color 150ms ease",
     ":hover": {
-      borderColor: "var(--color-logo-primary)",
-      backgroundColor: hoverBackground,
+      borderColor: state.isFocused ? "var(--color-logo-primary)" : hoverBorder,
     },
   }),
   valueContainer: (base) => ({
     ...base,
     paddingInline: 10,
-    paddingBlock: 6,
+    paddingBlock: 2,
   }),
   input: (base) => ({
     ...base,
@@ -96,10 +95,10 @@ const selectStyles: StylesConfig<SelectOption, false> = {
   menu: (provided) => ({
     ...provided,
     zIndex: 30,
-    backgroundColor: "var(--color-background)",
+    backgroundColor: "var(--color-surface)",
     color: "var(--color-text)",
-    border:
-      "1px solid color-mix(in srgb, var(--color-mid-gray) 30%, transparent)",
+    border: "1px solid var(--color-line)",
+    borderRadius: 9,
     boxShadow: "0 10px 30px rgba(15, 15, 15, 0.2)",
   }),
   option: (base, state) => ({

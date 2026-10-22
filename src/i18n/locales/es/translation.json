@@ -184,7 +184,6 @@
         "label": "Copiar automáticamente al portapapeles",
         "description": "Copia automáticamente cada transcripción terminada al portapapeles."
       },
-      "title": "General",
       "shortcut": {
         "title": "Atajos de crwbar voice",
         "description": "Configura atajos de teclado para activar la grabación de voz a texto",
@@ -241,6 +240,10 @@
         "title": "Búfer de grabación adicional",
         "description": "Tiempo adicional (en milisegundos) para seguir grabando después de soltar la tecla, para capturar el audio restante. 0 = sin búfer adicional.",
         "off": "Off"
+      },
+      "groups": {
+        "shortcuts": "Atajos",
+        "recording": "Grabación"
       }
     },
     "sound": {

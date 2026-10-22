@@ -4,12 +4,11 @@ import { ToggleSwitch } from "../ui/ToggleSwitch";
 import { useSettings } from "../../hooks/useSettings";
 
 interface DragDropToggleProps {
-  descriptionMode?: "inline" | "tooltip";
   grouped?: boolean;
 }
 
 export const DragDropToggle: React.FC<DragDropToggleProps> = React.memo(
-  ({ descriptionMode = "tooltip", grouped = false }) => {
+  ({ grouped = false }) => {
     const { t } = useTranslation();
     const { getSetting, updateSetting, isUpdating } = useSettings();
 
@@ -22,7 +21,6 @@ export const DragDropToggle: React.FC<DragDropToggleProps> = React.memo(
         isUpdating={isUpdating("drag_drop_enabled")}
         label={t("settings.general.dragDrop.label")}
         description={t("settings.general.dragDrop.description")}
-        descriptionMode={descriptionMode}
         grouped={grouped}
       />
     );

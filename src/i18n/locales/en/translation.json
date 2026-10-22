@@ -158,14 +158,13 @@
       "title": "{{model}} Settings"
     },
     "general": {
-      "title": "General",
       "dragDrop": {
         "label": "Transcribe Dropped Files",
-        "description": "Lets you drag an audio file onto the recording bar to transcribe it instead of the microphone."
+        "description": "Drop an audio file on the recording bar or this window to transcribe it."
       },
       "autoCopy": {
         "label": "Copy to Clipboard Automatically",
-        "description": "Copies every finished transcription to the clipboard automatically."
+        "description": "Every transcript also lands on the clipboard."
       },
       "shortcut": {
         "title": "crwbar voice Shortcuts",
@@ -177,7 +176,7 @@
         "bindings": {
           "transcribe": {
             "name": "Transcribe Shortcut",
-            "description": "The keyboard shortcut to record and transcribe your voice."
+            "description": "Starts dictation anywhere on your Mac."
           },
           "cancel": {
             "name": "Cancel Shortcut",
@@ -185,19 +184,19 @@
           },
           "transcribe_with_post_process": {
             "name": "Post-Processing Hotkey",
-            "description": "Optional: A dedicated hotkey that always applies AI post-processing to your transcription."
+            "description": "Optional: always runs AI post-processing on the result."
           },
           "voice_action": {
             "name": "Voice Action Shortcut",
-            "description": "Speak an instruction and generate text using optional context and your selected AI backend."
+            "description": "Speak an instruction; your AI backend writes the text."
           },
           "copy_last_transcript": {
             "name": "Copy Last Transcript",
-            "description": "The keyboard shortcut to copy the most recent transcription to the clipboard."
+            "description": "Copies the most recent transcript to the clipboard."
           },
           "insert_last_transcript": {
             "name": "Insert Last Transcript",
-            "description": "The keyboard shortcut to type the most recent transcription into the focused field, without changing the clipboard."
+            "description": "Pastes the most recent transcript where you type; the clipboard stays as it was."
           }
         },
         "errors": {
@@ -210,7 +209,7 @@
       },
       "language": {
         "title": "Language",
-        "description": "Select the language for speech recognition. Auto will automatically determine the language, while selecting a specific language can improve accuracy for that language.",
+        "description": "Auto detects the language; picking one can be more accurate.",
         "searchPlaceholder": "Search languages...",
         "noResults": "No languages found",
         "auto": "Auto"
@@ -221,8 +220,12 @@
       },
       "recordingBuffer": {
         "title": "Keep Recording After Release",
-        "description": "Keeps recording this long after you release the shortcut, so a word you are still finishing is not cut off. Transcription starts that much later.",
+        "description": "Catches the last word if you let go a moment early. Transcription starts that much later.",
         "off": "Off"
+      },
+      "groups": {
+        "shortcuts": "Shortcuts",
+        "recording": "Recording"
       }
     },
     "models": {
@@ -267,7 +270,7 @@
       },
       "duckingSpeed": {
         "title": "Ducking Speed",
-        "description": "How quickly other audio fades down when recording starts and back up when it ends.",
+        "description": "How fast other sound fades down and back up.",
         "options": {
           "instant": "Instant",
           "fast": "Fast",
@@ -290,16 +293,16 @@
       },
       "lazyStreamClose": {
         "label": "Keep Mic Open Between Transcriptions",
-        "description": "Keeps the microphone stream open for 30 seconds after recording stops, reducing latency for back-to-back transcriptions. May degrade Bluetooth audio quality while active."
+        "description": "Keeps the microphone open for 30 s after recording, so the next one starts faster. Can lower Bluetooth audio quality."
       },
       "acceleration": {
         "transcribe": {
           "title": "transcribe.cpp Acceleration",
-          "description": "Hardware acceleration for transcribe.cpp (Whisper-family) models. Auto uses GPU if available (Metal on macOS, Vulkan on Windows/Linux)."
+          "description": "Hardware for Whisper-family models. Auto uses the GPU when there is one (Metal on macOS)."
         },
         "ort": {
           "title": "ONNX Acceleration",
-          "description": "Hardware acceleration for ONNX models (Parakeet, Canary, Moonshine, etc.). DirectML on Windows is experimental. Models may fail to transcribe."
+          "description": "Hardware for ONNX models (Parakeet, Canary, Moonshine). DirectML on Windows is experimental and may fail."
         },
         "gpuDevice": {
           "auto": "Auto"
@@ -320,7 +323,7 @@
       "overlay": {
         "style": {
           "title": "Overlay",
-          "description": "Choose the recording overlay: None hides it, Minimal shows a compact pill, Live shows transcription in real time as you speak (streaming-capable models only — look for the Streaming badge in the model picker). On Linux 'None' is recommended.",
+          "description": "None hides it, Minimal shows a small pill, Live shows the text as you speak (streaming models only).",
           "options": {
             "none": "None",
             "minimal": "Minimal",
@@ -338,7 +341,7 @@
       },
       "pasteMethod": {
         "title": "Paste Method",
-        "description": "Choose how text is inserted. Direct: simulates typing via system input. None: skips paste, only updates history/clipboard.",
+        "description": "How the text gets into the app you are typing in. None only updates history and clipboard.",
         "options": {
           "clipboard": "Clipboard ({{modifier}}+V)",
           "clipboardCtrlShiftV": "Clipboard (Ctrl+Shift+V)",
@@ -351,14 +354,14 @@
       },
       "typingTool": {
         "title": "Typing Tool",
-        "description": "Choose which Linux typing tool to use for Direct paste method. Auto will automatically detect and use the best available tool for your system.",
+        "description": "Linux tool for the Direct paste method; Auto picks the best one.",
         "options": {
           "auto": "Auto (Recommended)"
         }
       },
       "autoSubmit": {
         "title": "Auto Submit",
-        "description": "Automatically send the selected key combination after text insertion. Cmd+Enter applies on macOS, while Windows/Linux use Super+Enter.",
+        "description": "Presses the chosen keys after the text is in, e.g. Enter to send a message.",
         "options": {
           "off": "Off",
           "enter": "Enter",
@@ -369,11 +372,11 @@
       },
       "translateToEnglish": {
         "label": "Translate to English",
-        "description": "Automatically translate speech from other languages to English during transcription."
+        "description": "Translates speech in other languages to English."
       },
       "modelUnload": {
         "title": "Unload Model",
-        "description": "Automatically free GPU/CPU memory when the model hasn't been used for the specified time",
+        "description": "Frees memory when the model has not been used for this long.",
         "options": {
           "never": "Never",
           "immediately": "Immediately",
@@ -387,7 +390,7 @@
       },
       "customWords": {
         "title": "Custom Words",
-        "description": "Add words that are often misheard or misspelled during transcription. The system will automatically correct similar-sounding words to match your list.",
+        "description": "Words that often come out wrong; similar-sounding words are corrected to match.",
         "placeholder": "Add a word",
         "add": "Add",
         "remove": "Remove {{word}}",
@@ -395,7 +398,7 @@
       },
       "voiceActivityDetection": {
         "title": "Voice Activity Detection",
-        "description": "Filter silence from recordings. Streaming-capable models use a longer VAD tail; disabling VAD records raw audio."
+        "description": "Leaves out silence. Off records the raw audio."
       }
     },
     "postProcessing": {
@@ -419,11 +422,11 @@
         },
         "clipboardContext": {
           "label": "Include Clipboard Context",
-          "description": "Send the current text clipboard as source material for commands such as ‘Write an email from this’."
+          "description": "Sends the clipboard text along, for commands like ‘Write an email from this’."
         },
         "context": {
           "title": "Persistent Context",
-          "description": "Optional background that is included with every Voice Action, such as your role, company, preferred writing style, or wording to avoid. It is never used for normal transcriptions.",
+          "description": "Sent with every Voice Action: your role, company, tone, words to avoid. Never used for normal transcriptions.",
           "placeholder": "Example: I work at … Keep emails concise, friendly, and direct.",
           "storage": "Saved as you type, stored locally on this device, and only sent with Voice Actions — never with normal transcriptions.",
           "clear": "Clear"
@@ -552,7 +555,7 @@
       },
       "historyLimit": {
         "title": "Recordings With Audio",
-        "description": "How many of the newest recordings keep their audio. Transcripts are always kept and stay searchable.",
+        "description": "How many of the newest recordings keep their audio. Transcripts always stay.",
         "entries": "recordings"
       },
       "recordingRetention": {
@@ -603,12 +606,12 @@
       "title": "Appearance",
       "accent": {
         "title": "Accent Color",
-        "description": "Pick a custom accent color for buttons, the recording bar, and highlights. Reset returns to the default orange.",
+        "description": "For buttons, the recording bar and highlights. Reset returns to orange.",
         "reset": "Reset"
       },
       "rgbMode": {
         "label": "Emil Mode",
-        "description": "Cycle the accent color through the rainbow. Overrides the accent color while it is on.",
+        "description": "Cycles the accent through the rainbow while it is on.",
         "boosted": "Double speed active"
       }
     },

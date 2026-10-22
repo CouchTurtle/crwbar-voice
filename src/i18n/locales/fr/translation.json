@@ -184,7 +184,6 @@
         "label": "Copier automatiquement dans le presse-papiers",
         "description": "Copie automatiquement chaque transcription terminée dans le presse-papiers."
       },
-      "title": "Général",
       "shortcut": {
         "title": "Raccourcis crwbar voice",
         "description": "Configurer les raccourcis clavier pour déclencher l'enregistrement de la reconnaissance vocale",
@@ -241,6 +240,10 @@
         "title": "Tampon d'enregistrement supplémentaire",
         "description": "Temps supplémentaire (en millisecondes) pour continuer l'enregistrement après avoir relâché la touche, pour capturer l'audio restant. 0 = pas de tampon supplémentaire.",
         "off": "Off"
+      },
+      "groups": {
+        "shortcuts": "Raccourcis",
+        "recording": "Enregistrement"
       }
     },
     "sound": {

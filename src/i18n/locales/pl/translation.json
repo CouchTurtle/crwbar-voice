@@ -184,7 +184,6 @@
         "label": "Automatycznie kopiuj do schowka",
         "description": "Automatycznie kopiuje każdą ukończoną transkrypcję do schowka."
       },
-      "title": "Ogólne",
       "shortcut": {
         "title": "Skróty crwbar voice",
         "description": "Skonfiguruj skróty klawiaturowe do uruchamiania nagrywania mowy",
@@ -241,6 +240,10 @@
         "title": "Dodatkowy bufor nagrywania",
         "description": "Dodatkowy czas (w milisekundach) na kontynuowanie nagrywania po zwolnieniu klawisza, aby przechwycić końcowy dźwięk. 0 = brak dodatkowego bufora.",
         "off": "Off"
+      },
+      "groups": {
+        "shortcuts": "Skróty",
+        "recording": "Nagrywanie"
       }
     },
     "sound": {

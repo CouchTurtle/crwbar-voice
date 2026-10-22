@@ -243,7 +243,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ onError }) => {
   };
 
   return (
-    <>
+    <div className="flex items-center gap-3">
       {/* Model Status and Switcher */}
       <div className="relative" ref={dropdownRef}>
         <ModelStatusButton
@@ -268,7 +268,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ onError }) => {
         downloadProgress={downloadProgress}
         downloadStats={downloadStats}
       />
-    </>
+    </div>
   );
 };
 

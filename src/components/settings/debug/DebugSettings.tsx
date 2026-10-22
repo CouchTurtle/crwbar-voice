@@ -13,22 +13,21 @@ export const DebugSettings: React.FC = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="max-w-3xl w-full mx-auto space-y-6">
+    <div className="max-w-3xl w-full mx-auto space-y-3.5">
       <SettingsGroup title={t("settings.debug.title")}>
         <LogLevelSelector grouped={true} />
-        <WhatsNewPreview descriptionMode="tooltip" grouped={true} />
-        <WordCorrectionThreshold descriptionMode="tooltip" grouped={true} />
-        <PasteDelay descriptionMode="tooltip" grouped={true} />
+        <WhatsNewPreview grouped={true} />
+        <WordCorrectionThreshold grouped={true} />
+        <PasteDelay grouped={true} />
         <PasteDelay
-          descriptionMode="tooltip"
           grouped={true}
           settingKey="paste_delay_after_ms"
           labelKey="settings.debug.pasteDelayAfter.title"
           descriptionKey="settings.debug.pasteDelayAfter.description"
         />
-        <AlwaysOnMicrophone descriptionMode="tooltip" grouped={true} />
-        <ClamshellMicrophoneSelector descriptionMode="tooltip" grouped={true} />
-        <LiveLogViewer descriptionMode="tooltip" grouped={true} />
+        <AlwaysOnMicrophone grouped={true} />
+        <ClamshellMicrophoneSelector grouped={true} />
+        <LiveLogViewer grouped={true} />
       </SettingsGroup>
     </div>
   );

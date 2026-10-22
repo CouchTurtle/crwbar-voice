@@ -8,12 +8,11 @@ import { useOsType } from "../../hooks/useOsType";
 import type { PasteMethod } from "@/bindings";
 
 interface PasteMethodProps {
-  descriptionMode?: "inline" | "tooltip";
   grouped?: boolean;
 }
 
 export const PasteMethodSetting: React.FC<PasteMethodProps> = React.memo(
-  ({ descriptionMode = "tooltip", grouped = false }) => {
+  ({ grouped = false }) => {
     const { t } = useTranslation();
     const { getSetting, updateSetting, isUpdating } = useSettings();
     const osType = useOsType();
@@ -77,9 +76,7 @@ export const PasteMethodSetting: React.FC<PasteMethodProps> = React.memo(
       <SettingContainer
         title={t("settings.advanced.pasteMethod.title")}
         description={t("settings.advanced.pasteMethod.description")}
-        descriptionMode={descriptionMode}
         grouped={grouped}
-        tooltipPosition="bottom"
       >
         <div className="flex flex-col gap-2">
           <Dropdown

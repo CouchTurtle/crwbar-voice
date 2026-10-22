@@ -33,7 +33,6 @@ const PostProcessingSettingsApiComponent: React.FC = () => {
       <SettingContainer
         title={t("settings.postProcessing.api.provider.title")}
         description={t("settings.postProcessing.api.provider.description")}
-        descriptionMode="tooltip"
         layout="horizontal"
         grouped={true}
       >
@@ -58,7 +57,6 @@ const PostProcessingSettingsApiComponent: React.FC = () => {
             <SettingContainer
               title={t("settings.postProcessing.api.baseUrl.title")}
               description={t("settings.postProcessing.api.baseUrl.description")}
-              descriptionMode="tooltip"
               layout="horizontal"
               grouped={true}
             >
@@ -79,7 +77,6 @@ const PostProcessingSettingsApiComponent: React.FC = () => {
           <SettingContainer
             title={t("settings.postProcessing.api.apiKey.title")}
             description={t("settings.postProcessing.api.apiKey.description")}
-            descriptionMode="tooltip"
             layout="horizontal"
             grouped={true}
           >
@@ -106,7 +103,6 @@ const PostProcessingSettingsApiComponent: React.FC = () => {
               ? t("settings.postProcessing.api.model.descriptionCustom")
               : t("settings.postProcessing.api.model.descriptionDefault")
           }
-          descriptionMode="tooltip"
           layout="stacked"
           grouped={true}
         >
@@ -255,7 +251,6 @@ const PostProcessingSettingsPromptsComponent: React.FC = () => {
       description={t(
         "settings.postProcessing.prompts.selectedPrompt.description",
       )}
-      descriptionMode="tooltip"
       layout="stacked"
       grouped={true}
     >
@@ -434,29 +429,21 @@ export const PostProcessingSettings: React.FC = () => {
   const enabled = getSetting("post_process_enabled") ?? false;
 
   return (
-    <div className="max-w-3xl w-full mx-auto space-y-6">
+    <div className="max-w-3xl w-full mx-auto space-y-3.5">
       <SettingsGroup title={t("settings.postProcessing.enable.title")}>
-        <PostProcessingToggle
-          descriptionMode={enabled ? "tooltip" : "inline"}
-          grouped={true}
-        />
+        <PostProcessingToggle grouped={true} />
       </SettingsGroup>
 
       {enabled && (
         <>
           <SettingsGroup title={t("settings.postProcessing.voiceAction.title")}>
-            <ShortcutInput
-              shortcutId="voice_action"
-              descriptionMode="tooltip"
-              grouped={true}
-            />
+            <ShortcutInput shortcutId="voice_action" grouped={true} />
             <VoiceActionSettings />
           </SettingsGroup>
 
           <SettingsGroup title={t("settings.postProcessing.hotkey.title")}>
             <ShortcutInput
               shortcutId="transcribe_with_post_process"
-              descriptionMode="tooltip"
               grouped={true}
             />
           </SettingsGroup>

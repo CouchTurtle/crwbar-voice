@@ -166,7 +166,6 @@
         "label": "Copiar automaticamente para a área de transferência",
         "description": "Copia automaticamente cada transcrição concluída para a área de transferência."
       },
-      "title": "Geral",
       "shortcut": {
         "title": "Atalhos do crwbar voice",
         "description": "Configure atalhos de teclado para iniciar a gravação de voz para texto",
@@ -223,6 +222,10 @@
         "title": "Buffer de gravação extra",
         "description": "Tempo extra (em milissegundos) para continuar gravando após soltar a tecla, para capturar áudio restante. 0 = sem buffer extra.",
         "off": "Off"
+      },
+      "groups": {
+        "shortcuts": "Atalhos",
+        "recording": "Gravação"
       }
     },
     "models": {

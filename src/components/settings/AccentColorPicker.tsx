@@ -6,7 +6,6 @@ import { useSettings } from "../../hooks/useSettings";
 import { applyAccentColor, DEFAULT_ACCENT } from "@/lib/utils/theme";
 
 interface AccentColorPickerProps {
-  descriptionMode?: "inline" | "tooltip";
   grouped?: boolean;
 }
 
@@ -16,7 +15,7 @@ interface AccentColorPickerProps {
  * clears it back to the built-in crw.bar orange.
  */
 export const AccentColorPicker: React.FC<AccentColorPickerProps> = React.memo(
-  ({ descriptionMode = "tooltip", grouped = false }) => {
+  ({ grouped = false }) => {
     const { t } = useTranslation();
     const { getSetting, updateSetting } = useSettings();
 
@@ -32,7 +31,6 @@ export const AccentColorPicker: React.FC<AccentColorPickerProps> = React.memo(
       <SettingContainer
         title={t("settings.appearance.accent.title")}
         description={t("settings.appearance.accent.description")}
-        descriptionMode={descriptionMode}
         grouped={grouped}
       >
         <div className="flex items-center gap-2">

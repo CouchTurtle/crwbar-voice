@@ -166,7 +166,6 @@
         "label": "Automatisch naar het klembord kopiëren",
         "description": "Kopieert elke voltooide transcriptie automatisch naar het klembord."
       },
-      "title": "Algemeen",
       "shortcut": {
         "title": "Sneltoetsen",
         "description": "Configureer sneltoetsen om spraak-naar-tekst-opnames te starten",
@@ -223,6 +222,10 @@
         "title": "Extra opnamebuffer",
         "description": "Extra tijd (in milliseconden) om te blijven opnemen nadat je de toets loslaat, om naloopaudio op te vangen. 0 = geen extra buffer.",
         "off": "Off"
+      },
+      "groups": {
+        "shortcuts": "Sneltoetsen",
+        "recording": "Opnemen"
       }
     },
     "models": {

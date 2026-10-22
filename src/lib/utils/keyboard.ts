@@ -168,38 +168,43 @@ const capitalizeKey = (key: string): string => {
   return key.replace(/\b\w/g, (c) => c.toUpperCase());
 };
 
-/**
- * Format a single key part for display.
- * Handles _left/_right suffixes and capitalizes names.
- * e.g. "shift_left" -> "Left Shift", "option" -> "Option", "space" -> "Space"
- */
-const formatKeyPart = (part: string): string => {
-  const trimmed = part.trim();
-  if (!trimmed) return "";
-
-  if (trimmed.endsWith("_left")) {
-    const name = trimmed.slice(0, -5);
-    return `Left ${capitalizeKey(name)}`;
-  }
-  if (trimmed.endsWith("_right")) {
-    const name = trimmed.slice(0, -6);
-    return `Right ${capitalizeKey(name)}`;
-  }
-
-  return capitalizeKey(trimmed);
+// The symbols macOS prints on its own keys and in its menus.
+const MAC_MODIFIER_SYMBOLS: Record<string, string> = {
+  option: "⌥",
+  alt: "⌥",
+  command: "⌘",
+  cmd: "⌘",
+  super: "⌘",
+  meta: "⌘",
+  control: "⌃",
+  ctrl: "⌃",
+  shift: "⇧",
 };
 
 /**
- * Get display-friendly key combination string for the current OS
- * Formats raw hotkey strings like "option_left+shift+space" into
- * human-readable form like "Left Option + Shift + Space"
+ * One label per key of a raw combination, for drawing as keys:
+ * "option_left+space" -> ["Left ⌥", "Space"] on macOS,
+ * ["Left Option", "Space"] elsewhere.
  */
-export const formatKeyCombination = (
-  combination: string,
-  _osType: OSType,
-): string => {
-  if (!combination) return "";
-  return combination.split("+").map(formatKeyPart).join(" + ");
+export const keyCapLabels = (combination: string, osType: OSType): string[] => {
+  if (!combination) return [];
+  return combination
+    .split("+")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => {
+      const side = part.endsWith("_left")
+        ? "Left "
+        : part.endsWith("_right")
+          ? "Right "
+          : "";
+      const name = side ? part.replace(/_(left|right)$/, "") : part;
+      const symbol =
+        osType === "macos"
+          ? MAC_MODIFIER_SYMBOLS[name.toLowerCase()]
+          : undefined;
+      return side + (symbol ?? capitalizeKey(name));
+    });
 };
 
 /**

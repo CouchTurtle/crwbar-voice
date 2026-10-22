@@ -176,14 +176,13 @@
       }
     },
     "general": {
-      "title": "Allgemein",
       "dragDrop": {
         "label": "Datei-Drop transkribieren",
-        "description": "Erlaubt, eine Audiodatei auf die Aufnahme-Leiste zu ziehen, um sie statt des Mikrofons zu transkribieren."
+        "description": "Eine Audiodatei auf die Aufnahme-Leiste oder dieses Fenster ziehen, um sie zu transkribieren."
       },
       "autoCopy": {
         "label": "Automatisch in die Zwischenablage",
-        "description": "Kopiert jede fertige Transkription automatisch in die Zwischenablage."
+        "description": "Jede Transkription landet zusätzlich in der Zwischenablage."
       },
       "shortcut": {
         "title": "crwbar voice-Tastenkürzel",
@@ -195,7 +194,7 @@
         "bindings": {
           "transcribe": {
             "name": "Transkriptions-Tastenkürzel",
-            "description": "Das Tastenkürzel zum Aufnehmen und Transkribieren deiner Stimme."
+            "description": "Startet das Diktat überall auf deinem Mac."
           },
           "cancel": {
             "name": "Abbrechen-Tastenkürzel",
@@ -203,19 +202,19 @@
           },
           "transcribe_with_post_process": {
             "name": "Nachbearbeitungs-Tastenkürzel",
-            "description": "Optional: Ein dediziertes Tastenkürzel, das immer die KI-Nachbearbeitung auf deine Transkription anwendet."
+            "description": "Optional: wendet immer die KI-Nachbearbeitung auf das Ergebnis an."
           },
           "voice_action": {
             "name": "Voice-Action-Tastenkürzel",
-            "description": "Sprich eine Anweisung und erzeuge daraus mit optionalem Kontext und dem gewählten KI-Backend einen Text."
+            "description": "Sprich eine Anweisung, dein KI-Backend schreibt den Text."
           },
           "copy_last_transcript": {
             "name": "Kopieren-Tastenkürzel",
-            "description": "Das Tastenkürzel, um die letzte Transkription in die Zwischenablage zu kopieren."
+            "description": "Kopiert die letzte Transkription in die Zwischenablage."
           },
           "insert_last_transcript": {
             "name": "Einfügen-Tastenkürzel",
-            "description": "Das Tastenkürzel, um die letzte Transkription in das aktive Feld zu tippen, ohne die Zwischenablage zu verändern."
+            "description": "Fügt die letzte Transkription dort ein, wo du tippst; die Zwischenablage bleibt, wie sie war."
           }
         },
         "errors": {
@@ -228,7 +227,7 @@
       },
       "language": {
         "title": "Sprache",
-        "description": "Wähle die Sprache für die Spracherkennung. Auto erkennt die Sprache automatisch, die Auswahl einer bestimmten Sprache kann die Genauigkeit verbessern.",
+        "description": "Auto erkennt die Sprache; eine feste Sprache kann genauer sein.",
         "searchPlaceholder": "Sprachen suchen...",
         "noResults": "Keine Sprachen gefunden",
         "auto": "Auto"
@@ -239,8 +238,12 @@
       },
       "recordingBuffer": {
         "title": "Nach dem Loslassen weiter aufnehmen",
-        "description": "Nimmt nach dem Loslassen des Tastenkürzels so lange weiter auf, damit ein Wort, das du gerade noch beendest, nicht abgeschnitten wird. Die Transkription startet entsprechend später.",
+        "description": "Fängt das letzte Wort ab, wenn du etwas zu früh loslässt. Die Transkription startet entsprechend später.",
         "off": "Aus"
+      },
+      "groups": {
+        "shortcuts": "Tastenkürzel",
+        "recording": "Aufnahme"
       }
     },
     "sound": {
@@ -267,7 +270,7 @@
       },
       "duckingSpeed": {
         "title": "Ducking-Geschwindigkeit",
-        "description": "Wie schnell andere Audioquellen beim Aufnahmestart aus- und danach wieder eingeblendet werden.",
+        "description": "Wie schnell andere Töne aus- und wieder eingeblendet werden.",
         "options": {
           "instant": "Sofort",
           "fast": "Schnell",
@@ -290,16 +293,16 @@
       },
       "lazyStreamClose": {
         "label": "Mikrofon zwischen Transkriptionen offen halten",
-        "description": "Hält den Mikrofon-Stream nach dem Aufnahmestopp 30 Sekunden lang offen, um die Latenz bei aufeinanderfolgenden Transkriptionen zu verringern. Kann die Bluetooth-Audioqualität beeinträchtigen."
+        "description": "Hält das Mikrofon nach der Aufnahme 30 s offen, damit die nächste schneller startet. Kann Bluetooth-Audio verschlechtern."
       },
       "acceleration": {
         "transcribe": {
           "title": "Whisper-Beschleunigung",
-          "description": "Hardwarebeschleunigung für Whisper-Modelle. Automatisch nutzt GPU falls verfügbar (Metal auf macOS, Vulkan auf Windows/Linux)."
+          "description": "Hardware für Whisper-Modelle. Auto nutzt die GPU, falls vorhanden (Metal auf macOS)."
         },
         "ort": {
           "title": "ONNX-Beschleunigung",
-          "description": "Hardwarebeschleunigung für ONNX-Modelle (Parakeet, Canary, Moonshine usw.). DirectML unter Windows ist experimentell. Modelle können bei der Transkription fehlschlagen."
+          "description": "Hardware für ONNX-Modelle (Parakeet, Canary, Moonshine). DirectML unter Windows ist experimentell und kann fehlschlagen."
         },
         "gpuDevice": {
           "auto": "Auto"
@@ -320,7 +323,7 @@
       "overlay": {
         "style": {
           "title": "Overlay",
-          "description": "Choose the recording overlay: None hides it, Minimal shows a compact pill, Live shows transcription in real time as you speak (streaming-capable models only — look for the Streaming badge in the model picker). On Linux 'None' is recommended.",
+          "description": "Keine blendet sie aus, Minimal zeigt eine kleine Pille, Live zeigt den Text beim Sprechen (nur Streaming-Modelle).",
           "options": {
             "none": "Keine",
             "minimal": "Minimal",
@@ -338,7 +341,7 @@
       },
       "pasteMethod": {
         "title": "Einfügemethode",
-        "description": "Wähle, wie Text eingefügt wird. Direkt: simuliert Tippen über Systemeingabe. Keine: überspringt Einfügen, aktualisiert nur Verlauf/Zwischenablage.",
+        "description": "Wie der Text in die App kommt, in der du tippst. Keine aktualisiert nur Verlauf und Zwischenablage.",
         "options": {
           "clipboard": "Zwischenablage ({{modifier}}+V)",
           "clipboardCtrlShiftV": "Zwischenablage (Strg+Umschalt+V)",
@@ -351,14 +354,14 @@
       },
       "typingTool": {
         "title": "Eingabetool",
-        "description": "Wähle, welches Linux-Eingabetool für die Direkt-Einfügen-Methode verwendet werden soll. Auto erkennt und verwendet automatisch das beste verfügbare Tool für dein System.",
+        "description": "Linux-Tool für die Direkt-Methode; Auto wählt das beste.",
         "options": {
           "auto": "Auto (Empfohlen)"
         }
       },
       "autoSubmit": {
         "title": "Automatisch absenden",
-        "description": "Sendet nach dem Einfügen von Text automatisch die ausgewählte Tastenkombination. Cmd+Enter gilt für macOS, während Windows/Linux Super+Enter verwenden.",
+        "description": "Drückt nach dem Einfügen die gewählten Tasten, etwa Enter zum Absenden.",
         "options": {
           "off": "Aus",
           "enter": "Enter",
@@ -369,11 +372,11 @@
       },
       "translateToEnglish": {
         "label": "Ins Englische übersetzen",
-        "description": "Sprache aus anderen Sprachen automatisch während der Transkription ins Englische übersetzen."
+        "description": "Übersetzt Sprache aus anderen Sprachen ins Englische."
       },
       "modelUnload": {
         "title": "Modell entladen",
-        "description": "GPU/CPU-Speicher automatisch freigeben, wenn das Modell für die angegebene Zeit nicht verwendet wurde",
+        "description": "Gibt Speicher frei, wenn das Modell so lange nicht benutzt wurde.",
         "options": {
           "never": "Nie",
           "immediately": "Sofort",
@@ -387,7 +390,7 @@
       },
       "customWords": {
         "title": "Benutzerdefinierte Wörter",
-        "description": "Wörter hinzufügen, die oft falsch gehört oder geschrieben werden. Das System korrigiert automatisch ähnlich klingende Wörter entsprechend deiner Liste.",
+        "description": "Wörter, die oft falsch erkannt werden; ähnlich klingende werden darauf korrigiert.",
         "placeholder": "Wort hinzufügen",
         "add": "Hinzufügen",
         "remove": "{{word}} entfernen",
@@ -395,7 +398,7 @@
       },
       "voiceActivityDetection": {
         "title": "Voice Activity Detection",
-        "description": "Filter silence from recordings. Streaming-capable models use a longer VAD tail; disabling VAD records raw audio."
+        "description": "Lässt Stille weg. Aus nimmt das Rohaudio auf."
       }
     },
     "postProcessing": {
@@ -419,11 +422,11 @@
         },
         "clipboardContext": {
           "label": "Zwischenablage als Kontext verwenden",
-          "description": "Sendet den aktuellen Text aus der Zwischenablage als Ausgangsmaterial mit – etwa für ‚Schreib daraus eine Mail‘."
+          "description": "Sendet den Text der Zwischenablage mit – etwa für ‚Schreib daraus eine Mail‘."
         },
         "context": {
           "title": "Dauerhafter Kontext",
-          "description": "Optionale Angaben, die bei jeder Voice Action mitgesendet werden, etwa deine Rolle, Firma, bevorzugte Tonalität oder Formulierungen, die vermieden werden sollen. Für normale Transkriptionen wird er nie verwendet.",
+          "description": "Geht mit jeder Voice Action mit: deine Rolle, Firma, Tonalität, Wörter, die du nicht willst. Nie bei normalen Transkriptionen.",
           "placeholder": "Beispiel: Ich arbeite bei … Mails bitte kurz, freundlich und direkt schreiben.",
           "storage": "Wird beim Tippen gespeichert, bleibt lokal auf diesem Gerät und geht nur bei Voice Actions mit – nie bei normalen Transkriptionen.",
           "clear": "Löschen"
@@ -545,7 +548,7 @@
       },
       "historyLimit": {
         "title": "Aufnahmen mit Audio",
-        "description": "So viele der neuesten Aufnahmen behalten ihr Audio. Transkripte bleiben immer erhalten und durchsuchbar.",
+        "description": "So viele der neuesten Aufnahmen behalten ihr Audio. Transkripte bleiben immer.",
         "entries": "Aufnahmen"
       },
       "recordingRetention": {
@@ -603,12 +606,12 @@
       "title": "Darstellung",
       "accent": {
         "title": "Akzentfarbe",
-        "description": "Wähle eine eigene Akzentfarbe für Buttons, die Aufnahme-Leiste und Hervorhebungen. „Zurücksetzen“ stellt das Standard-Orange wieder her.",
+        "description": "Für Buttons, die Aufnahme-Leiste und Hervorhebungen. Zurücksetzen stellt Orange wieder her.",
         "reset": "Zurücksetzen"
       },
       "rgbMode": {
         "label": "Emil Mode",
-        "description": "Lässt die Akzentfarbe dauerhaft durch den Regenbogen wandern. Überschreibt die gewählte Akzentfarbe, solange er aktiv ist.",
+        "description": "Lässt die Akzentfarbe durch den Regenbogen wandern, solange er an ist.",
         "boosted": "Doppelte Geschwindigkeit aktiv"
       }
     },

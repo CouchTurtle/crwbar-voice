@@ -166,7 +166,6 @@
         "label": "自動複製到剪貼簿",
         "description": "自動將每次完成的轉錄複製到剪貼簿。"
       },
-      "title": "一般",
       "shortcut": {
         "title": "crwbar voice 快捷鍵",
         "description": "設定啟動語音轉文字錄製的鍵盤快捷鍵",
@@ -223,6 +222,10 @@
         "title": "額外錄音緩衝",
         "description": "放開按鍵後繼續錄音的額外時間（毫秒），以捕捉尾音。0 = 無額外緩衝。",
         "off": "Off"
+      },
+      "groups": {
+        "shortcuts": "快捷鍵",
+        "recording": "錄音"
       }
     },
     "models": {

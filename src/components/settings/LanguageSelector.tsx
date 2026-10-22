@@ -11,7 +11,6 @@ import {
 } from "../../lib/constants/languages";
 
 interface LanguageSelectorProps {
-  descriptionMode?: "inline" | "tooltip";
   grouped?: boolean;
   supportedLanguages?: string[];
   // Whether the model can auto-detect language. Gates the "Auto" option:
@@ -39,7 +38,6 @@ const effectiveLanguage = (
 };
 
 export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
-  descriptionMode = "tooltip",
   grouped = false,
   supportedLanguages,
   supportsLanguageDetection = true,
@@ -137,43 +135,41 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
     <SettingContainer
       title={t("settings.general.language.title")}
       description={t("settings.general.language.description")}
-      descriptionMode={descriptionMode}
       grouped={grouped}
     >
       <div className="flex items-center space-x-1">
         <div className="relative" ref={dropdownRef}>
           <button
             type="button"
-            className={`px-2 py-1 text-sm font-semibold bg-mid-gray/10 border border-mid-gray/80 rounded min-w-[200px] text-start flex items-center justify-between transition-all duration-150 ${
+            className={`h-8 px-3 text-control font-medium bg-field border border-line rounded-field min-w-[190px] text-start flex items-center justify-between transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-logo-primary/40 ${
               isUpdating("selected_language")
                 ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-logo-primary/10 cursor-pointer hover:border-logo-primary"
+                : "hover:border-text/25 cursor-pointer"
             }`}
             onClick={handleToggle}
             disabled={isUpdating("selected_language")}
           >
             <span className="truncate">{selectedLanguageName}</span>
             <svg
-              className={`w-4 h-4 ms-2 transition-transform duration-200 ${
-                isOpen ? "transform rotate-180" : ""
-              }`}
+              className="w-3 h-3 ms-2 text-text/50"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
+                strokeWidth={2.4}
+                d="m7 15 5 5 5-5M7 9l5-5 5 5"
               />
             </svg>
           </button>
 
           {isOpen && !isUpdating("selected_language") && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-background border border-mid-gray/80 rounded shadow-lg z-50 max-h-60 overflow-hidden">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-surface border border-line rounded-field shadow-lg z-50 max-h-60 overflow-hidden">
               {/* Search input */}
-              <div className="p-2 border-b border-mid-gray/80">
+              <div className="p-1.5 border-b border-line">
                 <input
                   ref={searchInputRef}
                   type="text"
@@ -181,13 +177,13 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                   onChange={handleSearchChange}
                   onKeyDown={handleKeyDown}
                   placeholder={t("settings.general.language.searchPlaceholder")}
-                  className="w-full px-2 py-1 text-sm bg-mid-gray/10 border border-mid-gray/40 rounded focus:outline-none focus:ring-1 focus:ring-logo-primary focus:border-logo-primary"
+                  className="w-full h-7 px-2.5 text-control bg-field border border-line rounded-[7px] focus:outline-none focus:border-logo-primary focus:ring-2 focus:ring-logo-primary/20"
                 />
               </div>
 
-              <div className="max-h-48 overflow-y-auto">
+              <div className="max-h-48 overflow-y-auto p-1">
                 {filteredLanguages.length === 0 ? (
-                  <div className="px-2 py-2 text-sm text-mid-gray text-center">
+                  <div className="px-2.5 py-2 text-control text-text/50 text-center">
                     {t("settings.general.language.noResults")}
                   </div>
                 ) : (
@@ -195,9 +191,9 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                     <button
                       key={language.value}
                       type="button"
-                      className={`w-full px-2 py-1 text-sm text-start hover:bg-logo-primary/10 transition-colors duration-150 ${
+                      className={`w-full px-2.5 py-1.5 text-control text-start rounded-[6px] hover:bg-text/8 transition-colors duration-150 ${
                         selectedLanguage === language.value
-                          ? "bg-logo-primary/20 text-logo-primary font-semibold"
+                          ? "text-accent-text font-semibold"
                           : ""
                       }`}
                       onClick={() => handleLanguageSelect(language.value)}

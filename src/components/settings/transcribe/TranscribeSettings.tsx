@@ -377,7 +377,7 @@ export const TranscribeSettings: React.FC = () => {
   }, [progress]);
 
   return (
-    <div className="max-w-3xl w-full mx-auto space-y-6">
+    <div className="max-w-3xl w-full mx-auto space-y-3.5">
       <SettingsGroup title={t("transcribe.title")}>
         <div className="p-6 text-left">
           {running ? (

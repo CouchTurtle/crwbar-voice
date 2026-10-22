@@ -25,30 +25,21 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({
   };
 
   return (
-    <div className="absolute bottom-full start-0 mb-2 w-64 max-h-[60vh] overflow-y-auto bg-background border border-mid-gray/20 rounded-lg shadow-lg py-2 z-50">
+    <div className="absolute top-full end-0 mt-2 w-72 max-h-[60vh] overflow-y-auto bg-surface border border-line rounded-field shadow-lg p-1 z-50">
       {downloadedModels.length > 0 ? (
         <div>
           {downloadedModels.map((model) => (
-            <div
+            <button
               key={model.id}
+              type="button"
               onClick={() => handleModelClick(model.id)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  handleModelClick(model.id);
-                }
-              }}
-              tabIndex={0}
-              role="button"
-              className={`w-full px-3 py-2 text-start hover:bg-mid-gray/10 transition-colors cursor-pointer focus:outline-none ${
-                currentModelId === model.id
-                  ? "bg-logo-primary/10 text-logo-primary"
-                  : ""
+              className={`w-full px-2.5 py-2 text-start rounded-[6px] hover:bg-text/8 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-logo-primary/40 ${
+                currentModelId === model.id ? "bg-logo-primary/10" : ""
               }`}
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm text-text/80">
+                  <div className="text-control font-medium">
                     {getTranslatedModelName(model, t)}
                     {model.is_custom && (
                       <span className="ms-1.5 text-[10px] font-medium text-text/40 uppercase">
@@ -61,21 +52,21 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({
                       </span>
                     )}
                   </div>
-                  <div className="text-xs text-text/40 italic pe-4">
+                  <div className="text-caption text-text/50 pe-4">
                     {getTranslatedModelDescription(model, t)}
                   </div>
                 </div>
                 {currentModelId === model.id && (
-                  <div className="text-xs text-logo-primary">
+                  <div className="text-caption font-semibold text-accent-text">
                     {t("modelSelector.active")}
                   </div>
                 )}
               </div>
-            </div>
+            </button>
           ))}
         </div>
       ) : (
-        <div className="px-3 py-2 text-sm text-text/60">
+        <div className="px-2.5 py-2 text-control text-text/60">
           {t("modelSelector.noModelsAvailable")}
         </div>
       )}

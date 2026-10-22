@@ -29,44 +29,38 @@ export const AdvancedSettings: React.FC = () => {
     getSetting("recording_retention_period") === "preserve_limit";
 
   return (
-    <div className="max-w-3xl w-full mx-auto space-y-6">
+    <div className="max-w-3xl w-full mx-auto space-y-3.5">
       <SettingsGroup title={t("settings.advanced.groups.app")}>
-        <StartHidden descriptionMode="tooltip" grouped={true} />
-        <AutostartToggle descriptionMode="tooltip" grouped={true} />
-        <ShowTrayIcon descriptionMode="tooltip" grouped={true} />
-        <ShowOverlay descriptionMode="tooltip" grouped={true} />
-        <ModelUnloadTimeoutSetting descriptionMode="tooltip" grouped={true} />
-        <ExperimentalToggle descriptionMode="tooltip" grouped={true} />
+        <StartHidden grouped={true} />
+        <AutostartToggle grouped={true} />
+        <ShowTrayIcon grouped={true} />
+        <ShowOverlay grouped={true} />
+        <ModelUnloadTimeoutSetting grouped={true} />
+        <ExperimentalToggle grouped={true} />
       </SettingsGroup>
 
       <SettingsGroup title={t("settings.advanced.groups.output")}>
-        <PasteMethodSetting descriptionMode="tooltip" grouped={true} />
-        <TypingToolSetting descriptionMode="tooltip" grouped={true} />
-        <AutoSubmit descriptionMode="tooltip" grouped={true} />
+        <PasteMethodSetting grouped={true} />
+        <TypingToolSetting grouped={true} />
+        <AutoSubmit grouped={true} />
       </SettingsGroup>
 
       <SettingsGroup title={t("settings.advanced.groups.transcription")}>
-        <VoiceActivityDetection descriptionMode="tooltip" grouped={true} />
-        <CustomWords descriptionMode="tooltip" grouped />
-        <AppendTrailingSpace descriptionMode="tooltip" grouped={true} />
+        <VoiceActivityDetection grouped={true} />
+        <CustomWords grouped />
+        <AppendTrailingSpace grouped={true} />
       </SettingsGroup>
 
       <SettingsGroup title={t("settings.advanced.groups.history")}>
-        <RecordingRetentionPeriodSelector
-          descriptionMode="tooltip"
-          grouped={true}
-        />
-        {keepsLatest && <HistoryLimit descriptionMode="tooltip" grouped />}
+        <RecordingRetentionPeriodSelector grouped={true} />
+        {keepsLatest && <HistoryLimit grouped />}
       </SettingsGroup>
 
       {experimentalEnabled && (
         <SettingsGroup title={t("settings.advanced.groups.experimental")}>
-          <KeyboardImplementationSelector
-            descriptionMode="tooltip"
-            grouped={true}
-          />
-          <AccelerationSelector descriptionMode="tooltip" grouped={true} />
-          <LazyStreamClose descriptionMode="tooltip" grouped={true} />
+          <KeyboardImplementationSelector grouped={true} />
+          <AccelerationSelector grouped={true} />
+          <LazyStreamClose grouped={true} />
         </SettingsGroup>
       )}
     </div>

@@ -4,12 +4,11 @@ import { ToggleSwitch } from "../ui/ToggleSwitch";
 import { useSettings } from "../../hooks/useSettings";
 
 interface TranslateToEnglishProps {
-  descriptionMode?: "inline" | "tooltip";
   grouped?: boolean;
 }
 
 export const TranslateToEnglish: React.FC<TranslateToEnglishProps> = React.memo(
-  ({ descriptionMode = "tooltip", grouped = false }) => {
+  ({ grouped = false }) => {
     const { t } = useTranslation();
     const { getSetting, updateSetting, isUpdating } = useSettings();
 
@@ -22,7 +21,6 @@ export const TranslateToEnglish: React.FC<TranslateToEnglishProps> = React.memo(
         isUpdating={isUpdating("translate_to_english")}
         label={t("settings.advanced.translateToEnglish.label")}
         description={t("settings.advanced.translateToEnglish.description")}
-        descriptionMode={descriptionMode}
         grouped={grouped}
       />
     );
