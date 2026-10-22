@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { ChevronsUpDown } from "lucide-react";
 import { SettingContainer } from "../ui/SettingContainer";
 import { ResetButton } from "../ui/ResetButton";
 import { useSettings } from "../../hooks/useSettings";
@@ -150,20 +151,10 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             disabled={isUpdating("selected_language")}
           >
             <span className="truncate">{selectedLanguageName}</span>
-            <svg
+            <ChevronsUpDown
               className="w-3 h-3 ms-2 text-text/50"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
               aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2.4}
-                d="m7 15 5 5 5-5M7 9l5-5 5 5"
-              />
-            </svg>
+            />
           </button>
 
           {isOpen && !isUpdating("selected_language") && (
@@ -191,7 +182,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                     <button
                       key={language.value}
                       type="button"
-                      className={`w-full px-2.5 py-1.5 text-control text-start rounded-[6px] hover:bg-text/8 transition-colors duration-150 ${
+                      className={`w-full px-2.5 py-1.5 text-control text-start rounded-item hover:bg-text/8 transition-colors duration-150 ${
                         selectedLanguage === language.value
                           ? "text-accent-text font-semibold"
                           : ""

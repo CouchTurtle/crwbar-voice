@@ -520,7 +520,6 @@
       }
     },
     "debug": {
-      "title": "ניפוי שגיאות",
       "logDirectory": {
         "title": "תיקיית לוגים",
         "description": "המיקום שבו נשמרים קבצי הלוג"
@@ -618,7 +617,6 @@
       }
     },
     "about": {
-      "title": "אודות",
       "version": {
         "title": "גרסה",
         "description": "הגרסה הנוכחית של crwbar voice"
@@ -646,19 +644,6 @@
         }
       }
     }
-  },
-  "footer": {
-    "checkingUpdates": "בודק עדכונים...",
-    "updateAvailableShort": "יש עדכון זמין",
-    "upToDate": "מעודכן",
-    "updateCheckingDisabled": "בדיקת העדכונים כבויה",
-    "downloading": "מוריד... {{progress}}%",
-    "installing": "מתקין...",
-    "preparing": "מכין...",
-    "checkForUpdates": "בדוק עדכונים",
-    "portableUpdateTitle": "נדרש עדכון ידני",
-    "portableUpdateMessage": "התקנות ניידות אינן מתעדכנות אוטומטית. כדי לעדכן, הורד את מתקין ה-NSIS האחרון מ-GitHub Releases, התקן לאותה תיקייה, ואז העתק את תיקיית Data/ (הגדרות, מודלים, הקלטות) מהגרסה הישנה לחדשה.",
-    "portableUpdateButton": "פתח את GitHub Releases"
   },
   "common": {
     "loading": "טוען...",

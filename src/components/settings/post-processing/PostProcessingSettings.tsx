@@ -57,7 +57,7 @@ const PostProcessingSettingsApiComponent: React.FC = () => {
             <SettingContainer
               title={t("settings.postProcessing.api.baseUrl.title")}
               description={t("settings.postProcessing.api.baseUrl.description")}
-              layout="horizontal"
+              layout="stacked"
               grouped={true}
             >
               <div className="flex items-center gap-2">
@@ -68,7 +68,7 @@ const PostProcessingSettingsApiComponent: React.FC = () => {
                     "settings.postProcessing.api.baseUrl.placeholder",
                   )}
                   disabled={state.isBaseUrlUpdating}
-                  className="min-w-[380px]"
+                  className="w-full"
                 />
               </div>
             </SettingContainer>
@@ -77,7 +77,7 @@ const PostProcessingSettingsApiComponent: React.FC = () => {
           <SettingContainer
             title={t("settings.postProcessing.api.apiKey.title")}
             description={t("settings.postProcessing.api.apiKey.description")}
-            layout="horizontal"
+            layout="stacked"
             grouped={true}
           >
             <div className="flex items-center gap-2">
@@ -88,7 +88,7 @@ const PostProcessingSettingsApiComponent: React.FC = () => {
                   "settings.postProcessing.api.apiKey.placeholder",
                 )}
                 disabled={state.isApiKeyUpdating}
-                className="min-w-[320px]"
+                className="w-full"
               />
             </div>
           </SettingContainer>

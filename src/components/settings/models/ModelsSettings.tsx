@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ask } from "@tauri-apps/plugin-dialog";
-import { ChevronDown, Globe, RefreshCw, Search } from "lucide-react";
+import { ChevronDown, Globe, RefreshCw } from "lucide-react";
 import type { ModelCardStatus } from "@/components/onboarding";
-import { isLegacySource } from "@/components/onboarding/ModelCard";
+import { isLegacySource } from "@/lib/utils/modelInfo";
 import { useModelStore } from "@/stores/modelStore";
 import { useSettings } from "@/hooks/useSettings";
 import {
@@ -13,6 +13,9 @@ import {
 } from "@/lib/constants/languages.ts";
 import type { ModelInfo } from "@/bindings";
 import { ModelRow, type ModelRole } from "./ModelRow";
+import { IconButton } from "../../ui/IconButton";
+import { ListSection } from "../../ui/ListSection";
+import { SearchField } from "../../ui/SearchField";
 
 // check if model supports a language based on its supported_languages list
 const modelSupportsLanguage = (model: ModelInfo, langCode: string): boolean => {
@@ -174,7 +177,6 @@ export const ModelsSettings: React.FC = () => {
   const filteredModels = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return models.filter((model: ModelInfo) => {
-      // Hide deprecated legacy (.bin/ONNX) downloads unless already on disk.
       // Legacy (.bin/ONNX) downloads stay usable once on disk, but the catalog
       // GGUFs replaced them, so they are no longer offered.
       if (isLegacySource(model) && !model.is_downloaded) return false;
@@ -252,36 +254,27 @@ export const ModelsSettings: React.FC = () => {
     list: ModelInfo[],
     showRecommended: boolean,
   ) => (
-    <section className="space-y-1.5">
-      <h2 className="ms-1 text-section font-semibold text-text/60">{title}</h2>
-      <div className="bg-surface border border-line rounded-card px-4.5 divide-y divide-line">
-        {list.map((model) => row(model, showRecommended))}
-      </div>
-    </section>
+    <ListSection title={title}>
+      {list.map((model) => row(model, showRecommended))}
+    </ListSection>
   );
 
   return (
     <div className="max-w-3xl w-full mx-auto space-y-3.5">
       <div className="flex items-center gap-2">
         {/* Search the catalog by name or description */}
-        <div className="relative flex-1 min-w-0">
-          <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text/45 pointer-events-none" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t("settings.models.searchPlaceholder")}
-            aria-label={t("settings.models.searchPlaceholder")}
-            className="w-full h-[34px] ps-8 pe-3 text-control bg-field border border-line rounded-field hover:border-text/25 focus:outline-none focus:border-logo-primary focus:ring-2 focus:ring-logo-primary/20 placeholder:text-text/45"
-          />
-        </div>
+        <SearchField
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder={t("settings.models.searchPlaceholder")}
+        />
         {/* Language filter */}
         <div className="relative" ref={languageDropdownRef}>
           <button
             type="button"
             onClick={() => setLanguageDropdownOpen(!languageDropdownOpen)}
             aria-expanded={languageDropdownOpen}
-            className={`flex items-center gap-1.5 h-[34px] px-3 text-control font-medium rounded-field border transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-logo-primary/40 ${
+            className={`flex items-center gap-1.5 h-toolbar px-3 text-control font-medium rounded-field border transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-logo-primary/40 ${
               languageFilter !== "all"
                 ? "bg-logo-primary/15 border-transparent text-accent-text"
                 : "bg-field border-line hover:border-text/25"
@@ -332,7 +325,7 @@ export const ModelsSettings: React.FC = () => {
                       setLanguageDropdownOpen(false);
                       setLanguageSearch("");
                     }}
-                    className={`w-full px-2.5 py-1.5 text-control text-start rounded-[6px] transition-colors hover:bg-text/8 ${
+                    className={`w-full px-2.5 py-1.5 text-control text-start rounded-item transition-colors hover:bg-text/8 ${
                       languageFilter === lang.value
                         ? "text-accent-text font-semibold"
                         : ""
@@ -351,18 +344,16 @@ export const ModelsSettings: React.FC = () => {
           )}
         </div>
         {/* Pick up models added outside the app */}
-        <button
-          type="button"
+        <IconButton
+          variant="field"
           onClick={() => rescanLocalModels()}
           disabled={isRescanning}
           title={t("settings.models.rescan.tooltip")}
-          aria-label={t("settings.models.rescan.label")}
-          className="w-[34px] h-[34px] shrink-0 flex items-center justify-center rounded-field bg-field border border-line text-text/60 hover:text-text hover:border-text/25 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-logo-primary/40"
         >
           <RefreshCw
             className={`w-3.5 h-3.5 ${isRescanning ? "animate-spin" : ""}`}
           />
-        </button>
+        </IconButton>
       </div>
 
       {filteredModels.length > 0 ? (
@@ -377,9 +368,11 @@ export const ModelsSettings: React.FC = () => {
             )}
         </>
       ) : (
-        <div className="bg-surface border border-line rounded-card px-4 py-6 text-center text-label text-text/60">
-          {t("settings.models.noModelsMatch")}
-        </div>
+        <ListSection>
+          <p className="py-6 text-center text-label text-text/60">
+            {t("settings.models.noModelsMatch")}
+          </p>
+        </ListSection>
       )}
     </div>
   );

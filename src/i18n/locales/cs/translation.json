@@ -520,7 +520,6 @@
       }
     },
     "debug": {
-      "title": "Ladění",
       "logDirectory": {
         "title": "Složka protokolů",
         "description": "Umístění, kde jsou uloženy soubory protokolu"
@@ -618,7 +617,6 @@
       }
     },
     "about": {
-      "title": "O aplikaci",
       "version": {
         "title": "Verze",
         "description": "Aktuální verze crwbar voice"
@@ -646,19 +644,6 @@
         }
       }
     }
-  },
-  "footer": {
-    "checkingUpdates": "Kontroluji aktualizace...",
-    "updateAvailableShort": "Dostupná aktualizace",
-    "upToDate": "Vše aktuální",
-    "updateCheckingDisabled": "Kontrola aktualizací vypnuta",
-    "downloading": "Stahování... {{progress}}%",
-    "installing": "Instalace...",
-    "preparing": "Příprava...",
-    "checkForUpdates": "Zkontrolovat aktualizace",
-    "portableUpdateTitle": "Vyžadována ruční aktualizace",
-    "portableUpdateMessage": "Přenosné instalace nelze aktualizovat automaticky. Postup aktualizace: stáhněte nejnovější instalátor NSIS z GitHub Releases, nainstalujte jej do stejné složky a poté zkopírujte svou složku Data/ (nastavení, modely, nahrávky) ze staré verze do nové.",
-    "portableUpdateButton": "Otevřít GitHub Releases"
   },
   "common": {
     "loading": "Načítání...",

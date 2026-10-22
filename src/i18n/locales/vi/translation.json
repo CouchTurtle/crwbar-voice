@@ -520,7 +520,6 @@
       }
     },
     "debug": {
-      "title": "Gỡ lỗi",
       "logDirectory": {
         "title": "Thư mục nhật ký",
         "description": "Vị trí lưu trữ các tệp nhật ký"
@@ -618,7 +617,6 @@
       }
     },
     "about": {
-      "title": "Giới thiệu",
       "version": {
         "title": "Phiên bản",
         "description": "Phiên bản hiện tại của crwbar voice"
@@ -646,19 +644,6 @@
         }
       }
     }
-  },
-  "footer": {
-    "checkingUpdates": "Đang kiểm tra cập nhật...",
-    "updateAvailableShort": "Có bản cập nhật",
-    "upToDate": "Đã cập nhật",
-    "updateCheckingDisabled": "Đã tắt kiểm tra cập nhật",
-    "downloading": "Đang tải... {{progress}}%",
-    "installing": "Đang cài đặt...",
-    "preparing": "Đang chuẩn bị...",
-    "checkForUpdates": "Kiểm tra cập nhật",
-    "portableUpdateTitle": "Cần cập nhật thủ công",
-    "portableUpdateMessage": "Bản cài đặt di động không thể cập nhật tự động. Để cập nhật: tải trình cài đặt NSIS mới nhất từ GitHub Releases, cài đặt vào cùng thư mục, sau đó sao chép thư mục Data/ (cài đặt, mô hình, bản ghi) từ phiên bản cũ sang phiên bản mới.",
-    "portableUpdateButton": "Mở GitHub Releases"
   },
   "common": {
     "loading": "Đang tải...",

@@ -176,7 +176,7 @@
         "bindings": {
           "transcribe": {
             "name": "Transcribe Shortcut",
-            "description": "Starts dictation anywhere on your Mac."
+            "description": "Starts dictation in any app."
           },
           "cancel": {
             "name": "Cancel Shortcut",
@@ -520,7 +520,6 @@
       }
     },
     "debug": {
-      "title": "Debug",
       "logDirectory": {
         "title": "Log Directory",
         "description": "Location where log files are stored"
@@ -618,7 +617,6 @@
       }
     },
     "about": {
-      "title": "About",
       "version": {
         "title": "Version",
         "description": "Current version of crwbar voice"
@@ -646,19 +644,6 @@
         }
       }
     }
-  },
-  "footer": {
-    "checkingUpdates": "Checking for updates...",
-    "updateAvailableShort": "Update available",
-    "upToDate": "Up to date",
-    "updateCheckingDisabled": "Update Checking Disabled",
-    "downloading": "Downloading... {{progress}}%",
-    "installing": "Installing...",
-    "preparing": "Preparing...",
-    "checkForUpdates": "Check for updates",
-    "portableUpdateTitle": "Manual update required",
-    "portableUpdateMessage": "Portable installs cannot be updated automatically. To update: download the latest NSIS installer from GitHub Releases, install it to the same folder, then copy your Data/ folder (settings, models, recordings) from the old version to the new one.",
-    "portableUpdateButton": "Open GitHub Releases"
   },
   "whatsNew": {
     "title": "New in crwbar voice v{{version}}"

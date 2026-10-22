@@ -520,7 +520,6 @@
       }
     },
     "debug": {
-      "title": "Debug",
       "logDirectory": {
         "title": "Cartella dei Log",
         "description": "Cartella dove vengono salvati i file di log"
@@ -618,7 +617,6 @@
       }
     },
     "about": {
-      "title": "Informazioni",
       "version": {
         "title": "Versione",
         "description": "Versione attuale di crwbar voice"
@@ -646,19 +644,6 @@
         }
       }
     }
-  },
-  "footer": {
-    "checkingUpdates": "Controllo aggiornamenti...",
-    "updateAvailableShort": "Aggiornamento disponibile",
-    "upToDate": "Aggiornato",
-    "updateCheckingDisabled": "Controllo Aggiornamenti Disabilitato",
-    "downloading": "Download... {{progress}}%",
-    "installing": "Installazione...",
-    "preparing": "Preparazione...",
-    "checkForUpdates": "Controlla aggiornamenti",
-    "portableUpdateTitle": "Aggiornamento manuale necessario",
-    "portableUpdateMessage": "Le installazioni portatili non possono essere aggiornate automaticamente. Per aggiornare: scarica l'ultima versione del programma di installazione NSIS da GitHub Releases, installala nella stessa cartella, quindi copia la cartella Data/ (impostazioni, modelli, registrazioni) dalla vecchia versione a quella nuova..",
-    "portableUpdateButton": "Apri i rilasci su GitHub"
   },
   "common": {
     "loading": "Caricamento...",

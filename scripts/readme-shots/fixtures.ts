@@ -112,7 +112,7 @@ export const models: ModelInfo[] = [
   },
 ];
 
-const now = Math.floor(Date.UTC(2026, 9, 21, 15, 40) / 1000);
+export const now = Math.floor(Date.UTC(2026, 9, 21, 15, 40) / 1000);
 const entry = (
   id: number,
   minutesAgo: number,

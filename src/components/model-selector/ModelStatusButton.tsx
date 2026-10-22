@@ -1,4 +1,5 @@
 import React from "react";
+import { ChevronsUpDown } from "lucide-react";
 
 type ModelStatus =
   | "ready"
@@ -60,20 +61,7 @@ const ModelStatusButton: React.FC<ModelStatusButtonProps> = ({
         className={`w-[7px] h-[7px] rounded-full ${getStatusColor(status)}`}
       />
       <span className="max-w-48 truncate">{displayText}</span>
-      <svg
-        className="w-2.5 h-2.5 text-text/50"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2.6}
-          d="m7 15 5 5 5-5M7 9l5-5 5 5"
-        />
-      </svg>
+      <ChevronsUpDown className="w-2.5 h-2.5 text-text/50" aria-hidden="true" />
     </button>
   );
 };

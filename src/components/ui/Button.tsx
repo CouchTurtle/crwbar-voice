@@ -8,7 +8,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     | "danger"
     | "danger-ghost"
     | "ghost";
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md";
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -36,7 +36,6 @@ export const Button: React.FC<ButtonProps> = ({
   const sizeClasses = {
     sm: "h-7 px-2.5 text-caption",
     md: "h-8 px-3.5 text-control",
-    lg: "h-9 px-4 text-label",
   };
 
   return (

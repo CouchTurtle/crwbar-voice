@@ -4,7 +4,8 @@ import { toast } from "sonner";
 import { ChevronDown } from "lucide-react";
 import type { ModelInfo } from "@/bindings";
 import type { ModelCardStatus } from "./ModelCard";
-import ModelCard, { isLegacySource } from "./ModelCard";
+import ModelCard from "./ModelCard";
+import { isLegacySource } from "../../lib/utils/modelInfo";
 import CrwbarVoiceLogo from "../icons/CrwbarVoiceLogo";
 import { useModelStore } from "../../stores/modelStore";
 

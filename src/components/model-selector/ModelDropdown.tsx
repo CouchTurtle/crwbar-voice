@@ -33,7 +33,7 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({
               key={model.id}
               type="button"
               onClick={() => handleModelClick(model.id)}
-              className={`w-full px-2.5 py-2 text-start rounded-[6px] hover:bg-text/8 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-logo-primary/40 ${
+              className={`w-full px-2.5 py-2 text-start rounded-item hover:bg-text/8 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-logo-primary/40 ${
                 currentModelId === model.id ? "bg-logo-primary/10" : ""
               }`}
             >
@@ -52,7 +52,7 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({
                       </span>
                     )}
                   </div>
-                  <div className="text-caption text-text/50 pe-4">
+                  <div className="text-caption text-text/60 pe-4">
                     {getTranslatedModelDescription(model, t)}
                   </div>
                 </div>

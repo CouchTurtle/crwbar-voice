@@ -4,9 +4,7 @@ import { readFile } from "@tauri-apps/plugin-fs";
 import {
   Check,
   Copy,
-  Search,
   VolumeX,
-  X,
   FileAudio,
   FolderOpen,
   Mic,
@@ -25,8 +23,11 @@ import {
 import { useOsType } from "@/hooks/useOsType";
 import { highlightPieces } from "@/lib/utils/highlight";
 import { ActionMenu } from "../../ui/ActionMenu";
+import Badge from "../../ui/Badge";
 import { AudioPlayer, AudioPlayerGroup } from "../../ui/AudioPlayer";
 import { IconButton } from "../../ui/IconButton";
+import { ListSection } from "../../ui/ListSection";
+import { SearchField } from "../../ui/SearchField";
 
 /** Local calendar day, the key entries are grouped by. */
 const dayKey = (date: Date) =>
@@ -34,7 +35,7 @@ const dayKey = (date: Date) =>
 
 /** "Today", "Yesterday", then "Monday, Oct 20" (with the year once it is not this one). */
 const dayLabel = (date: Date, locale: string): string => {
-  const today = new Date();
+  const today = new Date(Date.now());
   const startOf = (d: Date) =>
     new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
   const daysAgo = Math.round((startOf(today) - startOf(date)) / 86_400_000);
@@ -103,12 +104,9 @@ const SourceBadge: React.FC<{ source: HistorySource }> = ({ source }) => {
 const PartialBadge: React.FC = () => {
   const { t } = useTranslation();
   return (
-    <span
-      className="rounded-[6px] bg-logo-primary/15 px-1.5 py-px text-caption font-semibold text-accent-text"
-      title={t("settings.history.partialHint")}
-    >
+    <Badge variant="primary" title={t("settings.history.partialHint")}>
       {t("settings.history.partial")}
-    </span>
+    </Badge>
   );
 };
 
@@ -355,9 +353,9 @@ export const HistorySettings: React.FC = () => {
   };
 
   const message = (text: string) => (
-    <div className="bg-surface border border-line rounded-card px-4 py-6 text-center text-label text-text/60">
-      {text}
-    </div>
+    <ListSection>
+      <p className="py-6 text-center text-label text-text/60">{text}</p>
+    </ListSection>
   );
 
   let content: React.ReactNode;
@@ -377,25 +375,20 @@ export const HistorySettings: React.FC = () => {
       <>
         <AudioPlayerGroup>
           {groupByDay(entries, i18n.language).map((group) => (
-            <section key={group.key} className="space-y-1.5">
-              <h2 className="ms-1 text-section font-semibold text-text/60">
-                {group.label}
-              </h2>
-              <div className="bg-surface border border-line rounded-card px-4.5 divide-y divide-line">
-                {group.entries.map((entry) => (
-                  <HistoryEntryComponent
-                    key={entry.id}
-                    entry={entry}
-                    onToggleSaved={() => toggleSaved(entry.id)}
-                    onCopyText={() => copyToClipboard(entry.transcription_text)}
-                    getAudioUrl={getAudioUrl}
-                    deleteAudio={deleteAudioEntry}
-                    retryTranscription={retryHistoryEntry}
-                    search={search}
-                  />
-                ))}
-              </div>
-            </section>
+            <ListSection key={group.key} title={group.label}>
+              {group.entries.map((entry) => (
+                <HistoryEntryComponent
+                  key={entry.id}
+                  entry={entry}
+                  onToggleSaved={() => toggleSaved(entry.id)}
+                  onCopyText={() => copyToClipboard(entry.transcription_text)}
+                  getAudioUrl={getAudioUrl}
+                  deleteAudio={deleteAudioEntry}
+                  retryTranscription={retryHistoryEntry}
+                  search={search}
+                />
+              ))}
+            </ListSection>
           ))}
         </AudioPlayerGroup>
         {/* Sentinel for infinite scroll */}
@@ -407,27 +400,12 @@ export const HistorySettings: React.FC = () => {
   return (
     <div className="max-w-3xl w-full mx-auto space-y-3.5">
       <div className="flex items-center gap-2">
-        <div className="relative flex-1 min-w-0">
-          <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text/45 pointer-events-none" />
-          <input
-            type="search"
-            value={searchInput}
-            onChange={(event) => setSearchInput(event.target.value)}
-            placeholder={t("settings.history.search.placeholder")}
-            aria-label={t("settings.history.search.placeholder")}
-            className="w-full h-[34px] rounded-field border border-line bg-field ps-8 pe-8 text-control text-text placeholder:text-text/45 hover:border-text/25 focus:border-logo-primary focus:ring-2 focus:ring-logo-primary/20 focus:outline-none [&::-webkit-search-cancel-button]:hidden"
-          />
-          {searchInput && (
-            <button
-              type="button"
-              onClick={() => setSearchInput("")}
-              aria-label={t("settings.history.search.clear")}
-              className="absolute end-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-text/45 hover:text-text"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
+        <SearchField
+          value={searchInput}
+          onChange={setSearchInput}
+          placeholder={t("settings.history.search.placeholder")}
+          clearLabel={t("settings.history.search.clear")}
+        />
         {sourceCounts && (
           <div className="flex gap-0.5 p-[3px] rounded-field bg-field border border-line">
             {(["all", "microphone", "file"] as const).map((f) => {
@@ -439,7 +417,7 @@ export const HistorySettings: React.FC = () => {
                   onClick={() => setFilter(f)}
                   aria-pressed={filter === f}
                   disabled={count === 0}
-                  className={`h-7 px-2.5 rounded-[7px] text-caption transition-colors cursor-pointer disabled:cursor-not-allowed disabled:text-text/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-logo-primary/40 ${
+                  className={`h-7 px-2.5 rounded-item text-caption transition-colors cursor-pointer disabled:cursor-not-allowed disabled:text-text/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-logo-primary/40 ${
                     filter === f
                       ? "bg-logo-primary/15 text-accent-text font-semibold"
                       : "text-text/60 font-medium hover:text-text"
@@ -451,15 +429,13 @@ export const HistorySettings: React.FC = () => {
             })}
           </div>
         )}
-        <button
-          type="button"
+        <IconButton
+          variant="field"
           onClick={openRecordingsFolder}
           title={t("settings.history.openFolder")}
-          aria-label={t("settings.history.openFolder")}
-          className="w-[34px] h-[34px] shrink-0 flex items-center justify-center rounded-field bg-field border border-line text-text/60 hover:text-text hover:border-text/25 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-logo-primary/40"
         >
           <FolderOpen className="w-4 h-4" />
-        </button>
+        </IconButton>
       </div>
       {content}
     </div>
@@ -640,7 +616,7 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
         // partial entry either never had a recording (cancelled dictation) or
         // lost it later, and "older recordings" fits count- and time-based
         // retention alike.
-        <p className="flex items-start gap-1.5 text-caption text-text/45">
+        <p className="flex items-start gap-1.5 text-caption text-text/60">
           <VolumeX width={13} height={13} className="shrink-0 mt-px" />
           <span>
             {t("settings.history.noAudio.title")} ·{" "}

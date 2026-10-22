@@ -101,6 +101,32 @@ src/
 `transcribe_file` is deliberately **not** gated on `drag_drop_enabled`: the drop
 sites check the setting themselves, and clicking the picker is consent enough.
 
+## Design system
+
+The look Leo chose from mockups in October 2026 ("2b"). Build new UI from it
+rather than around it.
+
+- **Tokens** live in `src/styles/theme.css` (light/dark pairs) and are
+  registered for Tailwind in `src/App.css`: `background` (the window),
+  `surface` (cards), `field` (inputs inside cards), `line` (hairlines, derived
+  from the text colour), `accent-text` (the accent darkened on light grounds,
+  where orange text is about 3:1), a type scale `text-title`, `text-section`,
+  `text-label`, `text-caption`, `text-control`, and `rounded-card` /
+  `rounded-field`. A `data-theme` override must set the same pairs.
+- **A setting is a `SettingContainer`**: label, the explanation always visible
+  under it, the control on the right. There is no tooltip mode any more; keep
+  descriptions to one line in en and de. Related settings share a
+  `SettingsGroup`, a card with its title inside.
+- **Chrome**: the page title and the model chip sit in a fixed header in
+  `App.tsx`; there is no footer. Shortcuts are drawn with `KeyCaps`
+  (`keyCapLabels` turns `option+space` into ⌥ Space on macOS). Actions that
+  should not be one stray click away go into `ActionMenu` ("…").
+- **History and Models** follow the same card-of-rows pattern: History groups
+  by day (`Intl`, so no strings per language), Models uses `ModelRow`; the
+  onboarding keeps the larger `ModelCard`.
+- The mockups are on the canvas "crwbar voice Redesign"; `scripts/readme-shots`
+  renders the real UI with demo data for checking a change in both themes.
+
 ## Gotchas
 
 **macOS `-psn_` launch argument.** LaunchServices appends an argument like

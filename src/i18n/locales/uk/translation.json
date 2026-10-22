@@ -520,7 +520,6 @@
       }
     },
     "debug": {
-      "title": "Дебаг",
       "logDirectory": {
         "title": "Папка логів",
         "description": "Розташування файлів логів"
@@ -618,7 +617,6 @@
       }
     },
     "about": {
-      "title": "Інфо",
       "version": {
         "title": "Версія",
         "description": "Поточна версія crwbar voice"
@@ -646,19 +644,6 @@
         }
       }
     }
-  },
-  "footer": {
-    "checkingUpdates": "Перевірка оновлень...",
-    "updateAvailableShort": "Доступне оновлення",
-    "upToDate": "Актуальна версія",
-    "updateCheckingDisabled": "Перевірка оновлень вимкнена",
-    "downloading": "Завантаження... {{progress}}%",
-    "installing": "Встановлення...",
-    "preparing": "Підготовка...",
-    "checkForUpdates": "Перевірити оновлення",
-    "portableUpdateTitle": "Потрібне ручне оновлення",
-    "portableUpdateMessage": "Портативні встановлення не можна оновити автоматично. Щоб оновити: завантажте найновіший інсталятор NSIS зі сторінки GitHub Releases, установіть його в ту саму теку, а потім скопіюйте теку Data/ (налаштування, моделі, записи) зі старої версії до нової.",
-    "portableUpdateButton": "Відкрити GitHub Releases"
   },
   "common": {
     "loading": "Завантаження...",

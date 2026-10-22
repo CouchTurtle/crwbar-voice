@@ -5,8 +5,10 @@ import type { ModelInfo } from "@/bindings";
 import type { ModelCardStatus } from "@/components/onboarding";
 import {
   getLanguageDisplayText,
+  getQuantLabel,
   isLegacySource,
-} from "@/components/onboarding/ModelCard";
+} from "@/lib/utils/modelInfo";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { formatModelSize } from "@/lib/utils/format";
 import {
   getTranslatedModelDescription,
@@ -60,6 +62,9 @@ export const ModelRow: React.FC<ModelRowProps> = ({
   downloadSpeed,
 }) => {
   const { t } = useTranslation();
+  const debugMode = useSettingsStore(
+    (state) => state.settings?.debug_mode ?? false,
+  );
   const name = getTranslatedModelName(model, t);
   const installed = status === "active" || status === "available";
   const busy =
@@ -76,6 +81,7 @@ export const ModelRow: React.FC<ModelRowProps> = ({
       ? t("modelSelector.capabilities.translate")
       : null,
     formatModelSize(Number(model.size_mb)),
+    debugMode ? getQuantLabel(model.filename) : null,
   ]
     .filter(Boolean)
     // Each fact stays on one line; the row breaks between them.
@@ -100,6 +106,16 @@ export const ModelRow: React.FC<ModelRowProps> = ({
         <Badge variant="secondary">{t("modelSelector.legacy")}</Badge>
       )}
     </>
+  );
+
+  // Accuracy and speed matter most when choosing what to download.
+  const scores = (model.accuracy_score > 0 || model.speed_score > 0) && (
+    <span className="grid grid-cols-[auto_64px] items-center gap-x-2 gap-y-1 text-caption text-text/60 shrink-0">
+      <span>{t("onboarding.modelCard.accuracy")}</span>
+      <Bar value={model.accuracy_score * 100} />
+      <span>{t("onboarding.modelCard.speed")}</span>
+      <Bar value={model.speed_score * 100} />
+    </span>
   );
 
   const title = (
@@ -166,6 +182,7 @@ export const ModelRow: React.FC<ModelRowProps> = ({
             {getTranslatedModelDescription(model, t)} · {meta}
           </span>
         </span>
+        {scores}
         <Button
           variant="primary-soft"
           size="sm"
@@ -203,24 +220,21 @@ export const ModelRow: React.FC<ModelRowProps> = ({
           <span className="text-caption text-text/60 truncate">{meta}</span>
         </span>
       </button>
-      {(model.accuracy_score > 0 || model.speed_score > 0) && (
-        <span className="grid grid-cols-[auto_64px] items-center gap-x-2 gap-y-1 text-caption text-text/50 shrink-0">
-          <span>{t("onboarding.modelCard.accuracy")}</span>
-          <Bar value={model.accuracy_score * 100} />
-          <span>{t("onboarding.modelCard.speed")}</span>
-          <Bar value={model.speed_score * 100} />
-        </span>
+      {scores}
+      {/* Not while switching: deleting a model mid-load would pull its files
+          out from under the load. */}
+      {installed && (
+        <ActionMenu
+          label={t("common.more")}
+          items={[
+            {
+              label: t("common.delete"),
+              onSelect: () => onDelete(model.id),
+              danger: true,
+            },
+          ]}
+        />
       )}
-      <ActionMenu
-        label={t("common.more")}
-        items={[
-          {
-            label: t("common.delete"),
-            onSelect: () => onDelete(model.id),
-            danger: true,
-          },
-        ]}
-      />
     </div>
   );
 };

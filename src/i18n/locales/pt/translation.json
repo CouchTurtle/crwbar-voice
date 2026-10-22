@@ -520,7 +520,6 @@
       }
     },
     "debug": {
-      "title": "Depuração",
       "logDirectory": {
         "title": "Diretório de Logs",
         "description": "Local onde os arquivos de log são armazenados"
@@ -618,7 +617,6 @@
       }
     },
     "about": {
-      "title": "Sobre",
       "version": {
         "title": "Versão",
         "description": "Versão atual do crwbar voice"
@@ -646,19 +644,6 @@
         }
       }
     }
-  },
-  "footer": {
-    "checkingUpdates": "Verificando atualizações...",
-    "updateAvailableShort": "Atualização disponível",
-    "upToDate": "Atualizado",
-    "updateCheckingDisabled": "Verificação de Atualização Desabilitada",
-    "downloading": "Baixando... {{progress}}%",
-    "installing": "Instalando...",
-    "preparing": "Preparando...",
-    "checkForUpdates": "Verificar atualizações",
-    "portableUpdateTitle": "Atualização manual necessária",
-    "portableUpdateMessage": "Instalações portáteis não podem ser atualizadas automaticamente. Para atualizar: baixe o instalador NSIS mais recente do GitHub Releases, instale-o na mesma pasta e, em seguida, copie sua pasta Data/ (configurações, modelos, gravações) da versão antiga para a nova.",
-    "portableUpdateButton": "Abrir GitHub Releases"
   },
   "common": {
     "loading": "Carregando...",

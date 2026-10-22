@@ -520,7 +520,6 @@
       }
     },
     "debug": {
-      "title": "デバッグ",
       "logDirectory": {
         "title": "ログディレクトリ",
         "description": "ログファイルの保存場所"
@@ -618,7 +617,6 @@
       }
     },
     "about": {
-      "title": "概要",
       "version": {
         "title": "バージョン",
         "description": "crwbar voice の現在のバージョン"
@@ -646,19 +644,6 @@
         }
       }
     }
-  },
-  "footer": {
-    "checkingUpdates": "アップデートを確認中…",
-    "updateAvailableShort": "アップデートあり",
-    "upToDate": "最新です",
-    "updateCheckingDisabled": "アップデート確認無効",
-    "downloading": "ダウンロード中… {{progress}}%",
-    "installing": "インストール中…",
-    "preparing": "準備中…",
-    "checkForUpdates": "アップデートを確認",
-    "portableUpdateTitle": "手動での更新が必要です",
-    "portableUpdateMessage": "ポータブル版は自動的に更新できません。更新するには、GitHub Releases から最新の NSIS インストーラーをダウンロードし、同じフォルダーにインストールしてから、古いバージョンの Data フォルダー(設定、モデル、録音)を新しいバージョンにコピーしてください。",
-    "portableUpdateButton": "GitHub Releases を開く"
   },
   "common": {
     "loading": "読み込み中…",

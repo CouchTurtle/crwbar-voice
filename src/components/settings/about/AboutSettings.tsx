@@ -29,7 +29,7 @@ export const AboutSettings: React.FC = () => {
 
   return (
     <div className="max-w-3xl w-full mx-auto space-y-3.5">
-      <SettingsGroup title={t("settings.about.title")}>
+      <SettingsGroup>
         <AppLanguageSelector grouped={true} />
         <ThemeSelector grouped={true} />
         <SettingContainer
@@ -37,7 +37,6 @@ export const AboutSettings: React.FC = () => {
           description={t("settings.about.version.description")}
           grouped={true}
         >
-          {/* eslint-disable-next-line i18next/no-literal-string */}
           <span className="text-sm font-mono">{version && `v${version}`}</span>
         </SettingContainer>
 

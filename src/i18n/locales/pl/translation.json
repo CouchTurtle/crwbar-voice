@@ -520,7 +520,6 @@
       }
     },
     "debug": {
-      "title": "Debugowanie",
       "logDirectory": {
         "title": "Katalog logów",
         "description": "Miejsce przechowywania plików logów"
@@ -618,7 +617,6 @@
       }
     },
     "about": {
-      "title": "O programie",
       "version": {
         "title": "Wersja",
         "description": "Aktualna wersja crwbar voice"
@@ -646,19 +644,6 @@
         }
       }
     }
-  },
-  "footer": {
-    "checkingUpdates": "Sprawdzanie aktualizacji...",
-    "updateAvailableShort": "Dostępna aktualizacja",
-    "upToDate": "Aktualne",
-    "updateCheckingDisabled": "Sprawdzanie aktualizacji wyłączone",
-    "downloading": "Pobieranie... {{progress}}%",
-    "installing": "Instalowanie...",
-    "preparing": "Przygotowywanie...",
-    "checkForUpdates": "Sprawdź aktualizacje",
-    "portableUpdateTitle": "Wymagana ręczna aktualizacja",
-    "portableUpdateMessage": "Instalacji przenośnych nie można aktualizować automatycznie. Aby zaktualizować: pobierz najnowszy instalator NSIS z GitHub Releases, zainstaluj go w tym samym folderze, a następnie skopiuj swój folder Data/ (ustawienia, modele, nagrania) ze starej wersji do nowej.",
-    "portableUpdateButton": "Otwórz GitHub Releases"
   },
   "common": {
     "loading": "Wczytywanie...",

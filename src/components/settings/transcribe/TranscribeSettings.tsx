@@ -433,10 +433,10 @@ export const TranscribeSettings: React.FC = () => {
             </div>
           ) : (
             <div
-              className={`rounded-lg border-2 border-dashed p-6 text-center transition-colors ${
+              className={`rounded-field border-2 border-dashed p-6 text-center transition-colors ${
                 dragging
                   ? "border-logo-primary bg-logo-primary/10"
-                  : "border-mid-gray/30"
+                  : "border-text/15"
               }`}
             >
               <div className="inline-flex rounded-lg bg-logo-primary/10 p-3">

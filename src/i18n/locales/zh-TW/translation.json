@@ -520,7 +520,6 @@
       }
     },
     "debug": {
-      "title": "偵錯",
       "logDirectory": {
         "title": "日誌目錄",
         "description": "日誌檔案的儲存位置"
@@ -618,7 +617,6 @@
       }
     },
     "about": {
-      "title": "關於",
       "version": {
         "title": "版本",
         "description": "crwbar voice 的目前版本"
@@ -646,19 +644,6 @@
         }
       }
     }
-  },
-  "footer": {
-    "checkingUpdates": "檢查更新中...",
-    "updateAvailableShort": "有可用更新",
-    "upToDate": "已是最新版本",
-    "updateCheckingDisabled": "更新檢查已停用",
-    "downloading": "下載中... {{progress}}%",
-    "installing": "安裝中...",
-    "preparing": "準備中...",
-    "checkForUpdates": "檢查更新",
-    "portableUpdateTitle": "需要手動更新",
-    "portableUpdateMessage": "可攜式安裝無法自動更新。更新方法：從 GitHub Releases 下載最新的 NSIS 安裝程式，安裝到相同資料夾，然後將舊版本的 Data/ 資料夾（設定、模型、錄音）複製到新版本。",
-    "portableUpdateButton": "開啟 GitHub Releases"
   },
   "common": {
     "loading": "載入中...",

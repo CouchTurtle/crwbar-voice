@@ -520,7 +520,6 @@
       }
     },
     "debug": {
-      "title": "Отлаживать",
       "logDirectory": {
         "title": "Каталог журналов",
         "description": "Место хранения файлов журналов"
@@ -618,7 +617,6 @@
       }
     },
     "about": {
-      "title": "О программе",
       "version": {
         "title": "Версия",
         "description": "Текущая версия crwbar voice"
@@ -646,19 +644,6 @@
         }
       }
     }
-  },
-  "footer": {
-    "checkingUpdates": "Проверяем наличие обновлений...",
-    "updateAvailableShort": "Доступно обновление",
-    "upToDate": "Не требует обновлений",
-    "updateCheckingDisabled": "Проверка обновлений отключена",
-    "downloading": "Загрузка... {{progress}} %",
-    "installing": "Установка...",
-    "preparing": "Подготовка...",
-    "checkForUpdates": "Проверить наличие обновлений",
-    "portableUpdateTitle": "Требуется ручное обновление",
-    "portableUpdateMessage": "Портативные установки нельзя обновить автоматически. Чтобы обновить: скачайте последний установщик NSIS со страницы GitHub Releases, установите его в ту же папку, затем скопируйте папку Data/ (настройки, модели, записи) из старой версии в новую.",
-    "portableUpdateButton": "Открыть GitHub Releases"
   },
   "common": {
     "loading": "Загрузка...",

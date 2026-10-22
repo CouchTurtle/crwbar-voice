@@ -31,6 +31,11 @@
 
   --radius-card: 18px;
   --radius-field: 9px;
+  /* An option inside a menu or list box. */
+  --radius-item: 6px;
+
+  /* Height of a toolbar's fields and square buttons. */
+  --spacing-toolbar: 34px;
 }
 
 :root {

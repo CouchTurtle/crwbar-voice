@@ -496,7 +496,6 @@
       }
     },
     "debug": {
-      "title": "تصحيح الأخطاء",
       "logDirectory": {
         "title": "مجلد السجلات",
         "description": "الموقع الذي يتم فيه تخزين ملفات السجل"
@@ -594,7 +593,6 @@
       }
     },
     "about": {
-      "title": "حول",
       "version": {
         "title": "الإصدار",
         "description": "الإصدار الحالي من crwbar voice"
@@ -646,19 +644,6 @@
         "files": "الملفات"
       }
     }
-  },
-  "footer": {
-    "checkingUpdates": "...جاري التحقق من وجود تحديثات",
-    "updateAvailableShort": "تحديث متاح",
-    "upToDate": "محدث",
-    "updateCheckingDisabled": "تم تعطيل التحقق من التحديث",
-    "downloading": "...جاري التنزيل {{progress}}%",
-    "installing": "...جاري التثبيت",
-    "preparing": "...جاري التحضير",
-    "checkForUpdates": "التحقق من وجود تحديثات",
-    "portableUpdateTitle": "التحديث اليدوي مطلوب",
-    "portableUpdateMessage": "لا يمكن تحديث التثبيتات المحمولة تلقائيًا. للتحديث: نزّل أحدث مثبّت NSIS من GitHub Releases، وثبّته في المجلد نفسه، ثم انسخ مجلد Data/ (الإعدادات والنماذج والتسجيلات) من الإصدار القديم إلى الجديد.",
-    "portableUpdateButton": "فتح GitHub Releases"
   },
   "common": {
     "loading": "...جاري التحميل",

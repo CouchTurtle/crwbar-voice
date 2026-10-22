@@ -520,7 +520,6 @@
       }
     },
     "debug": {
-      "title": "Probleemoplossing",
       "logDirectory": {
         "title": "Logboekmap",
         "description": "Locatie waar logbestanden worden opgeslagen"
@@ -618,7 +617,6 @@
       }
     },
     "about": {
-      "title": "Over crwbar voice",
       "version": {
         "title": "Versie",
         "description": "Huidige versie van crwbar voice"
@@ -646,19 +644,6 @@
         }
       }
     }
-  },
-  "footer": {
-    "checkingUpdates": "Controleren op updates...",
-    "updateAvailableShort": "Update beschikbaar",
-    "upToDate": "Up-to-date",
-    "updateCheckingDisabled": "Updatecontrole uitgeschakeld",
-    "downloading": "Downloaden... {{progress}}%",
-    "installing": "Installeren...",
-    "preparing": "Voorbereiden...",
-    "checkForUpdates": "Controleren op updates",
-    "portableUpdateTitle": "Handmatige update vereist",
-    "portableUpdateMessage": "Draagbare (portable) installaties kunnen niet automatisch worden bijgewerkt. Om bij te werken: download het nieuwste NSIS-installatiebestand van GitHub Releases, installeer het in dezelfde map en kopieer vervolgens je Data/-map (instellingen, modellen, opnames) van de oude versie naar de nieuwe.",
-    "portableUpdateButton": "GitHub Releases openen"
   },
   "whatsNew": {
     "title": "Nieuw in crwbar voice v{{version}}"

@@ -2,7 +2,7 @@
 // demo data. Loaded before the app's own entry point; see app.html/overlay.html.
 import { emit } from "@tauri-apps/api/event";
 import { mockIPC, mockWindows } from "@tauri-apps/api/mocks";
-import { fileTranscript, history, models, settings } from "./fixtures";
+import { fileTranscript, history, models, now, settings } from "./fixtures";
 
 const scene = new URLSearchParams(location.search).get("scene") ?? "";
 
@@ -20,8 +20,10 @@ mockWindows(scene.startsWith("overlay") ? "recording_overlay" : "main");
 // The Transcribe tab's countdown divides audio done by wall-clock time. A page
 // clock that can be wound forward lets a screenshot show a realistic estimate
 // without waiting half an hour.
-let clockOffset = 0;
+// It starts at the fixtures' "now", so day headings read the same whatever
+// day the shots are taken.
 const realNow = Date.now.bind(Date);
+let clockOffset = now * 1000 + 60_000 - realNow();
 Date.now = () => realNow() + clockOffset;
 
 const searchMatches = (text: string, query: string) => {

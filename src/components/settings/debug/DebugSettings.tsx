@@ -14,7 +14,7 @@ export const DebugSettings: React.FC = () => {
 
   return (
     <div className="max-w-3xl w-full mx-auto space-y-3.5">
-      <SettingsGroup title={t("settings.debug.title")}>
+      <SettingsGroup>
         <LogLevelSelector grouped={true} />
         <WhatsNewPreview grouped={true} />
         <WordCorrectionThreshold grouped={true} />

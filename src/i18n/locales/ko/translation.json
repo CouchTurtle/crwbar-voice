@@ -520,7 +520,6 @@
       }
     },
     "debug": {
-      "title": "디버그",
       "logDirectory": {
         "title": "로그 디렉토리",
         "description": "로그 파일이 저장되는 위치"
@@ -618,7 +617,6 @@
       }
     },
     "about": {
-      "title": "정보",
       "version": {
         "title": "버전",
         "description": "crwbar voice의 현재 버전"
@@ -646,19 +644,6 @@
         }
       }
     }
-  },
-  "footer": {
-    "checkingUpdates": "업데이트 확인 중...",
-    "updateAvailableShort": "업데이트 사용 가능",
-    "upToDate": "최신 상태",
-    "updateCheckingDisabled": "업데이트 확인 비활성화됨",
-    "downloading": "다운로드 중... {{progress}}%",
-    "installing": "설치 중...",
-    "preparing": "준비 중...",
-    "checkForUpdates": "업데이트 확인",
-    "portableUpdateTitle": "수동 업데이트 필요",
-    "portableUpdateMessage": "포터블 설치는 자동으로 업데이트할 수 없습니다. 업데이트하려면 GitHub Releases에서 최신 NSIS 설치 프로그램을 다운로드하여 같은 폴더에 설치한 다음, 이전 버전의 Data/ 폴더(설정, 모델, 녹음)를 새 버전으로 복사하세요.",
-    "portableUpdateButton": "GitHub Releases 열기"
   },
   "common": {
     "loading": "로딩 중...",

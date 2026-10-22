@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { ChevronsUpDown } from "lucide-react";
 
 export interface DropdownOption {
   value: string;
@@ -71,20 +72,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
         disabled={disabled}
       >
         <span className="truncate">{selectedOption?.label || placeholder}</span>
-        <svg
-          className="w-3 h-3 text-text/50"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2.4}
-            d="m7 15 5 5 5-5M7 9l5-5 5 5"
-          />
-        </svg>
+        <ChevronsUpDown className="w-3 h-3 text-text/50" aria-hidden="true" />
       </button>
       {isOpen && !disabled && (
         <div className="absolute top-full left-0 right-0 mt-1 p-1 bg-surface border border-line rounded-field shadow-lg z-50 max-h-60 overflow-y-auto">
@@ -97,9 +85,9 @@ export const Dropdown: React.FC<DropdownProps> = ({
               <button
                 key={option.value}
                 type="button"
-                className={`w-full px-2.5 py-1.5 text-control text-start rounded-[6px] hover:bg-text/8 transition-colors duration-150 ${
+                className={`w-full px-2.5 py-1.5 text-control text-start rounded-item hover:bg-text/8 transition-colors duration-150 ${
                   selectedValue === option.value
-                    ? "text-logo-primary font-semibold"
+                    ? "text-accent-text font-semibold"
                     : ""
                 } ${option.disabled ? "opacity-50 cursor-not-allowed" : ""}`}
                 onClick={() => handleSelect(option.value)}
