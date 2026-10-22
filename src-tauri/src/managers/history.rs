@@ -44,6 +44,19 @@ static MIGRATIONS: &[M] = &[
     M::up("ALTER TABLE transcription_history ADD COLUMN partial BOOLEAN NOT NULL DEFAULT 0;"),
 ];
 
+/// A history row about to be written. Named fields, because two booleans and
+/// two options in a row are easy to swap without the compiler noticing.
+pub struct NewEntry {
+    pub file_name: String,
+    pub source: HistorySource,
+    pub transcription_text: String,
+    pub post_process_requested: bool,
+    pub post_processed_text: Option<String>,
+    pub post_process_prompt: Option<String>,
+    /// The run stopped before the end of the audio.
+    pub partial: bool,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, Type)]
 pub struct PaginatedHistory {
     pub entries: Vec<HistoryEntry>,
@@ -277,17 +290,16 @@ impl HistoryManager {
 
     /// Save a new history entry to the database.
     /// The WAV file should already have been written to the recordings directory.
-    pub fn save_entry(
-        &self,
-        file_name: String,
-        source: HistorySource,
-        transcription_text: String,
-        post_process_requested: bool,
-        post_processed_text: Option<String>,
-        post_process_prompt: Option<String>,
-        // True when the run stopped before the end of the audio.
-        partial: bool,
-    ) -> Result<HistoryEntry> {
+    pub fn save_entry(&self, new: NewEntry) -> Result<HistoryEntry> {
+        let NewEntry {
+            file_name,
+            source,
+            transcription_text,
+            post_process_requested,
+            post_processed_text,
+            post_process_prompt,
+            partial,
+        } = new;
         let timestamp = Utc::now().timestamp();
         let title = self.format_timestamp_title(timestamp);
 

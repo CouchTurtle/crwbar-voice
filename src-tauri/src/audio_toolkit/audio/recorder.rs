@@ -503,90 +503,6 @@ pub fn is_no_input_device_error(error_message: &str) -> bool {
             && normalized.contains("coreaudio"))
 }
 
-#[cfg(test)]
-mod tests {
-    use super::{
-        handle_input_block, is_microphone_access_denied, is_no_input_device_error, AudioChunk,
-    };
-    use std::sync::{
-        atomic::{AtomicBool, Ordering},
-        mpsc,
-    };
-
-    /// The last block before a stop holds the end of the last word. It has to
-    /// reach the consumer ahead of the end-of-stream marker, not be swallowed.
-    #[test]
-    fn boundary_block_is_forwarded_before_end_of_stream() {
-        let (tx, rx) = mpsc::channel();
-        let stop_flag = AtomicBool::new(false);
-        let mut eos_sent = false;
-        let mut scratch = Vec::new();
-        let mut push = |flag: &AtomicBool, eos: &mut bool, block: &[f32]| {
-            handle_input_block::<f32>(block, 1, flag, eos, &mut scratch, &tx)
-        };
-
-        push(&stop_flag, &mut eos_sent, &[0.1]);
-        assert!(matches!(rx.try_recv(), Ok(AudioChunk::Samples(_))));
-        assert!(rx.try_recv().is_err(), "no marker while recording");
-
-        stop_flag.store(true, Ordering::Relaxed);
-        push(&stop_flag, &mut eos_sent, &[0.5, 0.5]);
-        match rx.try_recv() {
-            Ok(AudioChunk::Samples(samples)) => assert_eq!(samples, vec![0.5, 0.5]),
-            _ => panic!("the block that saw the stop must be forwarded, not dropped"),
-        }
-        assert!(matches!(rx.try_recv(), Ok(AudioChunk::EndOfStream)));
-
-        push(&stop_flag, &mut eos_sent, &[0.9]);
-        assert!(
-            rx.try_recv().is_err(),
-            "blocks after the marker are dropped"
-        );
-
-        stop_flag.store(false, Ordering::Relaxed);
-        push(&stop_flag, &mut eos_sent, &[0.2]);
-        assert!(matches!(rx.try_recv(), Ok(AudioChunk::Samples(_))));
-    }
-
-    #[test]
-    fn detects_access_is_denied() {
-        assert!(is_microphone_access_denied("Access is denied"));
-    }
-
-    #[test]
-    fn detects_permission_denied() {
-        assert!(is_microphone_access_denied("permission denied"));
-    }
-
-    #[test]
-    fn detects_windows_error_code() {
-        assert!(is_microphone_access_denied("WASAPI error: 0x80070005"));
-    }
-
-    #[test]
-    fn does_not_match_unrelated_errors() {
-        assert!(!is_microphone_access_denied("device not found"));
-    }
-
-    #[test]
-    fn detects_no_input_device() {
-        assert!(is_no_input_device_error("No input device found"));
-    }
-
-    #[test]
-    fn detects_coreaudio_config_error() {
-        assert!(is_no_input_device_error(
-            "Failed to fetch preferred config: A backend-specific error has occurred: An unknown error unknown to the coreaudio-rs API occurred"
-        ));
-    }
-
-    #[test]
-    fn does_not_match_other_errors_for_no_device() {
-        assert!(!is_no_input_device_error("permission denied"));
-        assert!(!is_no_input_device_error("device not found"));
-    }
-}
-
 #[allow(clippy::too_many_arguments)]
 fn run_consumer(
     in_sample_rate: u32,
@@ -816,5 +732,89 @@ fn run_consumer(
                 );
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        handle_input_block, is_microphone_access_denied, is_no_input_device_error, AudioChunk,
+    };
+    use std::sync::{
+        atomic::{AtomicBool, Ordering},
+        mpsc,
+    };
+
+    /// The last block before a stop holds the end of the last word. It has to
+    /// reach the consumer ahead of the end-of-stream marker, not be swallowed.
+    #[test]
+    fn boundary_block_is_forwarded_before_end_of_stream() {
+        let (tx, rx) = mpsc::channel();
+        let stop_flag = AtomicBool::new(false);
+        let mut eos_sent = false;
+        let mut scratch = Vec::new();
+        let mut push = |flag: &AtomicBool, eos: &mut bool, block: &[f32]| {
+            handle_input_block::<f32>(block, 1, flag, eos, &mut scratch, &tx)
+        };
+
+        push(&stop_flag, &mut eos_sent, &[0.1]);
+        assert!(matches!(rx.try_recv(), Ok(AudioChunk::Samples(_))));
+        assert!(rx.try_recv().is_err(), "no marker while recording");
+
+        stop_flag.store(true, Ordering::Relaxed);
+        push(&stop_flag, &mut eos_sent, &[0.5, 0.5]);
+        match rx.try_recv() {
+            Ok(AudioChunk::Samples(samples)) => assert_eq!(samples, vec![0.5, 0.5]),
+            _ => panic!("the block that saw the stop must be forwarded, not dropped"),
+        }
+        assert!(matches!(rx.try_recv(), Ok(AudioChunk::EndOfStream)));
+
+        push(&stop_flag, &mut eos_sent, &[0.9]);
+        assert!(
+            rx.try_recv().is_err(),
+            "blocks after the marker are dropped"
+        );
+
+        stop_flag.store(false, Ordering::Relaxed);
+        push(&stop_flag, &mut eos_sent, &[0.2]);
+        assert!(matches!(rx.try_recv(), Ok(AudioChunk::Samples(_))));
+    }
+
+    #[test]
+    fn detects_access_is_denied() {
+        assert!(is_microphone_access_denied("Access is denied"));
+    }
+
+    #[test]
+    fn detects_permission_denied() {
+        assert!(is_microphone_access_denied("permission denied"));
+    }
+
+    #[test]
+    fn detects_windows_error_code() {
+        assert!(is_microphone_access_denied("WASAPI error: 0x80070005"));
+    }
+
+    #[test]
+    fn does_not_match_unrelated_errors() {
+        assert!(!is_microphone_access_denied("device not found"));
+    }
+
+    #[test]
+    fn detects_no_input_device() {
+        assert!(is_no_input_device_error("No input device found"));
+    }
+
+    #[test]
+    fn detects_coreaudio_config_error() {
+        assert!(is_no_input_device_error(
+            "Failed to fetch preferred config: A backend-specific error has occurred: An unknown error unknown to the coreaudio-rs API occurred"
+        ));
+    }
+
+    #[test]
+    fn does_not_match_other_errors_for_no_device() {
+        assert!(!is_no_input_device_error("permission denied"));
+        assert!(!is_no_input_device_error("device not found"));
     }
 }

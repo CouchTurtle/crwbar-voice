@@ -1,4 +1,4 @@
-use crate::managers::history::{HistoryManager, HistorySource};
+use crate::managers::history::{HistoryManager, HistorySource, NewEntry};
 use crate::managers::transcription::TranscriptionManager;
 use crate::settings::{get_settings, write_settings, ModelUnloadTimeout};
 use serde::Serialize;
@@ -219,15 +219,15 @@ pub async fn transcribe_file(
     let wav_path = hm.recordings_dir().join(&file_name);
     match crate::audio_toolkit::save_wav_file(&wav_path, &samples) {
         Ok(()) => {
-            if let Err(e) = hm.save_entry(
+            if let Err(e) = hm.save_entry(NewEntry {
                 file_name,
-                HistorySource::File,
-                raw_text.clone(),
-                false,
-                processed.post_processed_text.clone(),
-                processed.post_process_prompt.clone(),
-                !complete,
-            ) {
+                source: HistorySource::File,
+                transcription_text: raw_text.clone(),
+                post_process_requested: false,
+                post_processed_text: processed.post_processed_text.clone(),
+                post_process_prompt: processed.post_process_prompt.clone(),
+                partial: !complete,
+            }) {
                 log::error!("Failed to save imported-file history entry: {}", e);
             }
         }

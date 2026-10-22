@@ -1,5 +1,5 @@
 use crate::managers::audio::AudioRecordingManager;
-use crate::managers::history::{HistoryManager, HistorySource};
+use crate::managers::history::{HistoryManager, HistorySource, NewEntry};
 use crate::managers::transcription::TranscriptionManager;
 use crate::shortcut;
 use crate::TranscriptionCoordinator;
@@ -80,15 +80,15 @@ fn keep_cancelled_transcript(app: &AppHandle, tm: &Arc<TranscriptionManager>) {
     };
 
     let file_name = format!("handy-cancelled-{}.wav", chrono::Utc::now().timestamp());
-    match history.save_entry(
+    match history.save_entry(NewEntry {
         file_name,
-        HistorySource::Microphone,
-        text,
-        false,
-        None,
-        None,
-        true,
-    ) {
+        source: HistorySource::Microphone,
+        transcription_text: text,
+        post_process_requested: false,
+        post_processed_text: None,
+        post_process_prompt: None,
+        partial: true,
+    }) {
         Ok(entry) => info!(
             "Kept the cancelled transcript as history entry {}",
             entry.id
