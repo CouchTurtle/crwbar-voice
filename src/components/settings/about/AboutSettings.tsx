@@ -21,7 +21,6 @@ export const AboutSettings: React.FC = () => {
         setVersion(appVersion);
       } catch (error) {
         console.error("Failed to get app version:", error);
-        setVersion("0.1.0");
       }
     };
 
@@ -39,7 +38,7 @@ export const AboutSettings: React.FC = () => {
           grouped={true}
         >
           {/* eslint-disable-next-line i18next/no-literal-string */}
-          <span className="text-sm font-mono">v{version}</span>
+          <span className="text-sm font-mono">{version && `v${version}`}</span>
         </SettingContainer>
 
         <AppDataDirectory descriptionMode="tooltip" grouped={true} />

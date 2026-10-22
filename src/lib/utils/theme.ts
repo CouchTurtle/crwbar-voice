@@ -136,8 +136,6 @@ export const RGB_SPEED_STORAGE_KEY = "crwbar.emilSpeed";
 
 let rgbFrame: number | null = null;
 
-export const isRgbModeRunning = (): boolean => rgbFrame !== null;
-
 /** Current speed multiplier (1 = normal). Read fresh so changes apply live. */
 export const getRgbSpeed = (): number => {
   try {

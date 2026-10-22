@@ -543,10 +543,6 @@
         "lineCount": "{{count}} líneas",
         "empty": "Esperando registros… Las entradas aparecerán aquí a medida que la aplicación las emita."
       },
-      "updateChecks": {
-        "label": "Buscar Actualizaciones",
-        "description": "Buscar automáticamente nuevas versiones de crwbar voice"
-      },
       "soundTheme": {
         "label": "Tema de Sonido",
         "description": "Elige un tema de sonido para la retroalimentación de inicio y parada de grabación"
@@ -594,11 +590,6 @@
         "title": "Implementación del teclado",
         "description": "Elige el sistema que gestiona los atajos de teclado.",
         "bindingsReset": "Los atajos de teclado eran incompatibles y se restablecieron a los valores predeterminados"
-      },
-      "paths": {
-        "appData": "Datos de la Aplicación:",
-        "models": "Modelos:",
-        "settings": "Configuración:"
       },
       "pasteDelay": {
         "title": "Retraso de pegado (antes)",
@@ -656,10 +647,6 @@
           "description": "Inferencia de alto rendimiento del modelo de reconocimiento automático de voz Whisper de OpenAI",
           "details": "crwbar voice usa ggml para procesamiento de voz a texto rápido y local. Gracias al increíble trabajo de Georgi Gerganov y colaboradores."
         }
-      },
-      "whatsNewUpdates": {
-        "label": "Mostrar novedades",
-        "description": "Mostrar notas de la versión después de las actualizaciones de crwbar voice"
       }
     }
   },

@@ -543,10 +543,6 @@
         "lineCount": "{{count}} regels",
         "empty": "Wachten op logboeken... Meldingen verschijnen hier zodra de app ze genereert."
       },
-      "updateChecks": {
-        "label": "Controleren op updates",
-        "description": "Automatisch controleren op nieuwe versies van crwbar voice"
-      },
       "whatsNewPreview": {
         "title": "Voorbeeld van release-notes",
         "description": "Open de nieuwste meegeleverde release-notes zonder deze als gelezen te markeren",
@@ -602,11 +598,6 @@
         "description": "Kies de backend voor sneltoetsen.",
         "bindingsReset": "Sneltoetsen waren incompatibel en zijn teruggezet naar de standaardwaarden"
       },
-      "paths": {
-        "appData": "App-data:",
-        "models": "Modellen:",
-        "settings": "Instellingen:"
-      },
       "pasteDelay": {
         "title": "Plakvertraging (voor)",
         "description": "Vertraging (in milliseconden) na het kopiëren van de tekst, voordat de plak-toetsaanslag wordt verzonden. Verhoog dit als er niets wordt geplakt."
@@ -634,10 +625,6 @@
       "version": {
         "title": "Versie",
         "description": "Huidige versie van crwbar voice"
-      },
-      "whatsNewUpdates": {
-        "label": "Toon 'Wat is er nieuw'",
-        "description": "Release-notes tonen nadat crwbar voice is bijgewerkt"
       },
       "appDataDirectory": {
         "title": "App-datamap",

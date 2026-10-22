@@ -543,10 +543,6 @@
         "lineCount": "{{count}}行",
         "empty": "ログを待機中… アプリが出力すると、ここにエントリが表示されます。"
       },
-      "updateChecks": {
-        "label": "アップデートを確認",
-        "description": "crwbar voice の新しいバージョンを自動的にチェック"
-      },
       "soundTheme": {
         "label": "サウンドテーマ",
         "description": "録音開始・停止フィードバックのサウンドテーマを選択"
@@ -594,11 +590,6 @@
         "title": "キーボード実装",
         "description": "キーボードショートカットのバックエンドを選択してください。",
         "bindingsReset": "キーボードショートカットに互換性がなかったため、デフォルトにリセットされました"
-      },
-      "paths": {
-        "appData": "アプリデータ:",
-        "models": "モデル:",
-        "settings": "設定:"
       },
       "pasteDelay": {
         "title": "貼り付け遅延(前)",
@@ -656,10 +647,6 @@
           "description": "オンデバイス機械学習推論のための高性能テンソルライブラリ",
           "details": "crwbar voice のローカルの音声からテキストへの文字起こしは transcribe.cpp と ggml を基盤としています。Georgi Gerganov 氏と貢献者の皆様の素晴らしい仕事に感謝します。"
         }
-      },
-      "whatsNewUpdates": {
-        "label": "新機能を表示",
-        "description": "crwbar voice のアップデート後にリリースノートを表示"
       }
     }
   },

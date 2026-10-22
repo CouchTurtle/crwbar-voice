@@ -543,10 +543,6 @@
         "lineCount": "{{count}} 行",
         "empty": "正在等待日志…… 应用产生日志时将显示在此处。"
       },
-      "updateChecks": {
-        "label": "检查更新",
-        "description": "自动检查 crwbar voice 的新版本"
-      },
       "soundTheme": {
         "label": "声音主题",
         "description": "选择录制开始和停止反馈的声音主题"
@@ -594,11 +590,6 @@
         "title": "键盘实现",
         "description": "选择键盘快捷键的后端。",
         "bindingsReset": "键盘快捷键不兼容，已重置为默认值"
-      },
-      "paths": {
-        "appData": "应用数据:",
-        "models": "模型:",
-        "settings": "设置:"
       },
       "pasteDelay": {
         "title": "粘贴延迟（前）",
@@ -656,10 +647,6 @@
           "description": "OpenAI Whisper 自动语音识别模型的高性能推理",
           "details": "crwbar voice 使用 ggml 进行快速的本地语音转文字处理。感谢 Georgi Gerganov 和贡献者们的出色工作。"
         }
-      },
-      "whatsNewUpdates": {
-        "label": "显示新功能",
-        "description": "crwbar voice 更新后显示发行说明"
       }
     }
   },
