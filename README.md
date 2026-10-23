@@ -12,14 +12,17 @@ Drop in a voice note or a recorded meeting, and find anything you ever said agai
 <p align="center"><img src="docs/images/overlay.png" width="480" alt="The recording bar while listening, with live text, and after copying"></p>
 
 Hold **⌥ Space** and speak. A small bar at the bottom of the screen shows it's
-listening; with a streaming model the words appear while you say them. Let go
-and the text is pasted into the app you were typing in.
+listening — on macOS 26 in Liquid Glass — and with a streaming model the words
+appear while you say them. Let go and the text is pasted into the app you were
+typing in.
 
 - **⌥ C** copies the last transcript, **⌥ V** inserts it again. Both can be
   reassigned or switched off.
 - **Esc** cancels. What was said up to then is kept in History.
 - **Keep Recording After Release** _(General)_ adds up to two seconds, so the
   last word isn't cut off.
+- **Lower Audio While Recording** _(General)_ fades music and calls down while
+  you speak, at the speed you choose.
 
 ## Files and History
 
@@ -31,8 +34,13 @@ meetings are split into pieces, with the time left measured on your Mac, and a
 run you stop keeps what it has done. Files can use their own model: a slower,
 more accurate one for recordings, a fast one for dictation.
 
-**History** keeps every transcript and searches all of them. The newest ten
-recordings keep their audio as well.
+**History** keeps every transcript, grouped by day, and searches all of them —
+case, word order and umlauts don't matter. The newest ten recordings keep their
+audio as well; re-transcribe or delete from an entry's **…** menu.
+
+**Models** shows which model does what: the one marked _Dictation_ runs when you
+speak, the one marked _Files_ handles recordings. Downloads show their progress
+in place.
 
 Imports: WAV, MP3, M4A (AAC and Apple Lossless), FLAC, OGG, Opus and CAF —
 WhatsApp voice notes and Apple Voice Memos included.
@@ -89,10 +97,10 @@ All of them can be changed in _General_; the ✕ next to one switches it off.
 ## Privacy
 
 Speech is transcribed on your Mac and audio never leaves it. There's no account,
-no analytics and no update check. The app goes online for two things:
-downloading a model you choose, and — only if you switch them on — AI
-post-processing and voice actions, which send the _text_ to the provider or
-CLI you set up.
+no analytics and no update check, and transcripts aren't written to the log.
+The app goes online for two things: downloading a model you choose, and — only
+if you switch on _AI_ — post-processing and voice actions, which send the
+_text_ to the provider or CLI you set up. With _AI_ off, nothing is sent.
 
 ## Limits
 
