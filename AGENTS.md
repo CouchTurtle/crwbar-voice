@@ -363,7 +363,7 @@ skips the build. It does **not** touch Rust — run those checks yourself from
 `src-tauri/`:
 
 ```bash
-cargo test         # 162 tests at 0.4.0
+cargo test         # 163 tests at 1.0.0
 cargo check
 cargo fmt -- --check
 ```
