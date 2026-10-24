@@ -33,12 +33,14 @@ const browser = await chromium.launch({ channel: "chrome", headless: true });
 const open = async (
   path: string,
   viewport: { width: number; height: number },
+  init?: () => void,
 ) => {
   const page = await browser.newPage({
     viewport,
     deviceScaleFactor: SCALE,
     colorScheme: "dark",
   });
+  if (init) await page.addInitScript(init);
   page.on("pageerror", (e) => console.error(`[${path}] ${e.message}`));
   await page.goto(base + path);
   return page;
@@ -77,14 +79,41 @@ async function overlayScene(
   scene: string,
   size: { width: number; height: number },
 ) {
+  // As on macOS 26: the page tints the card and draws its shadow, and the
+  // native glass under it blurs the desktop (drawn into the picture below).
   const page = await open(
     `scripts/readme-shots/overlay.html?scene=${scene}`,
     size,
+    () => ((window as any).__CRWBAR_GLASS__ = true),
   );
   await page.waitForFunction(() => (window as any).__sceneReady === true);
   await page.waitForTimeout(900); // let the enter animation settle
-  return shot(page, true);
+  const card = await page.locator(".scard").evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    const radius = parseFloat(getComputedStyle(el).borderTopLeftRadius);
+    return {
+      x: r.x,
+      y: r.y,
+      width: r.width,
+      height: r.height,
+      radius: Math.min(radius, r.height / 2),
+    };
+  });
+  return { image: await shot(page, true), card, size };
 }
+
+type OverlayShot = Awaited<ReturnType<typeof overlayScene>>;
+
+/** An overlay window placed on the desktop, with the blur its glass would add. */
+const onDesk = (
+  { image, card, size }: OverlayShot,
+  left: number,
+  top: number,
+) =>
+  `<div class="glass" style="left:${left + card.x}px;top:${top + card.y}px;width:${card.width}px;height:${card.height}px;border-radius:${card.radius}px"></div>` +
+  `<img class="pill" src="data:image/png;base64,${image}" style="left:${left}px;top:${top}px" width="${size.width}" height="${size.height}">`;
+
+const DESK = { width: 680, height: 300 };
 
 // ---- composition ------------------------------------------------------------
 
@@ -121,7 +150,30 @@ async function compose(body: string, file: string) {
       position: absolute; inset: 0; display: flex; align-items: center;
       justify-content: center; color: rgba(255,255,255,.85);
     }
-    .overlay img { display: block; filter: drop-shadow(0 10px 24px rgba(0,0,0,.28)); }
+    .desk {
+      position: relative; width: ${DESK.width}px; height: ${DESK.height}px;
+      border-radius: 16px; overflow: hidden;
+      background: linear-gradient(160deg, #56627a, #2f3646);
+      font: 600 15px -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    }
+    .doc {
+      position: absolute; left: 60px; top: 22px; width: 400px; height: 300px;
+      box-sizing: border-box; padding: 24px 28px; border-radius: 10px;
+      background: #fbfbfa; color: #1c1c1e; box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .doc i { display: block; height: 8px; border-radius: 4px; background: #d6d5d1; }
+    .doc .photo { height: 64px; width: 60%; border-radius: 6px; background: #e9c46a; }
+    .panel {
+      position: absolute; right: 34px; top: 52px; width: 150px; height: 220px;
+      border-radius: 10px; background: #1b1f27; box-shadow: 0 10px 30px rgba(0,0,0,.3);
+    }
+    .glass {
+      position: absolute;
+      -webkit-backdrop-filter: blur(22px) saturate(1.6);
+      backdrop-filter: blur(22px) saturate(1.6);
+    }
+    .pill { position: absolute; display: block; }
   </style></head><body>${body}</body></html>`);
   await page.waitForTimeout(200);
   await page
@@ -129,9 +181,6 @@ async function compose(body: string, file: string) {
     .screenshot({ path: join(OUT, file), omitBackground: true });
   console.log(`wrote docs/images/${file}`);
 }
-
-const img = (data: string, w: number, h: number) =>
-  `<div class="overlay"><img src="data:image/png;base64,${data}" width="${w}" height="${h}"></div>`;
 
 try {
   await mkdir(OUT, { recursive: true });
@@ -152,13 +201,21 @@ try {
     "app.png",
   );
 
-  const pill = { width: 256, height: 46 };
-  const card = { width: 400, height: 120 };
+  // The overlay windows' real sizes (overlay.rs), with the glass's shadow room.
+  const pill = { width: 280, height: 70 };
+  const card = { width: 424, height: 144 };
   const recording = await overlayScene("overlay-recording", pill);
   const live = await overlayScene("overlay-streaming", card);
   const done = await overlayScene("overlay-done", pill);
+  const desk =
+    `<div class="doc">Notes — Friday<i style="width:92%"></i><i style="width:80%"></i>` +
+    `<i style="width:88%"></i><span class="photo"></span><i style="width:70%"></i></div>` +
+    `<div class="panel"></div>` +
+    onDesk(live, (DESK.width - card.width) / 2, 14) +
+    onDesk(recording, 70, 212) +
+    onDesk(done, DESK.width - 70 - pill.width, 212);
   await compose(
-    `<div id="stage" class="column">${img(recording, pill.width, pill.height)}${img(live, card.width, card.height)}${img(done, pill.width, pill.height)}</div>`,
+    `<div id="stage"><div class="desk">${desk}</div></div>`,
     "overlay.png",
   );
 } finally {

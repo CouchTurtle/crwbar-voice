@@ -9,7 +9,7 @@ Drop in a voice note or a recorded meeting, and find anything you ever said agai
 
 ## Dictation
 
-<p align="center"><img src="docs/images/overlay.png" width="480" alt="The recording bar while listening, with live text, and after copying"></p>
+<p align="center"><img src="docs/images/overlay.png" width="640" alt="The recording bar on a desktop: with live text, while listening, and after copying"></p>
 
 Hold **⌥ Space** and speak. A small bar at the bottom of the screen shows it's
 listening — on macOS 26 in Liquid Glass — and with a streaming model the words

@@ -171,8 +171,10 @@
 .ov-stage.glass .scard {
   background: color-mix(in srgb, var(--color-background) 70%, transparent);
   border-color: transparent;
+  /* Offset plus blur stays inside the 12px of room the window leaves, or the
+     shadow ends in a hard edge at the window's border. */
   box-shadow:
-    0 4px 14px rgb(0 0 0 / 0.18),
+    0 2px 9px rgb(0 0 0 / 0.2),
     0 0 0 0.5px color-mix(in srgb, var(--color-text) 18%, transparent);
 }
 .ov-stage.glass .scard.dragging {
