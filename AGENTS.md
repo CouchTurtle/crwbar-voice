@@ -96,7 +96,7 @@ src/
 | RGB accent cycling ("Emil mode")                            | `settings.rgb_mode`, `theme.ts::startRgbMode`, `RgbModeToggle.tsx`                                                |
 | Voice actions (API / Codex CLI / Claude CLI)                | `actions.rs`, `post-processing/VoiceActionSettings.tsx`                                                           |
 | Audio ducking instead of hard mute, at a configurable speed | `managers/audio.rs`, `settings.rs::DuckingSpeed`                                                                  |
-| Liquid Glass under the overlay card (macOS 26)              | `glass.rs`, `src/lib/glass.ts`, `RecordingOverlay.tsx::measureGlass`, `overlay.rs::shadow_room`                   |
+| Liquid Glass under the overlay card (macOS 26)              | `glass.rs`, `src/overlay/host.ts`, `RecordingOverlay.tsx::measureCard`, `overlay.rs::shadow_room`                 |
 
 `transcribe_file` is deliberately **not** gated on `drag_drop_enabled`: the drop
 sites check the setting themselves, and clicking the picker is consent enough.
@@ -288,17 +288,29 @@ to decide whether a live-added entry belongs in the current results).
 **Liquid Glass is native, and the page only says where.** A webview cannot
 sample what lies behind its window, so `backdrop-filter` is never real glass.
 `glass.rs` puts an `NSGlassEffectView` _under_ the overlay's webview, and the
-page reports through `set_glass_frame`, every animation frame its card changes,
-the card as drawn (`measureGlass`: mid-morph widths, the pop-in scale and every
-fade are copied). Bare glass all but vanished on a light desktop — Leo's first
-look was a white pill on white — so the page tints it with the app surface and
-draws a shadow and hairline, and `shadow_room` grows the window by 12px on every
-side (and shrinks the screen offsets by as much) so that shadow is not cut off.
-Whether the overlay has glass is decided before its page loads
-(`glass::INIT_SCRIPT` sets `window.__CRWBAR_GLASS__`). Before macOS 26 nothing
-is installed and the overlay looks as it did. A glass sidebar for the main
-window was tried and taken back: over the desktop it was too see-through, and
-handing the title bar to the page cost dragging across the top.
+page reports through `set_overlay_card`, every animation frame its card
+changes, the card as drawn (`measureCard`: mid-morph widths, the pop-in scale
+and every fade are copied). Bare glass all but vanished on a light desktop —
+Leo's first look was a white pill on white — so the page tints it with the app
+surface and draws a shadow and hairline, and `shadow_room` grows the window by
+12px on every side (and shrinks the screen offsets by as much). The shadow's
+offset plus blur must stay inside those 12px, or it ends in a hard line at the
+window's edge. Before the page loads, the backend tells it to report the card
+(`__CRWBAR_CARD__`, every Mac) and whether glass is there (`__CRWBAR_GLASS__`).
+Before macOS 26 nothing is installed and the overlay looks as it did. A glass
+sidebar for the main window was tried and taken back: over the desktop it was
+too see-through, and handing the title bar to the page cost dragging across
+the top.
+
+**Only the card takes clicks.** A transparent webview window takes every click
+on its whole rectangle, and the overlay window is larger than its card. The
+strip around the pill swallowed clicks meant for the app underneath — a chat
+box at the bottom of the screen did not react while the overlay showed. The
+window now ignores the mouse (`setIgnoresMouseEvents`) except while the
+pointer is over the card, which `overlay.rs::follow_pointer` polls every 40ms
+while the overlay is shown, against the card frame the page last reported
+(`over_card`). Polled, because a window that ignores the mouse is told nothing
+about it. Cancel, copy again and dropping a file onto the pill keep working.
 
 **The end of a recording used to be thrown away twice.** The cpal block that
 first saw the stop flag was dropped although it was captured before the stop
@@ -363,7 +375,7 @@ skips the build. It does **not** touch Rust — run those checks yourself from
 `src-tauri/`:
 
 ```bash
-cargo test         # 163 tests at 1.0.0
+cargo test         # 164 tests
 cargo check
 cargo fmt -- --check
 ```

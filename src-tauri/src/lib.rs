@@ -626,7 +626,7 @@ pub fn run(cli_args: CliArgs) {
             commands::initialize_enigo,
             commands::initialize_shortcuts,
             commands::copy_last_transcript,
-            commands::set_glass_frame,
+            commands::set_overlay_card,
             commands::models::get_available_models,
             commands::models::get_model_info,
             commands::models::download_model,

@@ -2,6 +2,7 @@ use crate::input;
 use crate::settings;
 use crate::settings::{OverlayPosition, OverlayStyle};
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::sync::Mutex;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use tauri::{AppHandle, Emitter, Manager, PhysicalPosition, PhysicalSize};
 
@@ -59,6 +60,88 @@ fn shadow_room() -> f64 {
         12.0
     } else {
         0.0
+    }
+}
+
+/// Where the card is, in the overlay page's CSS pixels from the top-left, as the
+/// page measures it every frame the card changes.
+#[derive(Clone, Copy, Debug, serde::Deserialize, specta::Type)]
+pub struct CardFrame {
+    pub x: f64,
+    pub y: f64,
+    pub width: f64,
+    pub height: f64,
+    pub radius: f64,
+    pub opacity: f64,
+}
+
+/// The page's latest report: where the glass goes, and the only part of the
+/// overlay window that takes clicks.
+static CARD: Mutex<Option<CardFrame>> = Mutex::new(None);
+
+/// The overlay window is on screen (between `show()` and the delayed `hide()`).
+static SHOWN: AtomicBool = AtomicBool::new(false);
+
+pub fn set_card_frame(window: &tauri::WebviewWindow, frame: CardFrame) {
+    if let Ok(mut card) = CARD.lock() {
+        *card = Some(frame);
+    }
+    crate::glass::set_frame(window, frame);
+}
+
+/// Whether a point in window coordinates (AppKit's, from the bottom) is on the
+/// visible card (measured by the page from the top).
+#[cfg(any(target_os = "macos", test))]
+fn over_card(x: f64, y_from_bottom: f64, window_height: f64, card: &CardFrame) -> bool {
+    let y = window_height - y_from_bottom;
+    card.opacity > 0.5
+        && (card.x..=card.x + card.width).contains(&x)
+        && (card.y..=card.y + card.height).contains(&y)
+}
+
+/// The overlay window is larger than its card — room for the card to grow and
+/// for the glass's shadow — and a transparent webview still takes every click
+/// on it. The strip around the pill used to swallow clicks meant for the app
+/// underneath (a chat box at the bottom of the screen) for as long as the
+/// overlay showed. So the window lets clicks through and takes them only while
+/// the pointer is over the card: cancel, copy again and dropping a file still
+/// work. Polled, because a window that ignores the mouse hears nothing of it.
+#[cfg(target_os = "macos")]
+fn follow_pointer(app: AppHandle) {
+    std::thread::spawn(move || loop {
+        let shown = SHOWN.load(Ordering::Relaxed);
+        std::thread::sleep(Duration::from_millis(if shown { 40 } else { 250 }));
+        if shown {
+            let main = app.clone();
+            let _ = app.run_on_main_thread(move || update_click_through(&main));
+        }
+    });
+}
+
+/// Main thread only.
+#[cfg(target_os = "macos")]
+fn update_click_through(app: &AppHandle) {
+    let Some(window) = app.get_webview_window("recording_overlay") else {
+        return;
+    };
+    let Ok(ns_window) = window.ns_window() else {
+        return;
+    };
+    // SAFETY: Tauri hands out the live NSWindow of this webview window.
+    let ns_window: &objc2_app_kit::NSWindow = unsafe { &*ns_window.cast() };
+    let pointer = ns_window.mouseLocationOutsideOfEventStream();
+    let height = ns_window.frame().size.height;
+    let takes_clicks = CARD
+        .lock()
+        .ok()
+        .and_then(|card| *card)
+        .is_some_and(|card| over_card(pointer.x, pointer.y, height, &card));
+    if ns_window.ignoresMouseEvents() == takes_clicks {
+        ns_window.setIgnoresMouseEvents(!takes_clicks);
+        log::debug!(
+            "Overlay {} clicks",
+            if takes_clicks { "takes" } else { "passes on" }
+        );
     }
 }
 
@@ -380,12 +463,15 @@ pub fn create_recording_overlay(app_handle: &AppHandle) {
             .corner_radius(0.0)
             .style_mask(StyleMask::empty().borderless().nonactivating_panel())
             .with_window(|w| {
-                let w = w.decorations(false).transparent(true).focusable(false);
-                if crate::glass::supported() {
-                    w.initialization_script(crate::glass::INIT_SCRIPT)
-                } else {
-                    w
-                }
+                // Before the page's scripts run: report the card, and whether
+                // Liquid Glass sits under it.
+                w.decorations(false)
+                    .transparent(true)
+                    .focusable(false)
+                    .initialization_script(format!(
+                        "window.__CRWBAR_CARD__ = true; window.__CRWBAR_GLASS__ = {};",
+                        crate::glass::supported()
+                    ))
             })
             .collection_behavior(
                 CollectionBehavior::new()
@@ -399,6 +485,7 @@ pub fn create_recording_overlay(app_handle: &AppHandle) {
                 if let Some(window) = app_handle.get_webview_window("recording_overlay") {
                     crate::glass::install(&window);
                 }
+                follow_pointer(app_handle.clone());
             }
             Err(e) => {
                 log::error!("Failed to create recording overlay panel: {}", e);
@@ -440,6 +527,7 @@ fn show_overlay_state_with_mode(app_handle: &AppHandle, state: &str, mode: &str)
 
         let show_started = std::time::Instant::now();
         let _ = overlay_window.show();
+        SHOWN.store(true, Ordering::Relaxed);
         let show_elapsed = show_started.elapsed();
 
         // On Windows, aggressively re-assert "topmost" in the native Z-order after showing
@@ -549,6 +637,7 @@ pub fn hide_recording_overlay(app_handle: &AppHandle) {
             // stale 300ms timer must not hide the fresh overlay.
             if OVERLAY_GEN.load(Ordering::Relaxed) == my_gen {
                 let _ = window_clone.hide();
+                SHOWN.store(false, Ordering::Relaxed);
             }
         });
     }
@@ -604,4 +693,32 @@ pub fn emit_levels(app_handle: &AppHandle, levels: &[f32]) {
     // eval_script call per callback, cutting the per-callback WebKit
     // dispatch work in half.
     let _ = app_handle.emit_to("recording_overlay", "mic-level", levels);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// AppKit counts from the bottom of the window, the page from the top: a
+    /// pill flush with the bottom of a 70pt window must be hit near y = 0, and
+    /// the empty strip above it must let clicks through. A faded card takes none.
+    #[test]
+    fn only_the_visible_card_takes_clicks() {
+        let card = CardFrame {
+            x: 31.0,
+            y: 16.0,
+            width: 218.0,
+            height: 42.0,
+            radius: 21.0,
+            opacity: 1.0,
+        };
+        assert!(over_card(140.0, 20.0, 70.0, &card), "on the pill");
+        assert!(!over_card(140.0, 64.0, 70.0, &card), "strip above it");
+        assert!(!over_card(10.0, 20.0, 70.0, &card), "beside it");
+        let faded = CardFrame {
+            opacity: 0.2,
+            ..card
+        };
+        assert!(!over_card(140.0, 20.0, 70.0, &faded), "fading out");
+    }
 }

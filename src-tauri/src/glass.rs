@@ -2,25 +2,12 @@
 //!
 //! A webview cannot sample what lies behind its window, so CSS can never draw
 //! real glass. Instead a native `NSGlassEffectView` sits under the webview, and
-//! the page reports where it wants the glass every frame its card changes.
-//! Earlier macOS has no such class, and the page keeps drawing its own opaque
-//! card.
+//! the page reports where it wants the glass every frame its card changes
+//! (`overlay::set_card_frame`). Earlier macOS has no such class, and the page
+//! keeps drawing its own opaque card.
 
+use crate::overlay::CardFrame;
 use tauri::WebviewWindow;
-
-/// Where a page wants its glass, in CSS pixels from the top-left.
-#[derive(Clone, Copy, Debug, serde::Deserialize, specta::Type)]
-pub struct GlassFrame {
-    pub x: f64,
-    pub y: f64,
-    pub width: f64,
-    pub height: f64,
-    pub radius: f64,
-    pub opacity: f64,
-}
-
-/// Tells a page, before any of its scripts run, that its window has glass.
-pub const INIT_SCRIPT: &str = "window.__CRWBAR_GLASS__ = true;";
 
 /// Whether this Mac can draw Liquid Glass.
 #[cfg(target_os = "macos")]
@@ -51,7 +38,7 @@ pub fn install(window: &WebviewWindow) {
 }
 
 /// Moves the window's glass to where its page asked for it.
-pub fn set_frame(window: &WebviewWindow, frame: GlassFrame) {
+pub fn set_frame(window: &WebviewWindow, frame: CardFrame) {
     #[cfg(target_os = "macos")]
     {
         let label = window.label().to_string();
@@ -63,7 +50,7 @@ pub fn set_frame(window: &WebviewWindow, frame: GlassFrame) {
 
 #[cfg(target_os = "macos")]
 mod mac {
-    use super::GlassFrame;
+    use crate::overlay::CardFrame;
     use objc2::rc::Retained;
     use objc2::MainThreadMarker;
     use objc2_app_kit::{
@@ -116,7 +103,7 @@ mod mac {
         log::info!("Liquid Glass under the '{}' window", window.label());
     }
 
-    pub fn update(label: &str, frame: GlassFrame) {
+    pub fn update(label: &str, frame: CardFrame) {
         VIEWS.with(|views| {
             let views = views.borrow();
             let Some(Installed { glass, parent }) = views.get(label) else {

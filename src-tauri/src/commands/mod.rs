@@ -194,9 +194,10 @@ pub fn copy_last_transcript(app: AppHandle) {
     crate::tray::copy_last_transcript(&app);
 }
 
-/// A page reports where its Liquid Glass should be (macOS 26; a no-op elsewhere).
+/// The overlay page reports where its card is: for the Liquid Glass under it
+/// and for the part of the window that takes clicks (macOS; a no-op elsewhere).
 #[specta::specta]
 #[tauri::command]
-pub fn set_glass_frame(window: tauri::WebviewWindow, frame: crate::glass::GlassFrame) {
-    crate::glass::set_frame(&window, frame);
+pub fn set_overlay_card(window: tauri::WebviewWindow, frame: crate::overlay::CardFrame) {
+    crate::overlay::set_card_frame(&window, frame);
 }

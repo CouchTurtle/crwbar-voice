@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import "./RecordingOverlay.css";
 import { commands, events } from "@/bindings";
 import type {
-  GlassFrame,
+  CardFrame,
   StreamPhase,
   StreamPhaseEvent,
   StreamTextEvent,
@@ -15,7 +15,7 @@ import type {
 import BuiltStateIcon from "@/components/icons/BuiltStateIcon";
 import i18n, { syncLanguageFromSettings } from "@/i18n";
 import { getLanguageDirection } from "@/lib/utils/rtl";
-import { hasGlass } from "@/lib/glass";
+import { hasGlass, reportsCard } from "./host";
 import { applyRgbMode } from "@/lib/utils/theme";
 
 type OverlayState =
@@ -45,8 +45,8 @@ const WAVE_HEIGHT_CURVE = 0.5;
 const GLASS_TRAIL_MS = 400;
 
 /// The card as the browser draws it right now — mid-transition width, pop-in
-/// scale and fade included — for the native glass to copy.
-const measureGlass = (card: HTMLElement): GlassFrame => {
+/// scale and fade included — for the native glass and the click area to follow.
+const measureCard = (card: HTMLElement): CardFrame => {
   const rect = card.getBoundingClientRect();
   // Opacity multiplies down the tree: the stage fades, the card pops and leaves.
   let opacity = 1;
@@ -94,7 +94,7 @@ const RecordingOverlay: React.FC = () => {
   const [doneCopied, setDoneCopied] = useState(false);
   // macOS 26: native Liquid Glass under the page is the card's surface.
   const glass = hasGlass();
-  const lastGlassRef = useRef("");
+  const lastCardRef = useRef("");
 
   const smoothedLevelsRef = useRef<number[]>(Array(16).fill(0));
   // Live-text scroll-back: the text region "sticks" to the newest line while the
@@ -230,29 +230,30 @@ const RecordingOverlay: React.FC = () => {
     };
   }, []);
 
-  // Keep the glass on the card every frame something about the card changes,
-  // and for a moment after hiding so it fades out with the page.
+  // Report the card every frame something about it changes — the glass follows
+  // it, and only it takes clicks — and for a moment after hiding, so the glass
+  // fades out with the page.
   useEffect(() => {
-    if (!glass) return;
+    if (!reportsCard()) return;
     const stopAt = isVisible ? Infinity : performance.now() + GLASS_TRAIL_MS;
     let frame = 0;
     const tick = () => {
       const card = document.querySelector<HTMLElement>(".scard");
       if (card) {
-        const next = measureGlass(card);
+        const next = measureCard(card);
         // Exact: at rest the values repeat exactly, and rounding would drop
         // the last step of a fade (0.96 and 1 look alike to one decimal).
         const key = Object.values(next).join();
-        if (key !== lastGlassRef.current) {
-          lastGlassRef.current = key;
-          void commands.setGlassFrame(next);
+        if (key !== lastCardRef.current) {
+          lastCardRef.current = key;
+          void commands.setOverlayCard(next);
         }
       }
       if (performance.now() < stopAt) frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [glass, isVisible]);
+  }, [isVisible]);
 
   // Elapsed timer while the Live overlay is visible.
   useEffect(() => {

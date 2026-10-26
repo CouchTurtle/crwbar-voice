@@ -54,7 +54,7 @@ mockIPC(
         return { start: false, stop: false };
       case "initialize_enigo":
       case "initialize_shortcuts":
-      case "set_glass_frame":
+      case "set_overlay_card":
         return null;
       case "get_available_models":
         return models;

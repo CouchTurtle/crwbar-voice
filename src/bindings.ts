@@ -666,10 +666,11 @@ async copyLastTranscript() : Promise<void> {
     await TAURI_INVOKE("copy_last_transcript");
 },
 /**
- * A page reports where its Liquid Glass should be (macOS 26; a no-op elsewhere).
+ * The overlay page reports where its card is: for the Liquid Glass under it
+ * and for the part of the window that takes clicks (macOS; a no-op elsewhere).
  */
-async setGlassFrame(frame: GlassFrame) : Promise<void> {
-    await TAURI_INVOKE("set_glass_frame", { frame });
+async setOverlayCard(frame: CardFrame) : Promise<void> {
+    await TAURI_INVOKE("set_overlay_card", { frame });
 },
 async getAvailableModels() : Promise<Result<ModelInfo[], string>> {
     try {
@@ -1088,6 +1089,11 @@ export type AudioDevice = { index: string; name: string; is_default: boolean }
 export type AutoSubmitKey = "enter" | "ctrl_enter" | "cmd_enter"
 export type AvailableAccelerators = { transcribe: string[]; ort: string[]; gpu_devices: GpuDeviceOption[] }
 export type BindingResponse = { success: boolean; binding: ShortcutBinding | null; error: string | null }
+/**
+ * Where the card is, in the overlay page's CSS pixels from the top-left, as the
+ * page measures it every frame the card changes.
+ */
+export type CardFrame = { x: number; y: number; width: number; height: number; radius: number; opacity: number }
 export type ClipboardHandling = "dont_modify" | "copy_to_clipboard"
 export type CustomSounds = { start: boolean; stop: boolean }
 /**
@@ -1115,10 +1121,6 @@ export type EngineType =
  * flag exists so the caller never presents it as the whole recording.
  */
 export type FileTranscription = { text: string; complete: boolean }
-/**
- * Where a page wants its glass, in CSS pixels from the top-left.
- */
-export type GlassFrame = { x: number; y: number; width: number; height: number; radius: number; opacity: number }
 export type GpuDeviceOption = { id: number; name: string; total_vram_mb: number }
 export type HistoryEntry = { id: number; file_name: string; timestamp: number; saved: boolean; title: string; transcription_text: string; post_processed_text: string | null; post_process_prompt: string | null; post_process_requested: boolean; source: HistorySource; 
 /**
